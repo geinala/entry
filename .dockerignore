@@ -1,0 +1,17 @@
+**/.husky
+**/.tanstack
+**/.dockerignore
+**/.git
+**/.env*.example
+**/.gitignore
+**/.vscode
+**/docker-compose*
+**/compose*
+**/Dockerfile*
+**/node_modules
+**/npm-debug.log
+**/build
+**/dist
+**/dev-dist
+LICENSE
+README.md%                                                                                                                                                                     
