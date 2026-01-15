@@ -1,217 +1,68 @@
-# My React Vite Template with TanStack Query, TanStack Router, shadcn/ui, Husky and Feature-Sliced Design
+# DVRP Simulation Application
 
-This is a modern React template project built with Vite, _featuring Progressive Web App (PWA) support_ (cooming soon), TanStack Query (React Query), TanStack Router, shadcn/ui, Husky and following [Feature-Sliced Design](https://feature-sliced.github.io/documentation/) for a scalable and developer-friendly front-end setup.
+Aplikasi simulasi **Dynamic Vehicle Routing Problem (DVRP)** yang dirancang untuk mensimulasikan dan mengoptimalkan rute kendaraan secara dinamis.
 
-## Features
+## Tech Stack
 
-- **Vite:** Fast build tool for an optimized development experience.
-
-- **Progressive Web App (PWA):** Offline support, app-like installation, and service worker integration (planned).
-
-- **TanStack Query:** Efficient API data fetching and state management.
-
-- **TanStack Router:** Type-safe declarative routing for seamless navigation.
-
-- **shadcn/ui:** Customizable, accessible UI components for rapid development.
-
-- **TypeScript:** Type-safe code for improved maintainability.
-
-- **Tailwind CSS:** Utility-first CSS framework for quick UI styling.
-
-- **ESLint & Prettier:** Ensure code quality and consistent formatting.
-
-- **Husky:** Git hooks for automated linting and formatting before commits.
-
-- **Zod:** Schema validation for forms (e.g., login form validation).
+- Next.js 16 dengan App Router
+- React 19
+- TypeScript
+- TailwindCSS 4
+- shadcn/ui
+- TanStack Query
+- Zod
+- Jest
 
 ## Prerequisites
 
-Make sure you have installed:
-
-- Node.js (v18 or higher)
-
-- Corepack (recommended, or use npm/yarn/pnpm)
+- **Node.js**: 22 (gunakan [NVM](https://github.com/nvm-sh/nvm) untuk management)
+- **pnpm**: Enabled via corepack
+- **Docker** (opsional)
 
 ## Project Structure
 
 ```
+.
 ├── app
-│   ├── error
-│   │   ├── model
-│   │   ├── types
+│   ├── (authenticated)
+│   ├── _components
 │   │   └── ui
-│   ├── layouts
-│   ├── providers
-│   ├── routes
-│   │   ├── (admin)
-│   │   │   ├── dashboard
-│   │   │   ├── ....
-│   │   └── (public)
-│   │   │   └── auth
-│   │   │        └── sign-in
-│   │   │        └── ....
-│   │   │   └── ....
-│   └── styles
-├── config
-├── entities
-│   ├── <slice>
-│   │   └── api
-│   │   └── model
-│   │   └── ui
-│   └── ....
-├── features
-│   ├── <slice>
-│   │   └── api
-│   │   └── model
-│   │   └── ui
-│   └── ....
-├── pages
-│   ├── (admin)
+│   ├── _hooks
 │   └── (public)
-│   └── ....
-├── shared
-│   ├── api
-│   ├── helpers
-│   ├── hooks
-│   ├── lib
-│   ├── stores
-│   ├── types
-│   ├── ui
-│   └── utils
-│   └── ....
-└── widgets
-    ├── <widget>
-    ├── ....
+├── common
+├── lib
+├── public
+├── server
+├── services
+├── tests
+└── types
 ```
 
-#### Key Configurations
+### Folder Descriptions
 
-- `/app`: Entry point of the application. Contains error boundaries, global providers, layouts, routing, and global styles.
+- `app/`: Folder utama untuk Next.js App Router
+- `_components/`: Reusable UI components (shadcn/ui based)
+- `_hooks/`: Custom React hooks
+- `common/`: Shared utilities and helpers
+- `lib/`: Library functions
+- `server/`: Server-side logic
+- `services/`: External service integrations
+- `tests/`: Unit and integration tests
+- `types/`: TypeScript global type definitions
 
-- `/entities`: Represents main domain objects (e.g., user, role, permission). Each entity contains API, model (state, logic), and UI parts.
+## Key Features
 
-- `/features`: Reusable business logic or flows (e.g., auth/sign-in, filter, admin features).
+- ✅ Simulasi _real-time_ routing
+- ✅ Visual route mapping
+- ✅ Performance analytics
+- ✅ Responsive design dengan TailwindCSS
+- ✅ Type-safe dengan TypeScript & Zod
 
-- `/pages`: Route-level components mapped to URLs. Can compose entities, features, and widgets.
+## Resources
 
-- `/widgets`: Complex, reusable UI blocks (e.g., data-table, form, sidebar, admin components).
-
-- `/shared`: Global reusable resources — API client, hooks, helpers, UI primitives, utils, and state stores.
-
-- `/config`: App-wide configuration files.
-
-## Routing
-
-- Public routes (e.g., `auth/sign-in`) are located in `src/app/routes/(public)`.
-
-- Admin routes (dashboard, permissions, roles) are in `src/app/routes/(admin)`.
-
-- TanStack Router generates type-safe routes with `pnpm routes:generate`.
-
-## Data Fetching (TanStack Query)
-
-- Query Client is defined in `src/shared/lib/tanstack-query`.
-
-- Wrapped in QueryClientProvider under `src/app/providers`.
-
-- Fetch data using `useQuery` and `useMutation`.
-
-## UI Layer (shadcn/ui + Tailwind)
-
-- Pre-installed shadcn/ui components under `src/shared/ui`.
-
-- Tailwind CSS is configured in `tailwind.config.js`.
-
-- Global styles are under `src/app/styles`.
-
-## Form Validation (Zod)
-
-- Example: login schema with Zod in `src/features/auth/sign-in/model`.
-
-## Husky
-
-- Git hooks are set up in `.husky`.
-
-- Automatically runs `lint`, `format`, `build`, and etc on commit.
-
-## Featured-Slice Design
-
-This project follows [Feature-Sliced Design (FSD)](https://feature-sliced.github.io/documentation/), a front-end architecture pattern that divides the app into layers and slices for scalability and maintainability.
-
-<p align="center">
-  <img src="https://github.com/user-attachments/assets/8bb6ffdb-0996-4e2d-aa44-3ac74016cfa9" width="200" height="800" />
-</p>
-
-### Decision Trees
-
-To help guide where logic, types, or UI should be placed, this project includes decision tree diagrams:
-
-#### Logic Decision Tree
-
-![Logic](https://github.com/user-attachments/assets/48f106c1-9045-4e56-91e8-dd7c76a5d288)
-
-#### Types Decision Tree
-
-![Types](https://github.com/user-attachments/assets/7fad0560-9312-4b13-8e8c-c247aa6ac828)
-
-#### UI Component Decision Tree
-
-![UI Component](https://github.com/user-attachments/assets/5f3bc58c-1aed-4ce1-afaf-f9bc27e71c6a)
-
-These diagrams serve as practical references when deciding in which layer (entities, features, widgets, shared) a piece of code should live.
-
-## Getting Started
-
-1. Clone the repository:
-
-```bash
-git clone https://github.com/vunky-himawan/react-vite-template.git
-```
-
-2. Install dependencies:
-
-```bash
-pnpm install
-```
-
-3. Start the development server:
-
-```bash
-pnpm dev
-```
-
-Open http://localhost:5173 in your browser to view the app.
-
-4. Build for production:
-
-```bash
-pnpm build
-```
-
-Production files are generated in the dist folder.
-
-5. Preview the production build:
-
-```bash
-pnpm preview
-```
-
-## Scripts
-
-- `pnpm dev`: Start the development server.
-
-- `pnpm build`: Build the app for production.
-
-- `pnpm preview`: Preview the production build.
-
-- `pnpm routes:generate`: Generate route files using TanStack Router.
-
-- `pnpm prepare`: Run Husky hooks.
-
-- `pnpm lint`: Run ESLint to check code quality.
-
-<br>
-
-<hr>
-
-<p align="center"><b>Generated By Artificial Intelligence</b></p>
+- [Next.js Documentation](https://nextjs.org/docs)
+- [React Documentation](https://react.dev)
+- [TailwindCSS Documentation](https://tailwindcss.com/docs)
+- [shadcn/ui Documentation](https://ui.shadcn.com)
+- [TanStack Query Documentation](https://tanstack.com/query/latest)
+- [Zod Documentation](https://zod.dev)
