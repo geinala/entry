@@ -1,6 +1,11 @@
-import { integer, pgTable } from "drizzle-orm/pg-core";
+import { pgTable, serial, timestamp, varchar } from "drizzle-orm/pg-core";
 
 export const userTable = pgTable("users", {
-  id: integer("id").primaryKey(),
-  // Define other columns here
+  id: serial().primaryKey(),
+  clerkUserId: varchar("clerk_user_id").notNull(),
+  email: varchar("email").notNull().unique(),
+  fullName: varchar("full_name").notNull(),
+  createdAt: timestamp("created_at", { withTimezone: true })
+    .notNull()
+    .defaultNow(),
 });
