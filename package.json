@@ -16,6 +16,7 @@
     "drizzle:up": "drizzle-kit up"
   },
   "dependencies": {
+    "@clerk/elements": "^0.24.3",
     "@clerk/nextjs": "^6.36.7",
     "@radix-ui/react-slot": "^1.2.4",
     "@tanstack/react-query": "^5.90.17",
