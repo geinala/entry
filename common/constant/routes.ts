@@ -1,1 +1,6 @@
-export const PROTECTED_ROUTES = ["/api(/.*)?", "/coba"];
+export const PROTECTED_ROUTES = [
+  "/api(/.*)?",
+  "/history",
+  "/onboarding",
+  "/simulation",
+];

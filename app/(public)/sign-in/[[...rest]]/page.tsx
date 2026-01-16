@@ -7,6 +7,8 @@ export default function Page() {
     <main className="w-dvw h-dvh flex justify-center items-center">
       <SignIn
         path="/sign-in"
+        fallbackRedirectUrl={"/onboarding"}
+        forceRedirectUrl={"/onboarding"}
         appearance={{
           elements: {
             footerAction: { display: "none" },
