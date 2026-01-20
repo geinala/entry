@@ -68,8 +68,7 @@ export default function OnboardingPage() {
               Verifying your account
             </CardTitle>
             <CardDescription className="text-sm text-muted-foreground">
-              This will only take a moment. Please keep this window open while
-              we secure your data.
+              This will only take a moment. Please keep this window open while we secure your data.
             </CardDescription>
           </div>
         </CardHeader>

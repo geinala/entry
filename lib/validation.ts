@@ -12,10 +12,7 @@ export interface ValidationResult<T> {
  * @param data - Data yang akan divalidasi
  * @returns Hasil validasi dengan data atau error
  */
-export function validateSchema<T>(
-  schema: ZodSchema,
-  data: T,
-): ValidationResult<T> {
+export function validateSchema<T>(schema: ZodSchema, data: T): ValidationResult<T> {
   const result = schema.safeParse(data);
 
   if (result.success) {
