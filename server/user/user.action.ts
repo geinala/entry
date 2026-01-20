@@ -1,10 +1,7 @@
 "use server";
 
 import { actionWrapper } from "@/lib/action";
-import {
-  createUserRepository,
-  findUserByClerkIdRepository,
-} from "./user.repository";
+import { createUserRepository, findUserByClerkIdRepository } from "./user.repository";
 import { InsertUserData } from "./user.schema";
 
 export const createUserAction = async (data: InsertUserData) => {

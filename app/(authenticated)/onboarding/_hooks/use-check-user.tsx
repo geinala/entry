@@ -5,7 +5,7 @@ import { findUserByClerkIdAction } from "@/server/user/user.action";
 export const useCheckUser = () => {
   const checkUser = async (
     clerkUserId: string,
-    redirectOnSuccess: () => void
+    redirectOnSuccess: () => void,
   ): Promise<boolean> => {
     const response = await findUserByClerkIdAction(clerkUserId);
 

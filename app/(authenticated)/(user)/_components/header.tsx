@@ -10,9 +10,7 @@ const Header = () => {
         <Image width={64} height={64} src="/logo.png" alt="Logo" />
         <div>
           <h5 className="text-base font-bold flex items-center">Routify</h5>
-          <p className="text-sm">
-            Dynamic Vehicle Routing Problem Simulation using OSRM
-          </p>
+          <p className="text-sm">Dynamic Vehicle Routing Problem Simulation using OSRM</p>
         </div>
       </div>
       <div className="flex gap-4 items-center px-4">

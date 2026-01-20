@@ -7,7 +7,7 @@ type TResponse<T> = {
 
 export async function actionWrapper<TData>(
   action: () => Promise<TData>,
-  successMessage: string = "Berhasil"
+  successMessage: string = "Berhasil",
 ): Promise<TResponse<TData>> {
   try {
     const data = await action();
@@ -21,9 +21,7 @@ export async function actionWrapper<TData>(
     // TODO: Add logging mechanism here
 
     const errorMessage =
-      error instanceof Error
-        ? error.message
-        : "Terjadi kesalahan internal server.";
+      error instanceof Error ? error.message : "Terjadi kesalahan internal server.";
 
     return {
       success: false,
