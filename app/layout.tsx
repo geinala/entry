@@ -2,6 +2,10 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "./_components/ui/sonner";
+import { validateEnv } from "@/common/config/environtment";
+import { QueryProvider } from "@/lib/tanstack";
+
+validateEnv();
 
 export const metadata: Metadata = {
   title: "Routify",
@@ -15,13 +19,15 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <ClerkProvider>
-      <html lang="en">
-        <body className={`antialiased`}>
-          {children}
-          <Toaster position="top-center" />
-        </body>
-      </html>
-    </ClerkProvider>
+    <QueryProvider>
+      <ClerkProvider>
+        <html lang="en">
+          <body className={`antialiased`}>
+            {children}
+            <Toaster position="top-center" />
+          </body>
+        </html>
+      </ClerkProvider>
+    </QueryProvider>
   );
 }

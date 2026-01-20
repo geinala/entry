@@ -1,18 +1,15 @@
 "use client";
 
-import { createUserAction } from "@/server/user/user.action";
-import { InsertUserData } from "@/server/user/user.schema";
+import useAuthenticatedClient from "@/app/_hooks/use-authenticated-client";
+import { useQuery } from "@tanstack/react-query";
 
-export const useUserOnboard = () => {
-  const onboardUser = async (data: InsertUserData, onSuccess: () => void, onError: () => void) => {
-    const result = await createUserAction(data);
+export const useUserOnboarding = () => {
+  const api = useAuthenticatedClient();
 
-    if (result.success) {
-      onSuccess();
-    } else {
-      onError();
-    }
-  };
-
-  return { onboardUser };
+  return useQuery({
+    queryKey: ["onboard-user"],
+    queryFn: async () => {
+      return api.post("/users/onboarding");
+    },
+  });
 };
