@@ -17,7 +17,7 @@ import useUser from "@/app/_hooks/use-user";
 import { GroupedMenuItem, MENU_ITEMS, MenuItem } from "@/common/constants/menu";
 import { X } from "lucide-react";
 import Link from "next/link";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 
 export default function AuthenticatedSidebar() {
   const { isAdmin } = useUser();
