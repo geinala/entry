@@ -46,7 +46,7 @@ export default function OnboardingPage() {
               await signOut();
               router.replace("/sign-in");
             }, 2000);
-          }
+          },
         );
       }
     };

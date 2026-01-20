@@ -7,6 +7,7 @@ export default function Page() {
     <main className="w-dvw h-dvh flex justify-center items-center">
       <SignIn
         path="/sign-in"
+        afterSignOutUrl={"/sign-in"}
         fallbackRedirectUrl={"/onboarding"}
         forceRedirectUrl={"/onboarding"}
         appearance={{

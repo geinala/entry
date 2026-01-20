@@ -14,9 +14,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Dynamic Vehicle Routing Simulation App",
+  title: "Routify",
   description:
-    "Aplikasi simulasi dynamic vehicle routing dengan autentikasi menggunakan Clerk dan Next.js",
+    "Routify is a web application that allows users to create, simulate, and analyze various routing algorithms in a visual and interactive way.",
 };
 
 export default function RootLayout({
