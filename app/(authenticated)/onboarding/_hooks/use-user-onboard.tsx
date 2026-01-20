@@ -8,7 +8,7 @@ export const useUserOnboarding = () => {
 
   return useQuery({
     queryKey: ["onboard-user"],
-    queryFn: async () => {
+    queryFn: async (): Promise<{ registered: boolean; redirectTo: string }> => {
       return api.post("/users/onboarding");
     },
   });

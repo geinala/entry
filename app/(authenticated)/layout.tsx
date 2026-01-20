@@ -1,11 +1,20 @@
 "use client";
 
+import { usePathname } from "next/navigation";
 import { SidebarProvider } from "../_components/ui/sidebar";
 import { BreadcrumbProvider } from "../_contexts/breadcrumb.context";
 import Header from "./_components/header";
 import AuthenticatedSidebar from "./_components/sidebar";
 
 export default function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
+  const pathName = usePathname();
+
+  const withoutHeaderPaths = ["/onboarding"];
+
+  if (withoutHeaderPaths.includes(pathName)) {
+    return <>{children}</>;
+  }
+
   return (
     <BreadcrumbProvider>
       <SidebarProvider defaultOpen={false}>

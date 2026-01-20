@@ -10,14 +10,22 @@ import {
 } from "@/app/_components/ui/card";
 import { ShieldCheck } from "lucide-react";
 import { useUserOnboarding } from "./_hooks/use-user-onboard";
+import { useRouter } from "next/navigation";
 import { useEffect } from "react";
+import { Button } from "@/app/_components/ui/button";
+import { toast } from "sonner";
+import { useAuth } from "@clerk/nextjs";
 
 export default function OnboardingPage() {
-  const { data } = useUserOnboarding();
+  const router = useRouter();
+  const { signOut } = useAuth();
+  const { data, isLoading } = useUserOnboarding();
 
   useEffect(() => {
-    console.log("Onboarding data:", data);
-  }, [data]);
+    if (!isLoading && data && data.registered) {
+      router.replace(`${data.redirectTo}`);
+    }
+  }, [data, isLoading, router]);
 
   return (
     <main className="w-dvw h-dvh flex justify-center items-center">
@@ -38,8 +46,26 @@ export default function OnboardingPage() {
           </div>
         </CardHeader>
 
-        <CardContent className="flex justify-center py-3">
-          <Spinner className="h-8 w-8 text-primary animate-spin" />
+        <CardContent className="flex justify-center">
+          {isLoading && <Spinner className="h-8 w-8 text-primary animate-spin" />}
+          {!isLoading && data && !data.registered && (
+            <div className="flex flex-col justify-center items-center gap-2">
+              <p className="text-sm text-muted-foreground">
+                It seems like you are not registered yet.
+              </p>
+              <Button
+                onClick={() => {
+                  toast.info("Coming Soon");
+
+                  setTimeout(() => {
+                    signOut();
+                  }, 2000);
+                }}
+              >
+                Request Access
+              </Button>
+            </div>
+          )}
         </CardContent>
       </Card>
     </main>

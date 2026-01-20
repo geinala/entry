@@ -1,27 +1,19 @@
 import { MiddlewareResponse } from "@/lib/request";
 import { NextRequest, NextResponse } from "next/server";
-import { verifyToken } from "@clerk/backend";
+import { clerkClient } from "@clerk/nextjs/server";
 import env from "@/common/config/environtment";
 
-export const authMiddleware = async (req: NextRequest): Promise<MiddlewareResponse> => {
-  const token = req.headers.get("Authorization");
-
-  if (!token) {
-    return {
-      pass: false,
-      response: NextResponse.json({ message: "Unauthorized" }, { status: 401 }),
-    };
-  }
-
-  const tokenValue = token.replace("Bearer ", "");
-
+export const authMiddleware = async (req: NextRequest): Promise<MiddlewareResponse<string>> => {
   try {
-    await verifyToken(tokenValue, {
-      secretKey: env.CLERK_SECRET_KEY || "",
+    const client = await clerkClient();
+
+    const { toAuth } = await client.authenticateRequest(req, {
+      jwtKey: env.CLERK_JWT_KEY,
     });
 
     return {
       pass: true,
+      data: toAuth()?.userId as string,
       response: NextResponse.json({ message: "Authorized" }, { status: 200 }),
     };
   } catch {

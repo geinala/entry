@@ -1,15 +1,19 @@
 import { authMiddleware } from "@/middleware/auth.middleware";
+import { JwtPayload } from "@/types/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
-export interface MiddlewareResponse {
+export interface MiddlewareResponse<T = unknown> {
   pass: boolean;
   response: NextResponse;
+  data?: T;
 }
 
-export interface MiddlewareRequest {
+export type RequestCallback<T = unknown> = (req: NextRequest, context?: T) => Promise<NextResponse>;
+
+export interface MiddlewareRequest<T = unknown> {
   request: NextRequest;
-  callback: (req: NextRequest) => Promise<NextResponse>;
-  middleware?: Array<Promise<MiddlewareResponse>>;
+  callback: RequestCallback<T>;
+  middleware?: Array<Promise<MiddlewareResponse<T>>>;
 }
 
 export const handleRequest = async ({
@@ -27,7 +31,7 @@ export const handleRequest = async ({
     }
   }
 
-  const finalResult = callback(request);
+  const finalResult = await callback(request);
 
   return finalResult;
 };
@@ -36,8 +40,8 @@ export const handleAuthenticatedRequest = async ({
   request,
   callback,
   middleware,
-}: MiddlewareRequest): Promise<NextResponse> => {
-  const authResult = await authMiddleware(request);
+}: MiddlewareRequest<string>): Promise<NextResponse> => {
+  const authResult: MiddlewareResponse<string> = await authMiddleware(request);
 
   if (authResult) {
     if (!authResult.pass) {
@@ -45,17 +49,11 @@ export const handleAuthenticatedRequest = async ({
     }
   }
 
-  if (middleware) {
-    for (const middlewareFunction of middleware) {
-      const result: MiddlewareResponse = await middlewareFunction;
-
-      if (!result.pass) {
-        return result.response;
-      }
-    }
-  }
-
-  const finalResult = callback(request);
-
-  return finalResult;
+  return handleRequest({
+    request,
+    middleware,
+    callback: async (req) => {
+      return callback(req, authResult.data);
+    },
+  });
 };

@@ -16,15 +16,13 @@ export const createUserRepository = async (data: OnBoardingUserData) => {
 export const findUserByClerkIdRepository = async (clerkUserId: string) => {
   try {
     const user = await db
-      .select({
-        id: userTable.id,
-      })
+      .select()
       .from(userTable)
       .where(eq(userTable.clerkUserId, clerkUserId))
       .limit(1);
 
     return user[0] || null;
-  } catch {
-    throw new Error("Failed to find user by Clerk ID");
+  } catch (error) {
+    throw error;
   }
 };

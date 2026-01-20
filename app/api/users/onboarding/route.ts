@@ -8,6 +8,8 @@ import { NextRequest } from "next/server";
 export const POST = async (req: NextRequest) => {
   return handleAuthenticatedRequest({
     request: req,
-    callback: onBoardingUserController,
+    callback: (_, data) => {
+      return onBoardingUserController(data);
+    },
   });
 };
