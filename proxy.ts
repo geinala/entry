@@ -14,6 +14,5 @@ export const config = {
 
     // Always run for authenticated and api routes
     "/(authenticated)(.*)",
-    "/(api)(.*)",
   ],
 };

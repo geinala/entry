@@ -46,10 +46,6 @@ export default function AuthenticatedSidebar() {
     });
   }, [USER_ROLE]);
 
-  useEffect(() => {
-    console.log("Allowed Sidebar Menus:", allowedSidebarMenus);
-  }, [allowedSidebarMenus]);
-
   return (
     <Sidebar>
       <SidebarHeader className="flex justify-between items-center flex-row p-4">
