@@ -1,3 +1,5 @@
+"use client";
+
 export default function SimulationPage() {
   return (
     <div className="w-full h-full flex justify-center items-center flex-col gap-4">

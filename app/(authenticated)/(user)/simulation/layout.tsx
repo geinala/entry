@@ -1,19 +1,20 @@
-import { Sidebar, SidebarContent } from "@/app/_components/ui/sidebar";
+"use client";
+
+import { useBreadcrumb } from "@/app/_contexts/breadcrumb.context";
+import { useEffect } from "react";
 
 export default function SimulationLayout({ children }: { children: React.ReactNode }) {
+  const { setBreadcrumbs } = useBreadcrumb();
+
+  useEffect(() => {
+    setBreadcrumbs([{ label: "Simulation", href: "/simulation" }]);
+  }, [setBreadcrumbs]);
+
   return (
-    <main className="w-full min-h-screen grid grid-cols-[250px_1fr_250px] relative">
-      <Sidebar className="relative w-full">
-        <SidebarContent>
-          <div className="flex w-full h-full justify-center items-center">Sidebar</div>
-        </SidebarContent>
-      </Sidebar>
-      <div className="w-full relative p-3">{children}</div>
-      <Sidebar className="relative w-full" side="right">
-        <SidebarContent>
-          <div className="flex w-full h-full justify-center items-center">Sidebar</div>
-        </SidebarContent>
-      </Sidebar>
-    </main>
+    <>
+      <section className="h-full flex w-full">
+        <div className="w-full p-3">{children}</div>
+      </section>
+    </>
   );
 }
