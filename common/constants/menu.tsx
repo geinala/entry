@@ -1,0 +1,39 @@
+import { ClipboardClock, LayoutDashboard, Route } from "lucide-react";
+
+export type MenuItem = {
+  label: string;
+  href: string;
+  icon: React.ReactNode;
+  roles?: string[];
+};
+
+export interface GroupedMenuItem {
+  groupLabel: string;
+  items: MenuItem[];
+}
+
+export const MENU_ITEMS: (MenuItem | GroupedMenuItem)[] = [
+  {
+    groupLabel: "Main Menu",
+    items: [
+      {
+        label: "Dashboard",
+        href: "/dashboard",
+        roles: ["user", "admin"],
+        icon: <LayoutDashboard />,
+      },
+      {
+        label: "History",
+        href: "/history",
+        roles: ["user"],
+        icon: <ClipboardClock />,
+      },
+      {
+        label: "Simulation",
+        href: "/simulation",
+        roles: ["user"],
+        icon: <Route />,
+      },
+    ],
+  },
+];
