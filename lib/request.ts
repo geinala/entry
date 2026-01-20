@@ -1,5 +1,4 @@
 import { authMiddleware } from "@/middleware/auth.middleware";
-import { JwtPayload } from "@/types/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
 export interface MiddlewareResponse<T = unknown> {
