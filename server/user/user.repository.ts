@@ -1,17 +1,8 @@
 "use server";
 
 import { db } from "@/lib/db";
-import { OnBoardingUserData } from "./user.schema";
 import { userTable } from "@/drizzle/schema";
 import { eq } from "drizzle-orm";
-
-export const createUserRepository = async (data: OnBoardingUserData) => {
-  try {
-    return await db.insert(userTable).values(data).returning();
-  } catch {
-    throw new Error("Failed to create user");
-  }
-};
 
 export const findUserByClerkIdRepository = async (clerkUserId: string) => {
   try {
