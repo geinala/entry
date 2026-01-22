@@ -13,21 +13,21 @@ import {
   SidebarMenuItem,
   SidebarTrigger,
 } from "@/app/_components/ui/sidebar";
-import useUser from "@/app/_hooks/use-user";
+import { useUserContext } from "@/app/_contexts/user.context";
 import { GroupedMenuItem, MENU_ITEMS, MenuItem } from "@/common/constants/menu";
 import { X } from "lucide-react";
 import Link from "next/link";
 import { useMemo } from "react";
 
 export default function AuthenticatedSidebar() {
-  const { isAdmin } = useUser();
-  const USER_ROLE = isAdmin ? "admin" : "user";
+  const { userDetails } = useUserContext();
+  const role = userDetails?.role?.name;
 
   const allowedSidebarMenus = useMemo(() => {
     return MENU_ITEMS.map((item: MenuItem | GroupedMenuItem) => {
       if ("groupLabel" in item) {
         const filteredItems = item.items.filter(
-          (menuItem: MenuItem) => !menuItem.roles || menuItem.roles.includes(USER_ROLE),
+          (menuItem: MenuItem) => !menuItem.roles || menuItem.roles.includes(role || ""),
         );
 
         return {
@@ -42,9 +42,9 @@ export default function AuthenticatedSidebar() {
         return item.items.length > 0;
       }
 
-      return !item.roles || item.roles.includes(USER_ROLE);
+      return !item.roles || item.roles.includes(role || "");
     });
-  }, [USER_ROLE]);
+  }, [role]);
 
   return (
     <Sidebar>

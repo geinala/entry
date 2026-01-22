@@ -6,24 +6,30 @@ const isOnboardingRoute = createRouteMatcher(["/onboarding"]);
 const isPublicRoute = createRouteMatcher(["/", "/sign-in(.*)", "/sign-up(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
-  const { sessionClaims, userId, redirectToSignIn } = await auth();
+  const { sessionClaims, redirectToSignIn, isAuthenticated } = await auth();
+  const isOnboarded = sessionClaims?.metadata?.onboardingCompleted;
 
-  if (!userId && !isPublicRoute(req)) {
-    return redirectToSignIn();
+  // user yang belum login tidak boleh mengakses halaman private
+  if (!isAuthenticated) {
+    if (!isPublicRoute(req)) {
+      return redirectToSignIn();
+    }
+    return;
   }
 
-  if (userId) {
-    const isOnboarded = sessionClaims?.metadata?.onboardingCompleted;
+  // user yang sudah login tidak boleh mengakses halaman public
+  if (isAuthenticated && isPublicRoute(req)) {
+    return NextResponse.redirect(new URL("/dashboard", req.url));
+  }
 
-    if (!isOnboarded && !isOnboardingRoute(req) && !isPublicRoute(req)) {
-      const onboardingUrl = new URL("/onboarding", req.url);
-      return NextResponse.redirect(onboardingUrl);
-    }
+  // user yang sudah login tapi belum onboarding harus diarahkan ke halaman onboarding
+  if (!isOnboarded && !isOnboardingRoute(req)) {
+    return NextResponse.redirect(new URL("/onboarding", req.url));
+  }
 
-    if (isOnboarded && isOnboardingRoute(req)) {
-      const dashboardUrl = new URL("/dashboard", req.url);
-      return NextResponse.redirect(dashboardUrl);
-    }
+  // user yang sudah onboarding tidak boleh mengakses halaman onboarding
+  if (isOnboarded && isOnboardingRoute(req)) {
+    return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 });
 

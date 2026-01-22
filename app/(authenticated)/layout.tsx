@@ -5,6 +5,7 @@ import { SidebarProvider } from "../_components/ui/sidebar";
 import { BreadcrumbProvider } from "../_contexts/breadcrumb.context";
 import Header from "./_components/header";
 import AuthenticatedSidebar from "./_components/sidebar";
+import { UserProvider } from "../_contexts/user.context";
 
 export default function AuthenticatedLayout({ children }: { children: React.ReactNode }) {
   const pathName = usePathname();
@@ -16,16 +17,18 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
   }
 
   return (
-    <BreadcrumbProvider>
-      <SidebarProvider defaultOpen={false}>
-        <div className="w-full h-screen flex flex-col">
-          <Header />
-          <main className="h-full w-full flex">
-            <AuthenticatedSidebar />
-            {children}
-          </main>
-        </div>
-      </SidebarProvider>
-    </BreadcrumbProvider>
+    <UserProvider>
+      <BreadcrumbProvider>
+        <SidebarProvider defaultOpen={false}>
+          <div className="w-full h-screen flex flex-col">
+            <Header />
+            <main className="h-full w-full flex">
+              <AuthenticatedSidebar />
+              {children}
+            </main>
+          </div>
+        </SidebarProvider>
+      </BreadcrumbProvider>
+    </UserProvider>
   );
 }
