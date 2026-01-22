@@ -9,7 +9,8 @@ export const POST = async (req: NextRequest) => {
   return handleAuthenticatedRequest({
     request: req,
     callback: (_, data) => {
-      return onBoardingUserController(data);
+      const { clerkUserId } = data;
+      return onBoardingUserController(clerkUserId);
     },
   });
 };

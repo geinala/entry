@@ -1,16 +1,20 @@
 import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
-import { NextResponse } from "next/dist/server/web/spec-extension/response";
+import { NextResponse } from "next/server";
 
 const isOnboardingRoute = createRouteMatcher(["/onboarding"]);
-
+const isApiRoute = createRouteMatcher(["/api(.*)"]);
 const isPublicRoute = createRouteMatcher(["/", "/sign-in(.*)", "/sign-up(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
-  const { sessionClaims, redirectToSignIn, isAuthenticated } = await auth();
+  const { sessionClaims, redirectToSignIn, isAuthenticated, sessionStatus } = await auth();
   const isOnboarded = sessionClaims?.metadata?.onboardingCompleted;
 
   // user yang belum login tidak boleh mengakses halaman private
   if (!isAuthenticated) {
+    if (isApiRoute(req)) {
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+    }
+
     if (!isPublicRoute(req)) {
       return redirectToSignIn();
     }
@@ -19,6 +23,8 @@ export default clerkMiddleware(async (auth, req) => {
 
   // user yang sudah login tidak boleh mengakses halaman public
   if (isAuthenticated && isPublicRoute(req)) {
+    console.log("Redirecting to /dashboard");
+    console.log("Session Status:", sessionStatus);
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 

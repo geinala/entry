@@ -1,8 +1,9 @@
 import { ClipboardClock, LayoutDashboard, Route } from "lucide-react";
+import { Route as RouteNext } from "next";
 
 export type MenuItem = {
   label: string;
-  href: string;
+  href: RouteNext;
   icon: React.ReactNode;
   roles?: string[];
 };

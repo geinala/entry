@@ -9,7 +9,7 @@ export const GET = async (req: NextRequest) => {
   return handleAuthenticatedRequest({
     request: req,
     callback: (_, data) => {
-      return getUserDetailsController(data);
+      return getUserDetailsController(data.clerkUserId, data.sessionId);
     },
   });
 };
