@@ -1,15 +1,8 @@
 "use client";
 
-import { SignIn, useAuth } from "@clerk/nextjs";
-import { useEffect } from "react";
+import { SignIn } from "@clerk/nextjs";
 
 export default function Page() {
-  const { signOut } = useAuth();
-
-  useEffect(() => {
-    signOut();
-  }, [signOut]);
-
   return (
     <main className="w-dvw h-dvh flex justify-center items-center">
       <SignIn

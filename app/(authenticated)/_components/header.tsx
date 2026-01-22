@@ -6,10 +6,10 @@ import DownloadTemplateButton from "../(user)/_components/download-template.butt
 import { SidebarTrigger } from "@/app/_components/ui/sidebar";
 import Logo from "@/app/_components/logo";
 import Breadcrumb from "./breadcrumb";
-import { useUserContext } from "@/app/_contexts/user.context";
 
 const Header = () => {
-  const { isAdmin } = useUserContext();
+  // const { isAdmin } = useUserContext();
+  const isAdmin = false;
 
   return (
     <header className="w-full h-16 bg-sidebar border-b flex justify-between items-center p-4">

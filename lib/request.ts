@@ -1,58 +1,96 @@
-import { authMiddleware } from "@/middleware/auth.middleware";
+import { authMiddleware, AuthMiddlewareData } from "@/middleware/auth.middleware";
 import { NextRequest, NextResponse } from "next/server";
 
-export interface MiddlewareResponse<T = unknown> {
+export interface MiddlewareResponseBase {
   pass: boolean;
   response: NextResponse;
-  data?: T;
 }
 
-export type RequestCallback<T = unknown> = (req: NextRequest, context?: T) => Promise<NextResponse>;
+export interface MiddlewareResponseWithData<T> extends MiddlewareResponseBase {
+  pass: true;
+  data: T;
+}
 
-export interface MiddlewareRequest<T = unknown> {
+export interface MiddlewareResponseWithoutData extends MiddlewareResponseBase {
+  pass: false;
+}
+
+export type MiddlewareResponse<T> = MiddlewareResponseWithData<T> | MiddlewareResponseWithoutData;
+
+export type RequestCallback<T> = T extends undefined
+  ? (req: NextRequest) => Promise<NextResponse>
+  : (req: NextRequest, context: T) => Promise<NextResponse>;
+
+// Middleware function type
+export type MiddlewareFunction<T = unknown> = (req: NextRequest) => Promise<MiddlewareResponse<T>>;
+
+export interface MiddlewareRequest<T = undefined> {
   request: NextRequest;
   callback: RequestCallback<T>;
-  middleware?: Array<Promise<MiddlewareResponse<T>>>;
+  middleware?: MiddlewareFunction<unknown>[];
 }
 
-export const handleRequest = async ({
-  request,
-  callback,
-  middleware,
-}: MiddlewareRequest): Promise<NextResponse> => {
+export async function handleRequest(config: {
+  request: NextRequest;
+  callback: (req: NextRequest) => Promise<NextResponse>;
+  middleware?: MiddlewareFunction<unknown>[];
+}): Promise<NextResponse>;
+
+export async function handleRequest<T>(config: {
+  request: NextRequest;
+  callback: (req: NextRequest, context: T) => Promise<NextResponse>;
+  middleware?: MiddlewareFunction<unknown>[];
+  context: T;
+}): Promise<NextResponse>;
+
+export async function handleRequest<T = undefined>(config: {
+  request: NextRequest;
+  callback: RequestCallback<T>;
+  middleware?: MiddlewareFunction<unknown>[];
+  context?: T;
+}): Promise<NextResponse> {
+  const { request, callback, middleware } = config;
+
   if (middleware) {
     for (const middlewareFunction of middleware) {
-      const result: MiddlewareResponse = await middlewareFunction;
-
+      const result = await middlewareFunction(request);
       if (!result.pass) {
         return result.response;
       }
     }
   }
 
-  const finalResult = await callback(request);
+  if ("context" in config && config.context !== undefined) {
+    return (callback as (req: NextRequest, ctx: T) => Promise<NextResponse>)(
+      request,
+      config.context,
+    );
+  }
 
-  return finalResult;
-};
+  return (callback as (req: NextRequest) => Promise<NextResponse>)(request);
+}
 
 export const handleAuthenticatedRequest = async ({
   request,
   callback,
-  middleware,
-}: MiddlewareRequest<string>): Promise<NextResponse> => {
-  const authResult: MiddlewareResponse<string> = await authMiddleware(request);
+  middleware = [],
+}: MiddlewareRequest<AuthMiddlewareData>): Promise<NextResponse> => {
+  const authResult = await authMiddleware(request);
 
-  if (authResult) {
-    if (!authResult.pass) {
-      return authResult.response;
+  if (!authResult.pass) {
+    return authResult.response;
+  }
+
+  const authData = authResult.data;
+
+  if (middleware.length > 0) {
+    for (const middlewareFunction of middleware) {
+      const result = await middlewareFunction(request);
+      if (!result.pass) {
+        return result.response;
+      }
     }
   }
 
-  return handleRequest({
-    request,
-    middleware,
-    callback: async (req) => {
-      return callback(req, authResult.data);
-    },
-  });
+  return callback(request, authData);
 };

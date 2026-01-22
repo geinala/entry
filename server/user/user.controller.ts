@@ -2,25 +2,17 @@
 
 import { NextResponse } from "next/server";
 import { findUserWithRoleAndPermissionsService, validateUserService } from "./user.service";
-import { clerkClient } from "@clerk/nextjs/server";
+import { authService } from "@/services/auth.service";
 
-export const onBoardingUserController = async (clerkUserId?: string): Promise<NextResponse> => {
+export const onBoardingUserController = async (clerkUserId: string): Promise<NextResponse> => {
   try {
-    const client = await clerkClient();
-
-    if (!clerkUserId) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    }
-
     const user = await validateUserService(clerkUserId);
 
     if (user) {
       return NextResponse.json({ registered: true, redirectTo: "/dashboard" }, { status: 200 });
     }
 
-    await client.users.updateUserMetadata(clerkUserId, {
-      publicMetadata: { onboardingCompleted: false },
-    });
+    await authService.updateUserMetadata(clerkUserId, { onboardingStarted: true });
 
     return NextResponse.json({ registered: false, redirectTo: "/onboarding" }, { status: 200 });
   } catch {
@@ -28,16 +20,17 @@ export const onBoardingUserController = async (clerkUserId?: string): Promise<Ne
   }
 };
 
-export const getUserDetailsController = async (clerkUserId?: string): Promise<NextResponse> => {
+export const getUserDetailsController = async (
+  clerkUserId: string,
+  sessionId: string,
+): Promise<NextResponse> => {
   try {
-    if (!clerkUserId) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    }
-
     const user = await findUserWithRoleAndPermissionsService(clerkUserId);
 
     if (!user) {
-      return NextResponse.json({ message: "User not found" }, { status: 404 });
+      await authService.revokeSession(sessionId);
+
+      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
     }
 
     return NextResponse.json(user, { status: 200 });

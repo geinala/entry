@@ -7,6 +7,6 @@ interface LogoProps extends React.HTMLAttributes<HTMLImageElement> {
   height?: number;
 }
 
-export default function Logo({ width = 35, height = 35, ...props }: LogoProps) {
-  return <Image width={width} height={height} src="/logo-new.png" alt="Logo" {...props} />;
+export default function Logo({ width = 50, height = 50, ...props }: LogoProps) {
+  return <Image width={width} height={height} src="/logo.png" alt="Logo" {...props} />;
 }
