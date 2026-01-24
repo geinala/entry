@@ -4,6 +4,8 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "./_components/ui/sonner";
 import { validateEnv } from "@/common/config/environtment";
 import { QueryProvider } from "@/lib/tanstack";
+import "maplibre-gl/dist/maplibre-gl.css";
+import { SidebarProvider } from "./_components/ui/sidebar";
 
 validateEnv();
 
@@ -23,7 +25,7 @@ export default function RootLayout({
       <ClerkProvider>
         <html lang="en">
           <body className={`antialiased`}>
-            {children}
+            <SidebarProvider defaultOpen={false}>{children}</SidebarProvider>
             <Toaster position="top-center" />
           </body>
         </html>

@@ -9,6 +9,7 @@ export const env = {
   CLERK_SIGN_IN_FORCE_REDIRECT_URL: process.env.CLERK_SIGN_IN_FORCE_REDIRECT_URL,
   CLERK_SIGN_IN_FALLBACK_REDIRECT_URL: process.env.CLERK_SIGN_IN_FALLBACK_REDIRECT_URL,
   DATABASE_URL: process.env.DATABASE_URL,
+  NEXT_PUBLIC_TOMTOM_API_KEY: process.env.NEXT_PUBLIC_TOMTOM_API_KEY,
 } as const;
 
 export type Env = typeof env;
@@ -21,6 +22,7 @@ export const validateEnv = (): void => {
     "CLERK_SIGN_IN_FORCE_REDIRECT_URL",
     "CLERK_SIGN_IN_FALLBACK_REDIRECT_URL",
     "DATABASE_URL",
+    "NEXT_PUBLIC_TOMTOM_API_KEY",
   ];
 
   const missingVars = requiredVars.filter((key) => !process.env?.[key]);
