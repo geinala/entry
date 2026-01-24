@@ -1,4 +1,4 @@
-import { ClipboardClock, LayoutDashboard, Route } from "lucide-react";
+import { LayoutDashboard, Route } from "lucide-react";
 import { Route as RouteNext } from "next";
 
 export type MenuItem = {
@@ -22,12 +22,6 @@ export const MENU_ITEMS: (MenuItem | GroupedMenuItem)[] = [
         href: "/dashboard",
         roles: ["user", "admin"],
         icon: <LayoutDashboard />,
-      },
-      {
-        label: "History",
-        href: "/history",
-        roles: ["user"],
-        icon: <ClipboardClock />,
       },
       {
         label: "Simulation",

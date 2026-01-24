@@ -6,7 +6,7 @@ const isApiRoute = createRouteMatcher(["/api(.*)"]);
 const isPublicRoute = createRouteMatcher(["/", "/sign-in(.*)", "/sign-up(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
-  const { sessionClaims, redirectToSignIn, isAuthenticated, sessionStatus } = await auth();
+  const { sessionClaims, redirectToSignIn, isAuthenticated } = await auth();
   const isOnboarded = sessionClaims?.metadata?.onboardingCompleted;
 
   // user yang belum login tidak boleh mengakses halaman private
@@ -23,8 +23,6 @@ export default clerkMiddleware(async (auth, req) => {
 
   // user yang sudah login tidak boleh mengakses halaman public
   if (isAuthenticated && isPublicRoute(req)) {
-    console.log("Redirecting to /dashboard");
-    console.log("Session Status:", sessionStatus);
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 
