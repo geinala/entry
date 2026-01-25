@@ -1,6 +1,9 @@
+"use client";
+
 import { Paragraph } from "@/app/_components/typography";
 import { CloudUpload } from "lucide-react";
 
+// TODO: Implement CSV parsing and handling
 export default function CSVInput() {
   return (
     <>

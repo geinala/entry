@@ -1,3 +1,5 @@
+"use client";
+
 import {
   Sidebar,
   SidebarContent,
@@ -19,7 +21,8 @@ export const SimulationDetailLeftSidebar = () => {
         <CSVInput />
         <StartButton />
         <Separator />
-        <StatItem title="Status" value="All systems operational" />
+        <StatItem title="Status" value="All systems operational" />{" "}
+        {/* TODO: Replace with dynamic status */}
       </SidebarContent>
     </Sidebar>
   );
@@ -38,6 +41,7 @@ export const SimulationDetailRightSidebar = () => {
           <StatItem
             title="Distance"
             value={
+              // TODO: Replace with dynamic distance
               <div className="flex flex-row items-baseline gap-0.5">
                 <Title level={4}>123</Title>
                 km
@@ -49,6 +53,7 @@ export const SimulationDetailRightSidebar = () => {
           <StatItem
             title="Time"
             value={
+              // TODO: Replace with dynamic time
               <div className="flex flex-row items-baseline gap-2">
                 <span className="flex flex-row items-baseline gap-0.5">
                   <Title level={4}>2</Title>h
@@ -64,6 +69,7 @@ export const SimulationDetailRightSidebar = () => {
           <StatItem
             title="Vehicles Used"
             value={
+              // TODO: Replace with dynamic vehicle count
               <ItemContent className="flex flex-row justify-between items-center">
                 <Title level={3}>5</Title>
               </ItemContent>

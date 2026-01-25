@@ -3,6 +3,7 @@
 import { Item, ItemContent, ItemMedia, ItemTitle } from "@/app/_components/ui/item";
 import { CircleCheck, Clock, X } from "lucide-react";
 
+// TODO: Adjust according to actual status types and icons
 const statusConfig = {
   completed: {
     label: "Completed",
@@ -22,7 +23,7 @@ const statusConfig = {
 };
 
 interface SimulationStatusProps {
-  status?: "completed" | "pending" | "failed";
+  status?: "completed" | "pending" | "failed"; // TODO: Adjust according to actual status types
 }
 
 export default function SimulationStatus({ status = "completed" }: SimulationStatusProps) {
@@ -35,6 +36,7 @@ export default function SimulationStatus({ status = "completed" }: SimulationSta
         <IconComponent className={config.colorClass} />
       </ItemMedia>
       <ItemContent>
+        {/** TODO: Change with actual simulation status */}
         <ItemTitle className={config.colorClass}>{config.label}</ItemTitle>
       </ItemContent>
     </Item>

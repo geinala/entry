@@ -1,3 +1,5 @@
+"use client";
+
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/app/_components/ui/card";
 import { ItemMedia } from "@/app/_components/ui/item";
 import { MapPin, Clock, Truck, CheckCircle } from "lucide-react";
@@ -27,6 +29,7 @@ const StatisticsCard = ({ icon, title, content, footer }: StatisticsCardProps) =
   );
 };
 
+// TODO: Replace static data with dynamic data from simulation stats
 const CARD_CONFIG = {
   distance: {
     icon: (
@@ -73,32 +76,32 @@ const CARD_CONFIG = {
 const TotalDistanceCard = ({ content, footer }: DynamicCardProps) => (
   <StatisticsCard
     {...CARD_CONFIG.distance}
-    content={content ?? CARD_CONFIG.distance.defaultContent}
-    footer={footer ?? CARD_CONFIG.distance.defaultFooter}
+    content={content ?? CARD_CONFIG.distance.defaultContent} // TODO: Replace with dynamic data
+    footer={footer ?? CARD_CONFIG.distance.defaultFooter} // TODO: Replace with dynamic data
   />
 );
 
 const TotalTimeTravelCard = ({ content, footer }: DynamicCardProps) => (
   <StatisticsCard
     {...CARD_CONFIG.time}
-    content={content ?? CARD_CONFIG.time.defaultContent}
-    footer={footer ?? CARD_CONFIG.time.defaultFooter}
+    content={content ?? CARD_CONFIG.time.defaultContent} // TODO: Replace with dynamic data
+    footer={footer ?? CARD_CONFIG.time.defaultFooter} // TODO: Replace with dynamic data
   />
 );
 
 const TotalActiveVehiclesCard = ({ content, footer }: DynamicCardProps) => (
   <StatisticsCard
     {...CARD_CONFIG.vehicles}
-    content={content ?? CARD_CONFIG.vehicles.defaultContent}
-    footer={footer ?? CARD_CONFIG.vehicles.defaultFooter}
+    content={content ?? CARD_CONFIG.vehicles.defaultContent} // TODO: Replace with dynamic data
+    footer={footer ?? CARD_CONFIG.vehicles.defaultFooter} // TODO: Replace with dynamic data
   />
 );
 
 const TotalCompletedNodesCard = ({ content, footer }: DynamicCardProps) => (
   <StatisticsCard
     {...CARD_CONFIG.nodes}
-    content={content ?? CARD_CONFIG.nodes.defaultContent}
-    footer={footer ?? CARD_CONFIG.nodes.defaultFooter}
+    content={content ?? CARD_CONFIG.nodes.defaultContent} // TODO: Replace with dynamic data
+    footer={footer ?? CARD_CONFIG.nodes.defaultFooter} // TODO: Replace with dynamic data
   />
 );
 
