@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/app/_components/ui/button";
 import {
   Card,
@@ -16,6 +18,7 @@ import {
   TableRow,
 } from "@/app/_components/ui/table";
 import { Download, FileText } from "lucide-react";
+import { Indicator } from "./indicator";
 
 interface ActivityLog {
   id: string;
@@ -24,12 +27,7 @@ interface ActivityLog {
   description: string;
 }
 
-const ActivityIndicator = ({ color = "blue" }: { color?: string }) => (
-  <div className={`h-5 w-5 rounded-full bg-${color}-500/20 flex items-center justify-center`}>
-    <div className={`h-2.5 w-2.5 rounded-full bg-${color}-500`} />
-  </div>
-);
-
+// TODO: Delete this mock data and replace it with real activity logs
 const ACTIVITY_LOGS: ActivityLog[] = [
   {
     id: "1",
@@ -66,6 +64,7 @@ export default function LogTable() {
         </div>
       </CardHeader>
       <CardContent className="p-0">
+        {/** TODO: Replace with dynamic activity logs */}
         <Table>
           <TableHeader>
             <TableRow className="bg-background border-none">
@@ -79,7 +78,7 @@ export default function LogTable() {
               <TableRow key={log.id}>
                 <TableCell className="pl-6">{log.date}</TableCell>
                 <TableCell className="flex items-center gap-3">
-                  <ActivityIndicator />
+                  <Indicator />
                   {log.activity}
                 </TableCell>
                 <TableCell>{log.description}</TableCell>

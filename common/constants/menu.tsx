@@ -1,3 +1,5 @@
+"use client";
+
 import { LayoutDashboard, Route } from "lucide-react";
 import { Route as RouteNext } from "next";
 
@@ -24,8 +26,8 @@ export const MENU_ITEMS: (MenuItem | GroupedMenuItem)[] = [
         icon: <LayoutDashboard />,
       },
       {
-        label: "Simulation",
-        href: "/simulation",
+        label: "Simulations",
+        href: "/simulations",
         roles: ["user"],
         icon: <Route />,
       },
