@@ -1,9 +1,11 @@
+import { cn } from "@/lib/utils";
+
 interface TitleProps {
   children: React.ReactNode;
   level?: 1 | 2 | 3 | 4;
 }
 
-interface ParagraphProps {
+interface ParagraphProps extends React.HTMLAttributes<HTMLParagraphElement> {
   children: React.ReactNode;
 }
 
@@ -24,8 +26,12 @@ const Title = ({ children, level = 1 }: TitleProps) => {
   return <Tag className={headingClass}>{children}</Tag>;
 };
 
-const Paragraph = ({ children }: ParagraphProps) => {
-  return <p className="leading-7 not-first:mt-2">{children}</p>;
+const Paragraph = ({ children, className, ...props }: ParagraphProps) => {
+  return (
+    <p className={cn("leading-7 not-first:mt-2 text-sm", className)} {...props}>
+      {children}
+    </p>
+  );
 };
 
 export { Title, Paragraph };

@@ -16,6 +16,7 @@ import {
   TableRow,
 } from "@/app/_components/ui/table";
 import { Download, FileText } from "lucide-react";
+import { Indicator } from "./indicator";
 
 interface ActivityLog {
   id: string;
@@ -23,12 +24,6 @@ interface ActivityLog {
   activity: string;
   description: string;
 }
-
-const ActivityIndicator = ({ color = "blue" }: { color?: string }) => (
-  <div className={`h-5 w-5 rounded-full bg-${color}-500/20 flex items-center justify-center`}>
-    <div className={`h-2.5 w-2.5 rounded-full bg-${color}-500`} />
-  </div>
-);
 
 const ACTIVITY_LOGS: ActivityLog[] = [
   {
@@ -79,7 +74,7 @@ export default function LogTable() {
               <TableRow key={log.id}>
                 <TableCell className="pl-6">{log.date}</TableCell>
                 <TableCell className="flex items-center gap-3">
-                  <ActivityIndicator />
+                  <Indicator />
                   {log.activity}
                 </TableCell>
                 <TableCell>{log.description}</TableCell>
