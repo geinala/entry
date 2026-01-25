@@ -24,8 +24,8 @@ export const MENU_ITEMS: (MenuItem | GroupedMenuItem)[] = [
         icon: <LayoutDashboard />,
       },
       {
-        label: "Simulation",
-        href: "/simulation",
+        label: "Simulations",
+        href: "/simulations",
         roles: ["user"],
         icon: <Route />,
       },
