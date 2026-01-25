@@ -1,3 +1,5 @@
+"use client";
+
 import { Button } from "@/app/_components/ui/button";
 import {
   Card,
@@ -25,6 +27,7 @@ interface ActivityLog {
   description: string;
 }
 
+// TODO: Delete this mock data and replace it with real activity logs
 const ACTIVITY_LOGS: ActivityLog[] = [
   {
     id: "1",
@@ -61,6 +64,7 @@ export default function LogTable() {
         </div>
       </CardHeader>
       <CardContent className="p-0">
+        {/** TODO: Replace with dynamic activity logs */}
         <Table>
           <TableHeader>
             <TableRow className="bg-background border-none">

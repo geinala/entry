@@ -1,3 +1,5 @@
+"use client";
+
 import { Item, ItemContent, ItemHeader, ItemTitle } from "@/app/_components/ui/item";
 import { Indicator } from "../../_components/indicator";
 import { Paragraph } from "@/app/_components/typography";

@@ -30,9 +30,6 @@ export default function SimulationDetailPage() {
       rightSidebar={<SimulationDetailRightSidebar />}
     >
       <TomTomMap />
-      {/* <div className="w-full h-full flex justify-center items-center">
-        <Paragraph>This is the simulation detail page.</Paragraph>
-      </div> */}
     </SimulationsLayoutShell>
   );
 }

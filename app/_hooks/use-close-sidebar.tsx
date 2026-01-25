@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect } from "react";
 import { useSidebar } from "../_components/ui/sidebar";
 

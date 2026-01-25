@@ -1,3 +1,5 @@
+"use client";
+
 import { LayoutDashboard, Route } from "lucide-react";
 import { Route as RouteNext } from "next";
 
