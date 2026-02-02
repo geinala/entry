@@ -10,6 +10,9 @@ export const env = {
   CLERK_SIGN_IN_FALLBACK_REDIRECT_URL: process.env.CLERK_SIGN_IN_FALLBACK_REDIRECT_URL,
   DATABASE_URL: process.env.DATABASE_URL,
   NEXT_PUBLIC_TOMTOM_API_KEY: process.env.NEXT_PUBLIC_TOMTOM_API_KEY,
+  REDIS_HOST: process.env.REDIS_HOST || "localhost",
+  REDIS_PORT: process.env.REDIS_PORT ? Number(process.env.REDIS_PORT) : 6379,
+  REDIS_PASSWORD: process.env.REDIS_PASSWORD || "",
 } as const;
 
 export type Env = typeof env;
@@ -23,6 +26,8 @@ export const validateEnv = (): void => {
     "CLERK_SIGN_IN_FALLBACK_REDIRECT_URL",
     "DATABASE_URL",
     "NEXT_PUBLIC_TOMTOM_API_KEY",
+    "REDIS_HOST",
+    "REDIS_PORT",
   ];
 
   const missingVars = requiredVars.filter((key) => !process.env?.[key]);

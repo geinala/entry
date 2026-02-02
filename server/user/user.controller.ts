@@ -1,8 +1,14 @@
 "use server";
 
-import { NextResponse } from "next/server";
-import { findUserWithRoleAndPermissionsService, validateUserService } from "./user.service";
+import { NextRequest, NextResponse } from "next/server";
+import {
+  findUserWithRoleAndPermissionsService,
+  getUsersWithPaginationService,
+  validateUserService,
+} from "./user.service";
 import { authService } from "@/services/auth.service";
+import { validateSchema } from "@/lib/validation";
+import { IndexQueryParams } from "@/types/query-params";
 
 export const onBoardingUserController = async (clerkUserId: string): Promise<NextResponse> => {
   try {
@@ -34,6 +40,27 @@ export const getUserDetailsController = async (
     }
 
     return NextResponse.json(user, { status: 200 });
+  } catch {
+    return NextResponse.json({ message: "Something went wrong" }, { status: 500 });
+  }
+};
+
+export const getUsersWithPaginationController = async (req: NextRequest): Promise<NextResponse> => {
+  try {
+    const { searchParams } = new URL(req.url);
+    const page = parseInt(searchParams.get("page") || "1", 10);
+    const pageSize = parseInt(searchParams.get("pageSize") || "10", 10);
+    const search = searchParams.get("search") || undefined;
+
+    const result = validateSchema(IndexQueryParams, { page, pageSize, search });
+
+    if (!result.success) {
+      return NextResponse.json({ message: "Invalid query parameters" }, { status: 400 });
+    }
+
+    const users = await getUsersWithPaginationService({ page, pageSize, search });
+
+    return NextResponse.json(users, { status: 200 });
   } catch {
     return NextResponse.json({ message: "Something went wrong" }, { status: 500 });
   }

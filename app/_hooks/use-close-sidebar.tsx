@@ -11,13 +11,9 @@ export const useCloseSidebarOnFocusOutside = ({ ref }: Params) => {
   const { setOpen } = useSidebar();
 
   useEffect(() => {
-    console.log("useCloseSidebarOnFocusOutside mounted");
-    console.log("ref current:", ref.current);
-
     if (!ref.current) return;
 
     const handleFocusOut = () => {
-      console.log("Focus moved outside, closing sidebar");
       setOpen(false);
     };
 

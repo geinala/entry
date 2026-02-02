@@ -8,6 +8,7 @@ import {
   TrafficIncidentsModule,
 } from "@tomtom-org/maps-sdk/map";
 import env from "@/common/config/environtment";
+import maplibregl from "maplibre-gl";
 
 const TomTomMap = () => {
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
@@ -34,10 +35,20 @@ const TomTomMap = () => {
       visible: true,
       icons: { visible: true },
     });
+    const depotCoord: [number, number] = [112.6156684, -7.9467136];
+    const depotEl = document.createElement("div");
+    depotEl.className = "depot-marker";
+    depotEl.style.backgroundImage = "url('/images/logo.png')";
+    depotEl.style.width = "36px";
+    depotEl.style.height = "36px";
+    depotEl.style.backgroundSize = "contain";
+
+    new maplibregl.Marker({ element: depotEl }).setLngLat(depotCoord).addTo(map.mapLibreMap);
 
     mapInstanceRef.current = map;
 
     return () => {
+      mapInstanceRef.current?.mapLibreMap.remove();
       mapInstanceRef.current = null;
     };
   }, []);

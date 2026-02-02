@@ -54,3 +54,7 @@ export function getValidationErrors(error: z.ZodError): Record<string, string> {
 
   return errors;
 }
+
+export function getValidData(schema: ZodSchema, data: unknown) {
+  return schema.parse(data);
+}

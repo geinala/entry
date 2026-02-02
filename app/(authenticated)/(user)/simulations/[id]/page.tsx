@@ -6,6 +6,7 @@ import { useBreadcrumb } from "@/app/_contexts/breadcrumb.context";
 import { useEffect } from "react";
 import { useParams } from "next/navigation";
 import TomTomMap from "./_components/tomtom-map";
+import { Route } from "next";
 
 export default function SimulationDetailPage() {
   const params = useParams();
@@ -19,7 +20,7 @@ export default function SimulationDetailPage() {
       },
       {
         label: "Visualization",
-        href: `/simulations/${params.id}`,
+        href: `/simulations/${params.id}` as Route,
       },
     ]);
   }, [setBreadcrumbs, params.id]);

@@ -3,7 +3,12 @@ import { NextResponse } from "next/server";
 
 const isOnboardingRoute = createRouteMatcher(["/onboarding"]);
 const isApiRoute = createRouteMatcher(["/api(.*)"]);
-const isPublicRoute = createRouteMatcher(["/", "/sign-in(.*)", "/sign-up(.*)"]);
+const isPublicRoute = createRouteMatcher([
+  "/",
+  "/sign-in(.*)",
+  "/sign-up(.*)",
+  "/api/optimizations",
+]);
 
 export default clerkMiddleware(async (auth, req) => {
   const { sessionClaims, redirectToSignIn, isAuthenticated } = await auth();
