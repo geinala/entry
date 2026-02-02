@@ -65,6 +65,7 @@ const DataTable = <TData, TValue>(props: Props<TData, TValue>) => {
     return Math.ceil(total / pageSize);
   }, [total, pageSize]);
 
+  // eslint-disable-next-line react-hooks/incompatible-library
   const table = useReactTable({
     data: data || [],
     columns,
