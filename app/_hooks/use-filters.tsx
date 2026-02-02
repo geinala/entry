@@ -1,9 +1,10 @@
 import { debounce } from "@/lib/debounce";
 import { updateQueryParam } from "@/lib/query-param";
-import { getValidData } from "@/lib/validation";
+import { parseQueryParams } from "@/lib/validation";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import z, { ZodSchema } from "zod";
+import { SortCriterion } from "../_components/data-table/sort";
 
 export const useFilters = (schema: ZodSchema) => {
   const searchParams = useSearchParams();
@@ -11,7 +12,8 @@ export const useFilters = (schema: ZodSchema) => {
   const router = useRouter();
 
   const validFilters = useMemo(() => {
-    return getValidData(schema, Object.fromEntries(searchParams.entries()));
+    const result = parseQueryParams(schema, Object.fromEntries(searchParams.entries()));
+    return result.success ? result.data : {};
   }, [searchParams, schema]);
 
   const updateUrl = useCallback(
@@ -27,7 +29,6 @@ export const useFilters = (schema: ZodSchema) => {
         updateUrl({
           search: value || null,
           page: 1,
-          pageSize: 10,
         });
       }, 500),
     [updateUrl],
@@ -50,6 +51,18 @@ export const useFilters = (schema: ZodSchema) => {
     [updateUrl],
   );
 
+  const handleSortingChange = useCallback(
+    (sorts: SortCriterion[]) => {
+      const sortValue = sorts.map((s) => `${s.key}:${s.direction}`).join(",");
+
+      updateUrl({
+        sort: sortValue || null,
+        page: 1,
+      });
+    },
+    [updateUrl],
+  );
+
   const pagination = useMemo(
     () => ({
       page: typeof validFilters.page === "number" && validFilters.page > 0 ? validFilters.page : 1,
@@ -66,13 +79,11 @@ export const useFilters = (schema: ZodSchema) => {
       onFilterChange: () => {
         // TODO: Implement filter change handler
       },
-      onSortingChange: () => {
-        // TODO: Implement sorting change handler
-      },
+      onSortingChange: handleSortingChange,
       onPaginationChange: handlePaginationChange,
       onSearch: handleSearch,
     }),
-    [handlePaginationChange, handleSearch],
+    [handlePaginationChange, handleSearch, handleSortingChange],
   );
 
   return {
