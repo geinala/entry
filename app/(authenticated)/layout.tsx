@@ -1,7 +1,6 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { SidebarProvider } from "../_components/ui/sidebar";
 import { BreadcrumbProvider } from "../_contexts/breadcrumb.context";
 import Header from "./_components/header";
 import AuthenticatedSidebar from "./_components/sidebar";
@@ -19,15 +18,13 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
   return (
     <UserProvider>
       <BreadcrumbProvider>
-        <SidebarProvider defaultOpen={false}>
-          <div className="w-full h-screen flex flex-col">
-            <Header />
-            <main className="h-full w-full flex">
-              <AuthenticatedSidebar />
-              {children}
-            </main>
-          </div>
-        </SidebarProvider>
+        <div className="w-full h-screen flex flex-col">
+          <Header />
+          <main className="h-full w-full flex">
+            <AuthenticatedSidebar />
+            {children}
+          </main>
+        </div>
       </BreadcrumbProvider>
     </UserProvider>
   );

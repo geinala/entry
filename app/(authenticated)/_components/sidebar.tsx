@@ -13,15 +13,20 @@ import {
   SidebarMenuItem,
   SidebarTrigger,
 } from "@/app/_components/ui/sidebar";
-// import { useUserContext } from "@/app/_contexts/user.context";
+import { useUserContext } from "@/app/_contexts/user.context";
 import { GroupedMenuItem, MENU_ITEMS, MenuItem } from "@/common/constants/menu";
 import { X } from "lucide-react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 
 export default function AuthenticatedSidebar() {
-  // const { userDetails } = useUserContext();
-  const role = "user";
+  const { userDetails } = useUserContext();
+  const role = userDetails?.role?.name;
+  const pathname = usePathname();
+  const isMenuActive = (href: string) => {
+    return pathname.startsWith(href);
+  };
 
   const allowedSidebarMenus = useMemo(() => {
     return MENU_ITEMS.map((item: MenuItem | GroupedMenuItem) => {
@@ -47,7 +52,7 @@ export default function AuthenticatedSidebar() {
   }, [role]);
 
   return (
-    <Sidebar>
+    <Sidebar containerClassName="z-999">
       <SidebarHeader className="flex justify-between items-center flex-row p-4">
         <Logo />
         <SidebarTrigger variant={"ghost"}>
@@ -65,7 +70,7 @@ export default function AuthenticatedSidebar() {
                     {item.items.map((subItem, subIndex) => (
                       <SidebarMenuItem key={subIndex}>
                         <Link href={subItem.href}>
-                          <SidebarMenuButton>
+                          <SidebarMenuButton isActive={isMenuActive(subItem.href)}>
                             {subItem.icon}
                             {subItem.label}
                           </SidebarMenuButton>
@@ -83,7 +88,7 @@ export default function AuthenticatedSidebar() {
                   <SidebarMenu>
                     <SidebarMenuItem>
                       <Link href={item.href}>
-                        <SidebarMenuButton>
+                        <SidebarMenuButton isActive={isMenuActive(item.href)}>
                           {item.icon}
                           {item.label}
                         </SidebarMenuButton>
