@@ -1,10 +1,11 @@
 "use client";
 
+import { Route } from "next";
 import { createContext, useContext, useState } from "react";
 
 export type BreadcrumbItem = {
   label: string;
-  href?: string;
+  href?: Route;
 };
 
 const BreadcrumbContext = createContext<{
