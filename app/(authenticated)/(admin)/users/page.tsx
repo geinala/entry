@@ -8,17 +8,18 @@ import Image from "next/image";
 import { useEffect, useMemo } from "react";
 import { useGetUsers } from "./_hooks/use-get-users";
 import { useFilters } from "@/app/_hooks/use-filters";
-import { IndexQueryParams } from "@/types/query-params";
 import Page from "@/app/_components/page";
+import { SortOptionType } from "@/app/_components/data-table/sort";
+import { GetUsersQueryParams } from "@/server/user/user.schema";
 
 export default function UsersPage() {
-  console.log("RENDER USERS PAGE");
   const { setBreadcrumbs } = useBreadcrumb();
-  const { handleChange, pagination, filters, search } = useFilters(IndexQueryParams);
+  const { handleChange, pagination, filters, search } = useFilters(GetUsersQueryParams);
 
   const { data, isLoading } = useGetUsers({
     ...pagination,
     search: filters.search,
+    sort: filters.sort,
   });
 
   useEffect(() => {
@@ -71,6 +72,28 @@ export default function UsersPage() {
     [],
   );
 
+  const sortOptions = useMemo<SortOptionType[]>(
+    () => [
+      {
+        key: "fullName",
+        label: "Name",
+        options: [
+          { direction: "asc", label: "A-Z" },
+          { direction: "desc", label: "Z-A" },
+        ],
+      },
+      {
+        key: "email",
+        label: "Email",
+        options: [
+          { direction: "asc", label: "A-Z" },
+          { direction: "desc", label: "Z-A" },
+        ],
+      },
+    ],
+    [],
+  );
+
   return (
     <Page title="Users" description="This page for managing users.">
       <DataTable<User, unknown>
@@ -84,6 +107,8 @@ export default function UsersPage() {
         handleChange={handleChange}
         isSearchable
         pagination={pagination}
+        sortOptions={sortOptions}
+        sortDefaultValue={filters.sort}
       />
     </Page>
   );

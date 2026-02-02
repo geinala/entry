@@ -1,10 +1,10 @@
 import useAuthenticatedClient from "@/app/_hooks/use-authenticated-client";
+import { GetUsersQueryParamsType } from "@/server/user/user.schema";
 import { User } from "@/types/database";
 import { TPaginationResponse } from "@/types/meta";
-import { IndexQueryParamsType } from "@/types/query-params";
 import { useQuery } from "@tanstack/react-query";
 
-export const useGetUsers = (options: IndexQueryParamsType) => {
+export const useGetUsers = (options: GetUsersQueryParamsType) => {
   const api = useAuthenticatedClient();
 
   return useQuery({
