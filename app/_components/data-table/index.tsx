@@ -7,16 +7,17 @@ import {
   type Table as TableType,
   useReactTable,
 } from "@tanstack/react-table";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
-import { Card, CardContent, CardFooter, CardHeader } from "./ui/card";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
+import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
 import { useMemo } from "react";
-import Loading from "./loading";
-import { useIsMobile } from "../_hooks/use-mobile";
-import { Button } from "./ui/button";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "./ui/select";
-import { Pagination, PaginationContent, PaginationItem } from "./ui/pagination";
+import Loading from "../loading";
+import { useIsMobile } from "../../_hooks/use-mobile";
+import { Button } from "../ui/button";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
+import { Pagination, PaginationContent, PaginationItem } from "../ui/pagination";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
-import { Input } from "./ui/input";
+import { Input } from "../ui/input";
+import { SortButton, SortCriterion, SortOptionType } from "./sort";
 
 interface Props<TData, TValue> {
   source: {
@@ -39,10 +40,12 @@ interface Props<TData, TValue> {
   filterComponents?: React.ReactNode;
   handleChange: {
     onFilterChange: (newFilters: Record<string, string | number | undefined>) => void;
-    onSortingChange: (sortKey: string, order: "asc" | "desc") => void;
+    onSortingChange: (sorts: SortCriterion[]) => void;
     onPaginationChange: (page: number, pageSize: number) => void;
     onSearch: (searchTerm: string) => void;
   };
+  sortOptions?: Array<SortOptionType>;
+  sortDefaultValue?: SortCriterion[];
 }
 
 const DataTable = <TData, TValue>(props: Props<TData, TValue>) => {
@@ -55,6 +58,9 @@ const DataTable = <TData, TValue>(props: Props<TData, TValue>) => {
     filterComponents,
     handleChange,
     search,
+    sortOptions,
+    sortDefaultValue,
+    placeholderSearch,
   } = props;
   const { data, meta } = source;
   const { page, pageSize } = pagination;
@@ -82,18 +88,35 @@ const DataTable = <TData, TValue>(props: Props<TData, TValue>) => {
     manualSorting: true,
   });
 
+  const showHeader = useMemo(() => {
+    return isSearchable || Boolean(filterComponents) || Boolean(sortOptions);
+  }, [isSearchable, filterComponents, sortOptions]);
+
   return (
-    <Card className="gap-2 shadow-none">
-      {isSearchable || filterComponents ? (
-        <CardHeader>
-          <Input
-            placeholder={props.placeholderSearch || "Search..."}
-            defaultValue={search}
-            onChange={(e) => handleChange.onSearch(e.target.value)}
-          />
+    <Card className="gap-3 shadow-none">
+      {showHeader && (
+        <CardHeader className="flex gap-2">
+          {isSearchable && (
+            <Input
+              size={"sm"}
+              placeholder={placeholderSearch || "Search..."}
+              defaultValue={search}
+              onChange={(e) => handleChange.onSearch(e.target.value)}
+            />
+          )}
+
+          {filterComponents && <div className="flex gap-2">{filterComponents}</div>}
+
+          {sortOptions && (
+            <SortButton
+              sortOptions={sortOptions}
+              defaultValue={sortDefaultValue}
+              onSortChange={handleChange.onSortingChange}
+            />
+          )}
         </CardHeader>
-      ) : null}
-      <CardContent className="p-0">
+      )}
+      <CardContent>
         <Table>
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (

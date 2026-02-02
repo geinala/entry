@@ -1,4 +1,3 @@
-import { IndexQueryParamsType } from "@/types/query-params";
 import {
   findUserByClerkIdRepository,
   findUserWithRoleAndPermissionsRepository,
@@ -9,6 +8,7 @@ import { UserType } from "./user.types";
 import { paginationResponseMapper } from "@/lib/pagination";
 import { User } from "@/types/database";
 import { TPaginationResponse } from "@/types/meta";
+import { GetUsersQueryParamsType } from "./user.schema";
 
 export const validateUserService = async (clerkUserId: string) => {
   try {
@@ -51,7 +51,7 @@ export const findUserWithRoleAndPermissionsService = async (clerkUserId: string)
 };
 
 export const getUsersWithPaginationService = async (
-  queryParams: IndexQueryParamsType,
+  queryParams: GetUsersQueryParamsType,
 ): Promise<TPaginationResponse<User[]>> => {
   try {
     const [users, total] = await Promise.all([
