@@ -109,6 +109,7 @@ export default function UsersPage() {
         pagination={pagination}
         sortOptions={sortOptions}
         sortDefaultValue={filters.sort}
+        filterComponents
       />
     </Page>
   );
