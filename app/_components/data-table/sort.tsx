@@ -92,7 +92,14 @@ export const SortButton = ({ sortOptions, defaultValue, onSortChange }: Props) =
             ))}
           </CardContent>
           <CardFooter className="flex justify-between items-center p-0">
-            <Button variant={"outline"} size={"sm"} onClick={() => setSelectedValues([])}>
+            <Button
+              variant={"outline"}
+              size={"sm"}
+              onClick={() => {
+                onSortChange?.([]);
+                setSelectedValues([]);
+              }}
+            >
               Reset
             </Button>
             <Button

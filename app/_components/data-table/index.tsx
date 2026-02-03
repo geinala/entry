@@ -16,8 +16,9 @@ import { Button } from "../ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Pagination, PaginationContent, PaginationItem } from "../ui/pagination";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
-import { Input } from "../ui/input";
 import { SortButton, SortCriterion, SortOptionType } from "./sort";
+import { Filter } from "./filter";
+import { Search } from "./search";
 
 interface Props<TData, TValue> {
   source: {
@@ -97,15 +98,12 @@ const DataTable = <TData, TValue>(props: Props<TData, TValue>) => {
       {showHeader && (
         <CardHeader className="flex gap-2">
           {isSearchable && (
-            <Input
-              size={"sm"}
-              placeholder={placeholderSearch || "Search..."}
-              defaultValue={search}
-              onChange={(e) => handleChange.onSearch(e.target.value)}
+            <Search
+              search={search || ""}
+              placeholderSearch={placeholderSearch}
+              onSearchChange={handleChange.onSearch}
             />
           )}
-
-          {filterComponents && <div className="flex gap-2">{filterComponents}</div>}
 
           {sortOptions && (
             <SortButton
@@ -114,6 +112,8 @@ const DataTable = <TData, TValue>(props: Props<TData, TValue>) => {
               onSortChange={handleChange.onSortingChange}
             />
           )}
+
+          {filterComponents && <Filter />}
         </CardHeader>
       )}
       <CardContent>
