@@ -3,7 +3,14 @@ import { Button } from "../ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "../ui/dropdown-menu";
 import { Card, CardContent, CardFooter } from "../ui/card";
 
-export const Filter = () => {
+interface Props {
+  key?: string;
+  defaultValue?: string | number | boolean;
+}
+
+export const Filter = (props: Props) => {
+  const { defaultValue, key } = props;
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
