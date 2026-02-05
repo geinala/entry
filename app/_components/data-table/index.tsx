@@ -17,7 +17,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Pagination, PaginationContent, PaginationItem } from "../ui/pagination";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { SortButton, SortCriterion, SortOptionType } from "./sort";
-import { Filter } from "./filter";
 import { Search } from "./search";
 
 interface Props<TData, TValue> {
@@ -113,7 +112,7 @@ const DataTable = <TData, TValue>(props: Props<TData, TValue>) => {
             />
           )}
 
-          {filterComponents && <Filter />}
+          {/* {filterComponents && <Filter />} */}
         </CardHeader>
       )}
       <CardContent>
