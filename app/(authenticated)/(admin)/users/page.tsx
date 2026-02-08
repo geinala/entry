@@ -11,6 +11,8 @@ import { useFilters } from "@/app/_hooks/use-filters";
 import Page from "@/app/_components/page";
 import { SortOptionType } from "@/app/_components/data-table/sort";
 import { GetUsersQueryParams } from "@/server/user/user.schema";
+import TimeInput from "@/app/_components/data-table/filters/time-input";
+import { DateRangePicker } from "@/app/_components/data-table/filters/date-range-picker";
 
 export default function UsersPage() {
   const { setBreadcrumbs } = useBreadcrumb();
@@ -96,6 +98,8 @@ export default function UsersPage() {
 
   return (
     <Page title="Users" description="This page for managing users.">
+      <TimeInput allowClear />
+      <DateRangePicker />
       <DataTable<User, unknown>
         columns={columns}
         isLoading={isLoading}
