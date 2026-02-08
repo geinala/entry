@@ -1,4 +1,4 @@
-import { z, ZodSchema } from "zod";
+import { z, ZodSchema, ZodTypeAny } from "zod";
 
 export interface ValidationResult<T> {
   success: boolean;
@@ -54,3 +54,35 @@ export function getValidationErrors(error: z.ZodError): Record<string, string> {
 
   return errors;
 }
+
+export function parseQueryParams<TSchema extends ZodTypeAny>(schema: TSchema, query: unknown) {
+  return schema.safeParse(query);
+}
+
+export const createSortSchema = <T extends string>(allowedKeys: T[]) => {
+  return z
+    .union([z.string(), z.array(z.string())])
+    .optional()
+    .transform((val) => {
+      if (!val) return undefined;
+
+      const sortArray = Array.isArray(val) ? val : val.split(",");
+
+      const parsedSorts = sortArray
+        .map((item) => {
+          const parts = item.split(":");
+          if (parts.length !== 2) return null;
+
+          const [key, direction] = parts;
+
+          if (direction !== "asc" && direction !== "desc") return null;
+
+          if (!allowedKeys.includes(key as T)) return null;
+
+          return { key: key as T, direction: direction as "asc" | "desc" };
+        })
+        .filter((item): item is { key: T; direction: "asc" | "desc" } => item !== null);
+
+      return parsedSorts.length > 0 ? parsedSorts : undefined;
+    });
+};

@@ -1,8 +1,15 @@
 "use server";
 
-import { NextResponse } from "next/server";
-import { findUserWithRoleAndPermissionsService, validateUserService } from "./user.service";
+import { NextRequest, NextResponse } from "next/server";
+import {
+  findUserWithRoleAndPermissionsService,
+  getUsersWithPaginationService,
+  validateUserService,
+} from "./user.service";
 import { authService } from "@/services/auth.service";
+import { parseQueryParams } from "@/lib/validation";
+import { GetUsersQueryParams } from "./user.schema";
+import { parseSortParams } from "@/lib/query-param";
 
 export const onBoardingUserController = async (clerkUserId: string): Promise<NextResponse> => {
   try {
@@ -34,6 +41,31 @@ export const getUserDetailsController = async (
     }
 
     return NextResponse.json(user, { status: 200 });
+  } catch {
+    return NextResponse.json({ message: "Something went wrong" }, { status: 500 });
+  }
+};
+
+export const getUsersWithPaginationController = async (req: NextRequest): Promise<NextResponse> => {
+  try {
+    const { searchParams } = new URL(req.url);
+
+    const rawQueryParams = {
+      page: searchParams.get("page"),
+      pageSize: searchParams.get("pageSize"),
+      search: searchParams.get("search") || undefined,
+      sort: parseSortParams(searchParams),
+    };
+
+    const result = parseQueryParams(GetUsersQueryParams, rawQueryParams);
+
+    if (!result.success) {
+      return NextResponse.json({ message: "Invalid query parameters" }, { status: 400 });
+    }
+
+    const users = await getUsersWithPaginationService(result.data);
+
+    return NextResponse.json(users, { status: 200 });
   } catch {
     return NextResponse.json({ message: "Something went wrong" }, { status: 500 });
   }
