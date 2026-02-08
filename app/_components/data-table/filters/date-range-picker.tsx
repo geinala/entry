@@ -114,10 +114,10 @@ export const DateRangePicker = ({
             placeholder="Start date"
             className={cn(
               "relative border-0 rounded-l-md rounded-r-none shadow-none focus-visible:ring-0",
-              "bg-[linear-gradient(theme(colors.primary)_0_0)] bg-no-repeat",
-              "bg-[length:0_2px] bg-[position:0_100%]",
+              "bg-[linear-gradient(var(--color-primary)_0_0)] bg-no-repeat",
+              "bg-size-[0_2px] bg-position-[0_100%]",
               "transition-[background-size] duration-300 ease-out",
-              activeField === "start" && "bg-[length:100%_2px]",
+              activeField === "start" && "bg-size-[100%_2px]",
             )}
             value={dateRange?.from ? format(dateRange.from, dateFormat) : ""}
             onClick={handleStartClick}
@@ -131,10 +131,10 @@ export const DateRangePicker = ({
             placeholder="End date"
             className={cn(
               "relative border-0 rounded-none shadow-none focus-visible:ring-0",
-              "bg-[linear-gradient(theme(colors.primary)_0_0)] bg-no-repeat",
-              "bg-[length:0_2px] bg-[position:0_100%]",
+              "bg-[linear-gradient(var(--color-primary)_0_0)] bg-no-repeat",
+              "bg-size-[0_2px] bg-position-[0_100%]",
               "transition-[background-size] duration-300 ease-out",
-              activeField === "end" && "bg-[length:100%_2px]",
+              activeField === "end" && "bg-size-[100%_2px]",
             )}
             value={dateRange?.to ? format(dateRange.to, dateFormat) : ""}
             onClick={handleEndDateClick}
