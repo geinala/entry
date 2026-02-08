@@ -8,14 +8,19 @@ import { Button } from "../../ui/button";
 
 type TimeFormat = "24h" | "12h";
 
-interface Props {
+export type TimePickerProps = {
   value?: string;
   onChange?: (value: string) => void;
   format?: TimeFormat;
   allowClear?: boolean;
-}
+};
 
-export default function TimeInput({ value, onChange, format = "12h", allowClear = false }: Props) {
+export default function TimePicker({
+  value,
+  onChange,
+  format = "12h",
+  allowClear = false,
+}: TimePickerProps) {
   const emptyValue = "-- : -- : --";
   const [open, setOpen] = useState(false);
   const [time, setTime] = useState(value || emptyValue);
@@ -164,8 +169,11 @@ export default function TimeInput({ value, onChange, format = "12h", allowClear 
             onMouseEnter={() => setIsHovered(true)}
             onMouseLeave={() => setIsHovered(false)}
             onClick={(e) => {
-              e.stopPropagation();
-              handleClear(e);
+              if (allowClear && isHovered && time !== emptyValue) {
+                handleClear(e);
+              } else {
+                setOpen((prev) => !prev);
+              }
             }}
           >
             {allowClear && isHovered && time !== emptyValue ? (

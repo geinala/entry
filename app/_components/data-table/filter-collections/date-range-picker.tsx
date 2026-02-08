@@ -10,11 +10,11 @@ import { format } from "date-fns";
 import { Input } from "../../ui/input";
 import { cn } from "@/lib/utils";
 
-interface DateRangePickerProps {
+export type DateRangePickerProps = {
   onChange?: (dateRange: DateRange | undefined) => void;
   defaultValue?: DateRange;
   format?: string;
-}
+};
 
 export const DateRangePicker = ({
   onChange,

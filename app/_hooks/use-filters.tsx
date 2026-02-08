@@ -5,6 +5,7 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useMemo } from "react";
 import z, { ZodSchema } from "zod";
 import { SortCriterion } from "../_components/data-table/sort";
+import { FilterValue } from "../_components/data-table";
 
 export const useFilters = (schema: ZodSchema) => {
   const searchParams = useSearchParams();
@@ -63,6 +64,23 @@ export const useFilters = (schema: ZodSchema) => {
     [updateUrl],
   );
 
+  const handleFilterChange = useCallback(
+    (filters: Record<string, FilterValue>) => {
+      const updatedFilters: Record<string, z.infer<typeof schema>> = { page: 1 };
+
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value === undefined || value === null || value === "") {
+          updatedFilters[key] = null;
+        } else {
+          updatedFilters[key] = value as z.infer<typeof schema>;
+        }
+      });
+
+      updateUrl(updatedFilters);
+    },
+    [updateUrl],
+  );
+
   const pagination = useMemo(
     () => ({
       page: typeof validFilters.page === "number" && validFilters.page > 0 ? validFilters.page : 1,
@@ -76,14 +94,12 @@ export const useFilters = (schema: ZodSchema) => {
 
   const handlers = useMemo(
     () => ({
-      onFilterChange: () => {
-        // TODO: Implement filter change handler
-      },
+      onFilterChange: handleFilterChange,
       onSortingChange: handleSortingChange,
       onPaginationChange: handlePaginationChange,
       onSearch: handleSearch,
     }),
-    [handlePaginationChange, handleSearch, handleSortingChange],
+    [handlePaginationChange, handleSearch, handleSortingChange, handleFilterChange],
   );
 
   return {
