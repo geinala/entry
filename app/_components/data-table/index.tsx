@@ -17,8 +17,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from ".
 import { Pagination, PaginationContent, PaginationItem } from "../ui/pagination";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
 import { SortButton, SortCriterion, SortOptionType } from "./sort";
-import { Filter } from "./filter";
 import { Search } from "./search";
+import { FilterItemType } from "./filter-collections/factory";
+import { FilterTable } from "./filter";
+import { DateRange } from "react-day-picker";
+
+export type FilterValue =
+  | string
+  | number
+  | boolean
+  | DateRange
+  | undefined
+  | Array<string | number>;
 
 interface Props<TData, TValue> {
   source: {
@@ -38,9 +48,9 @@ interface Props<TData, TValue> {
     pageSize: number;
   };
   isSearchable?: boolean;
-  filterComponents?: React.ReactNode;
+  filterComponents?: FilterItemType[];
   handleChange: {
-    onFilterChange: (newFilters: Record<string, string | number | undefined>) => void;
+    onFilterChange: (value: Record<string, FilterValue>) => void;
     onSortingChange: (sorts: SortCriterion[]) => void;
     onPaginationChange: (page: number, pageSize: number) => void;
     onSearch: (searchTerm: string) => void;
@@ -113,7 +123,9 @@ const DataTable = <TData, TValue>(props: Props<TData, TValue>) => {
             />
           )}
 
-          {filterComponents && <Filter />}
+          {filterComponents && (
+            <FilterTable filterItems={filterComponents} onChange={handleChange.onFilterChange} />
+          )}
         </CardHeader>
       )}
       <CardContent>

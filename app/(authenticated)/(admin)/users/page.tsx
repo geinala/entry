@@ -57,17 +57,6 @@ export default function UsersPage() {
         accessorKey: "email",
         header: "Email",
       },
-      {
-        accessorKey: "role",
-        header: "Role",
-        cell: ({ row }) => {
-          const roleId = row.original.roleId;
-          let roleName = "User";
-          if (roleId === 1) roleName = "Admin";
-          else if (roleId === 2) roleName = "Moderator";
-          return <span>{roleName}</span>;
-        },
-      },
     ],
     [],
   );
@@ -109,7 +98,6 @@ export default function UsersPage() {
         pagination={pagination}
         sortOptions={sortOptions}
         sortDefaultValue={filters.sort}
-        filterComponents
       />
     </Page>
   );
