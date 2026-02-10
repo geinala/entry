@@ -2,13 +2,7 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 const isOnboardingRoute = createRouteMatcher(["/onboarding"]);
-const isApiRoute = createRouteMatcher(["/api(.*)"]);
-const isPublicRoute = createRouteMatcher([
-  "/",
-  "/sign-in(.*)",
-  "/sign-up(.*)",
-  "/api/optimizations",
-]);
+const isPublicRoute = createRouteMatcher(["/", "/sign-in(.*)", "/sign-up(.*)", "/waitlist(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
   const { sessionClaims, redirectToSignIn, isAuthenticated } = await auth();
@@ -16,10 +10,6 @@ export default clerkMiddleware(async (auth, req) => {
 
   // user yang belum login tidak boleh mengakses halaman private
   if (!isAuthenticated) {
-    if (isApiRoute(req)) {
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-    }
-
     if (!isPublicRoute(req)) {
       return redirectToSignIn();
     }
@@ -44,10 +34,6 @@ export default clerkMiddleware(async (auth, req) => {
 
 export const config = {
   matcher: [
-    // Skip Next.js internals and all static files, unless found in search params
-    "/((?!_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
-
-    // Always run for API routes
-    "/(api|trpc)(.*)",
+    "/((?!api|_next|[^?]*\\.(?:html?|css|js(?!on)|jpe?g|webp|png|gif|svg|ttf|woff2?|ico|csv|docx?|xlsx?|zip|webmanifest)).*)",
   ],
 };

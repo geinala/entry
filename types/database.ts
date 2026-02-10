@@ -1,5 +1,11 @@
 import { InferSelectModel, InferInsertModel } from "drizzle-orm";
-import { userTable, roleTable, permissionTable, rolePermissionTable } from "@/drizzle/schema";
+import {
+  userTable,
+  roleTable,
+  permissionTable,
+  rolePermissionTable,
+  waitlistTable,
+} from "@/drizzle/schema";
 
 // User Types
 export type User = InferSelectModel<typeof userTable>;
@@ -29,3 +35,7 @@ export type RoleWithPermissions = Role & {
 export type UserWithRoleAndPermissions = User & {
   role?: RoleWithPermissions;
 };
+
+// Waitlist Types
+export type WaitlistEntry = InferSelectModel<typeof waitlistTable>;
+export type NewWaitlistEntry = InferInsertModel<typeof waitlistTable>;
