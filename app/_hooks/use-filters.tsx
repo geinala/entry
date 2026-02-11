@@ -1,3 +1,5 @@
+"use client";
+
 import { debounce } from "@/lib/debounce";
 import { updateQueryParam } from "@/lib/query-param";
 import { parseQueryParams } from "@/lib/validation";

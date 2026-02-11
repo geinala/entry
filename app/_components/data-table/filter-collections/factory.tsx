@@ -1,3 +1,5 @@
+"use client";
+
 import { ReactNode } from "react";
 import { Label } from "../../ui/label";
 import { DateRangePickerProps } from "./date-range-picker";
