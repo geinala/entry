@@ -30,6 +30,11 @@ export const getWaitlistEntriesWithPaginationRepository = async (
       operator: "ilike",
       value: search,
     },
+    {
+      key: "status",
+      operator: "eq",
+      value: queryParams.status,
+    },
   ];
 
   const sortableColumns: Record<WaitlistSortableKey, (typeof waitlistTable)[WaitlistSortableKey]> =
@@ -44,6 +49,7 @@ export const getWaitlistEntriesWithPaginationRepository = async (
   > = {
     fullName: waitlistTable.fullName,
     email: waitlistTable.email,
+    status: waitlistTable.status,
   };
 
   const searchConditions = buildFilterClause({
@@ -79,6 +85,7 @@ export const getWaitlistEntriesCountRepository = async (
   > = {
     fullName: waitlistTable.fullName,
     email: waitlistTable.email,
+    status: waitlistTable.status,
   };
 
   const filters: FilterCriterion[] = [

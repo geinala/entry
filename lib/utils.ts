@@ -1,3 +1,5 @@
+"use client";
+
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { format as dateFnsFormat } from "date-fns";
@@ -21,4 +23,10 @@ export function convertUtcToLocalTime(params: IConvertUtcToLocalTimeParams) {
   const localDate = toZonedTime(date, env.NEXT_PUBLIC_NODE_TZ);
 
   return format ? dateFnsFormat(localDate, format) : localDate;
+}
+
+export function toTitleCase(str: string) {
+  return str.replace(/\w\S*/g, (txt) => {
+    return txt.charAt(0).toUpperCase() + txt.substr(1).toLowerCase();
+  });
 }
