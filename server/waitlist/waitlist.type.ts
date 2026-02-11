@@ -2,4 +2,6 @@ import { waitlistTable } from "@/drizzle/schema";
 
 export type WaitlistSortableKey = keyof Pick<typeof waitlistTable, "fullName" | "email">;
 
-export type WaitlistFilteredColumns = WaitlistSortableKey;
+export type WaitlistFilteredColumns =
+  | WaitlistSortableKey
+  | keyof Pick<typeof waitlistTable, "status">;
