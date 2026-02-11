@@ -1,11 +1,11 @@
 "use client";
 
-import { LayoutDashboard, Route, Users } from "lucide-react";
+import { LayoutDashboard, Route, UserCog, Users } from "lucide-react";
 import { Route as RouteNext } from "next";
 
 export type MenuItem = {
   label: string;
-  href: RouteNext;
+  path: RouteNext;
   icon: React.ReactNode;
   roles?: string[];
 };
@@ -21,13 +21,13 @@ export const MENU_ITEMS: (MenuItem | GroupedMenuItem)[] = [
     items: [
       {
         label: "Dashboard",
-        href: "/dashboard",
+        path: "/dashboard",
         roles: ["user", "admin"],
         icon: <LayoutDashboard />,
       },
       {
         label: "Simulations",
-        href: "/simulations",
+        path: "/simulations",
         roles: ["user"],
         icon: <Route />,
       },
@@ -37,9 +37,15 @@ export const MENU_ITEMS: (MenuItem | GroupedMenuItem)[] = [
     groupLabel: "Master Data",
     items: [
       {
-        href: "/users",
+        path: "/users",
         icon: <Users />,
         label: "User Management",
+        roles: ["admin"],
+      },
+      {
+        path: "/users/waitlist",
+        icon: <UserCog />,
+        label: "Waitlist",
         roles: ["admin"],
       },
     ],

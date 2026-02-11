@@ -11,6 +11,6 @@ export type TPaginationMeta = {
 };
 
 export type TPaginationResponse<T, M = TPaginationMeta> = {
-  data: T;
+  data: T[];
   meta: M;
 };

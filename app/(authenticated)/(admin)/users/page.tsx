@@ -85,14 +85,11 @@ export default function UsersPage() {
 
   return (
     <Page title="Users" description="This page for managing users.">
-      <DataTable<User, unknown>
+      <DataTable
         columns={columns}
         isLoading={isLoading}
         search={search}
-        source={{
-          data: data?.data || [],
-          meta: data?.meta,
-        }}
+        source={data}
         handleChange={handleChange}
         isSearchable
         pagination={pagination}

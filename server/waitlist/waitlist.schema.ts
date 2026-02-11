@@ -1,3 +1,5 @@
+import { createSortSchema } from "@/lib/validation";
+import { IndexQueryParams } from "@/types/query-params";
 import z from "zod";
 
 export const WaitlistFormSchema = z.object({
@@ -9,3 +11,9 @@ export const WaitlistFormSchema = z.object({
 });
 
 export type WaitlistFormType = z.infer<typeof WaitlistFormSchema>;
+
+export const GetWaitlistQueryParams = IndexQueryParams.extend({
+  sort: createSortSchema(["fullName", "email"]),
+});
+
+export type GetWaitlistQueryParamsType = z.infer<typeof GetWaitlistQueryParams>;
