@@ -9,7 +9,7 @@ export const useGetUsers = (options: GetUsersQueryParamsType) => {
 
   return useQuery({
     queryKey: ["users", options],
-    queryFn: async (): Promise<TPaginationResponse<User[]>> => {
+    queryFn: async (): Promise<TPaginationResponse<User>> => {
       return await api.get("/users", { params: options });
     },
   });
