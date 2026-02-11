@@ -6,8 +6,7 @@ import { ColumnDef } from "@tanstack/react-table";
 import { useMemo } from "react";
 import { WaitlistStatusBadge } from "../_components/waitlist-status.badge";
 import { Button } from "@/app/_components/ui/button";
-import { toast } from "sonner";
-import { Ellipsis } from "lucide-react";
+import { Send, XCircle } from "lucide-react";
 import { SortOptionType } from "@/app/_components/data-table/sort";
 import { useFilters } from "@/app/_hooks/use-filters";
 import {
@@ -16,6 +15,7 @@ import {
 } from "@/server/waitlist/waitlist.schema";
 import { FilterItemType } from "@/app/_components/data-table/filter-collections/factory";
 import { waitlistStatusEnum } from "@/drizzle/schema";
+import { toast } from "sonner";
 
 export const useGetDataTableProperties = () => {
   const { filters } = useFilters(GetWaitlistQueryParams);
@@ -54,19 +54,29 @@ const useGetDataTableColumns = () => {
         },
       },
       {
+        id: "actions",
         accessorKey: "actions",
-        header: "",
+        header: "Actions",
         cell: () => {
           return (
-            <Button
-              variant={"ghost"}
-              size={"icon"}
-              onClick={() => {
-                toast.info("Coming soon!");
-              }}
-            >
-              <Ellipsis />
-            </Button>
+            <>
+              <Button
+                variant={"ghost"}
+                size={"sm"}
+                className="text-green-600 hover:text-green-700"
+                onClick={() => toast.warning("Coming Soon")}
+              >
+                <Send /> Send Invitation
+              </Button>
+              <Button
+                variant={"ghost"}
+                size={"sm"}
+                onClick={() => toast.warning("Coming Soon")}
+                className="ml-2 text-red-600 hover:text-red-700"
+              >
+                <XCircle /> Reject
+              </Button>
+            </>
           );
         },
       },
