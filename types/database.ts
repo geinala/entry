@@ -5,6 +5,7 @@ import {
   permissionTable,
   rolePermissionTable,
   waitlistTable,
+  waitlistStatusEnum,
 } from "@/drizzle/schema";
 
 // User Types
@@ -39,3 +40,4 @@ export type UserWithRoleAndPermissions = User & {
 // Waitlist Types
 export type WaitlistEntry = InferSelectModel<typeof waitlistTable>;
 export type NewWaitlistEntry = InferInsertModel<typeof waitlistTable>;
+export type WaitlistStatus = (typeof waitlistStatusEnum.enumValues)[number];

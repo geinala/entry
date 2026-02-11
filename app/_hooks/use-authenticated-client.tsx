@@ -1,3 +1,5 @@
+"use client";
+
 import { client } from "@/lib/axios";
 import { useAuth } from "@clerk/nextjs";
 
