@@ -1,3 +1,5 @@
+"use client";
+
 import useAuthenticatedClient from "@/app/_hooks/use-authenticated-client";
 import { GetUsersQueryParamsType } from "@/server/user/user.schema";
 import { User } from "@/types/database";
