@@ -7,17 +7,23 @@ import { useEffect } from "react";
 import { useGetWaitlistEntriesQuery } from "./_hooks/use-queries";
 import { useFilters } from "@/app/_hooks/use-filters";
 import { GetWaitlistQueryParams } from "@/server/waitlist/waitlist.schema";
-import { useGetDataTableProperties } from "./_hooks/use-get-data-table-properties";
+import { useWaitlistColumns } from "./_hooks/use-waitlist-columns";
+import { getWaitlistFilteringOptions, getWaitlistSortingOptions } from "./waitlist-table.config";
 
 export default function WaitlistPage() {
   const { setBreadcrumbs } = useBreadcrumb();
   const { handleChange, pagination, filters, search } = useFilters(GetWaitlistQueryParams);
+
   const { data, isLoading } = useGetWaitlistEntriesQuery({
     ...pagination,
     search: filters.search,
     sort: filters.sort,
     status: filters.status,
   });
+
+  const columns = useWaitlistColumns();
+  const sortOptions = getWaitlistSortingOptions();
+  const filterOptions = getWaitlistFilteringOptions(filters);
 
   useEffect(() => {
     setBreadcrumbs([
@@ -27,8 +33,6 @@ export default function WaitlistPage() {
       },
     ]);
   }, [setBreadcrumbs]);
-
-  const { columns, sortOptions, filterOptions } = useGetDataTableProperties();
 
   return (
     <Page
