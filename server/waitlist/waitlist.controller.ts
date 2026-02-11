@@ -38,6 +38,7 @@ export const getWaitlistEntriesWithPaginationController = async (
       pageSize: searchParams.get("pageSize"),
       search: searchParams.get("search") || undefined,
       sort: parseSortParams(searchParams),
+      status: searchParams.get("status") || undefined,
     };
 
     const result = parseQueryParams(GetWaitlistQueryParams, rawQueryParams);

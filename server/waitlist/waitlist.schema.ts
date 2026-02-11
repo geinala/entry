@@ -1,6 +1,7 @@
 import { createSortSchema } from "@/lib/validation";
 import { IndexQueryParams } from "@/types/query-params";
 import z from "zod";
+import { waitlistStatusEnum } from "@/drizzle/schema";
 
 export const WaitlistFormSchema = z.object({
   email: z.string().email("Invalid email address"),
@@ -14,6 +15,7 @@ export type WaitlistFormType = z.infer<typeof WaitlistFormSchema>;
 
 export const GetWaitlistQueryParams = IndexQueryParams.extend({
   sort: createSortSchema(["fullName", "email"]),
+  status: z.enum(waitlistStatusEnum.enumValues).optional(),
 });
 
 export type GetWaitlistQueryParamsType = z.infer<typeof GetWaitlistQueryParams>;

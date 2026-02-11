@@ -36,7 +36,11 @@ export const SelectFilter = (props: SelectFilterProps) => {
       }}
       {...selectProps}
     >
-      <SelectTrigger isShowClearButton={allowClear && value !== ""} onClear={handleClear}>
+      <SelectTrigger
+        isShowClearButton={allowClear && value !== ""}
+        onClear={handleClear}
+        className="w-full"
+      >
         <SelectValue placeholder={props.placeholder || "Select an option"} />
       </SelectTrigger>
       <SelectContent position="popper">

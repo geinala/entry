@@ -3,18 +3,11 @@
 import DataTable from "@/app/_components/data-table";
 import Page from "@/app/_components/page";
 import { useBreadcrumb } from "@/app/_contexts/breadcrumb.context";
-import { WaitlistEntry } from "@/types/database";
-import { useEffect, useMemo } from "react";
+import { useEffect } from "react";
 import { useGetWaitlistEntriesQuery } from "./_hooks/use-queries";
-import { ColumnDef } from "@tanstack/react-table";
 import { useFilters } from "@/app/_hooks/use-filters";
 import { GetWaitlistQueryParams } from "@/server/waitlist/waitlist.schema";
-import { WaitlistStatusBadge } from "./_components/waitlist-status.badge";
-import { Button } from "@/app/_components/ui/button";
-import { Ellipsis } from "lucide-react";
-import { convertUtcToLocalTime } from "@/lib/utils";
-import { SortOptionType } from "@/app/_components/data-table/sort";
-import { toast } from "sonner";
+import { useGetDataTableProperties } from "./_hooks/use-get-data-table-properties";
 
 export default function WaitlistPage() {
   const { setBreadcrumbs } = useBreadcrumb();
@@ -23,6 +16,7 @@ export default function WaitlistPage() {
     ...pagination,
     search: filters.search,
     sort: filters.sort,
+    status: filters.status,
   });
 
   useEffect(() => {
@@ -34,74 +28,7 @@ export default function WaitlistPage() {
     ]);
   }, [setBreadcrumbs]);
 
-  const columns = useMemo<ColumnDef<WaitlistEntry>[]>(
-    () => [
-      {
-        accessorKey: "fullName",
-        header: "Name",
-      },
-      {
-        accessorKey: "email",
-        header: "Email",
-      },
-      {
-        accessorKey: "createdAt",
-        header: "Registered At",
-        cell: ({ row }) => {
-          const entry = row.original;
-          return convertUtcToLocalTime({ utcDateStr: entry.createdAt.toString(), format: "PPpp" });
-        },
-      },
-      {
-        accessorKey: "status",
-        header: "Status",
-        cell: ({ row }) => {
-          const entry = row.original;
-          return <WaitlistStatusBadge status={entry.status} />;
-        },
-      },
-      {
-        accessorKey: "actions",
-        header: "",
-        cell: () => {
-          return (
-            <Button
-              variant={"ghost"}
-              size={"icon"}
-              onClick={() => {
-                toast.info("Coming soon!");
-              }}
-            >
-              <Ellipsis />
-            </Button>
-          );
-        },
-      },
-    ],
-    [],
-  );
-
-  const sortOptions = useMemo<SortOptionType[]>(
-    () => [
-      {
-        key: "fullName",
-        label: "Name",
-        options: [
-          { direction: "asc", label: "A-Z" },
-          { direction: "desc", label: "Z-A" },
-        ],
-      },
-      {
-        key: "email",
-        label: "Email",
-        options: [
-          { direction: "asc", label: "A-Z" },
-          { direction: "desc", label: "Z-A" },
-        ],
-      },
-    ],
-    [],
-  );
+  const { columns, sortOptions, filterOptions } = useGetDataTableProperties();
 
   return (
     <Page
@@ -119,6 +46,7 @@ export default function WaitlistPage() {
         sortOptions={sortOptions}
         sortDefaultValue={filters.sort}
         placeholderSearch="Search with name or email ..."
+        filterComponents={filterOptions}
       />
     </Page>
   );
