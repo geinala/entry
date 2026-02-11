@@ -21,6 +21,7 @@ import { Search } from "./search";
 import { FilterItemType } from "./filter-collections/factory";
 import { FilterTable } from "./filter";
 import { DateRange } from "react-day-picker";
+import { TPaginationResponse } from "@/types/meta";
 
 export type FilterValue =
   | string
@@ -30,15 +31,8 @@ export type FilterValue =
   | undefined
   | Array<string | number>;
 
-interface Props<TData, TValue> {
-  source: {
-    data?: TData[];
-    meta?: {
-      currentPage?: number;
-      pageSize?: number;
-      total?: number;
-    };
-  };
+interface Props<TData, TValue = unknown> {
+  source?: TPaginationResponse<TData>;
   columns: ColumnDef<TData, TValue>[];
   isLoading?: boolean;
   placeholderSearch?: string;
@@ -59,7 +53,7 @@ interface Props<TData, TValue> {
   sortDefaultValue?: SortCriterion[];
 }
 
-const DataTable = <TData, TValue>(props: Props<TData, TValue>) => {
+const DataTable = <TData, TValue = unknown>(props: Props<TData, TValue>) => {
   const {
     columns,
     source,
@@ -73,7 +67,7 @@ const DataTable = <TData, TValue>(props: Props<TData, TValue>) => {
     sortDefaultValue,
     placeholderSearch,
   } = props;
-  const { data, meta } = source;
+  const { data = [], meta } = source || {};
   const { page, pageSize } = pagination;
   const { total } = meta || {};
 

@@ -55,11 +55,14 @@ export default function OnboardingPage() {
               </p>
               <Button
                 onClick={() => {
-                  toast.info("Coming Soon");
-
-                  setTimeout(() => {
-                    signOut();
-                  }, 2000);
+                  toast.info("Redirecting to waitlist page...", {
+                    duration: 2000,
+                    closeButton: false,
+                    dismissible: false,
+                    onAutoClose: () => {
+                      signOut({ redirectUrl: "/waitlist" });
+                    },
+                  });
                 }}
               >
                 Request Access

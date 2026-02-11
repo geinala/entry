@@ -5,29 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1768962181302,
-      "tag": "0000_tense_vanisher",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1770292597417,
-      "tag": "0001_wakeful_kronos",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1770654966232,
-      "tag": "0002_worthless_thunderball",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1770730252810,
-      "tag": "0003_salty_manta",
+      "when": 1770768106882,
+      "tag": "0000_gigantic_fallen_one",
       "breakpoints": true
     }
   ]

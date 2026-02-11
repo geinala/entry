@@ -1,1 +1,0 @@
-ALTER TABLE "waitlists" DROP COLUMN "ip_address";

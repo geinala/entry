@@ -12,7 +12,6 @@ import Link from "next/link";
 import { useForm } from "@tanstack/react-form";
 import { WaitlistFormSchema } from "@/server/waitlist/waitlist.schema";
 import { useCreateWaitlistEntryMutation } from "../_hooks/use-mutations";
-import { useEffect } from "react";
 
 export const WaitlistForm = () => {
   const { mutateAsync } = useCreateWaitlistEntryMutation();
@@ -27,10 +26,6 @@ export const WaitlistForm = () => {
       await mutateAsync(values.value);
     },
   });
-
-  useEffect(() => {
-    console.log(form.state);
-  }, [form.state]);
 
   return (
     <Card className="min-w-96 justify-center">

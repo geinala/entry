@@ -52,7 +52,7 @@ export const findUserWithRoleAndPermissionsService = async (clerkUserId: string)
 
 export const getUsersWithPaginationService = async (
   queryParams: GetUsersQueryParamsType,
-): Promise<TPaginationResponse<User[]>> => {
+): Promise<TPaginationResponse<User>> => {
   try {
     const [users, total] = await Promise.all([
       getUsersWithPaginationRepository(queryParams),

@@ -6,6 +6,7 @@ import { AnyColumn, eq, or, sql } from "drizzle-orm";
 import { GetUsersQueryParamsType } from "./user.schema";
 import { buildFilterClause, buildSortingClause, FilterCriterion } from "@/lib/query";
 import { PgColumn } from "drizzle-orm/pg-core";
+import { calculateOffset } from "@/lib/pagination";
 
 export const findUserByClerkIdRepository = async (clerkUserId: string) => {
   return await db.select().from(userTable).where(eq(userTable.clerkUserId, clerkUserId)).limit(1);
@@ -23,7 +24,8 @@ export const findUserWithRoleAndPermissionsRepository = async (clerkUserId: stri
 
 export const getUsersWithPaginationRepository = async (queryParams: GetUsersQueryParamsType) => {
   const { page, pageSize, search, sort } = queryParams;
-  const offset = (page - 1) * pageSize;
+  const offset = calculateOffset(page, pageSize);
+
   const filters: FilterCriterion[] = [
     { key: "email", operator: "ilike", value: search },
     {
@@ -32,10 +34,12 @@ export const getUsersWithPaginationRepository = async (queryParams: GetUsersQuer
       value: search,
     },
   ];
+
   const sortableColumns: Record<string, PgColumn> = {
     fullName: userTable.fullName,
     email: userTable.email,
   } as const;
+
   const columns: Record<string, PgColumn> = {
     fullName: userTable.fullName,
     email: userTable.email,
