@@ -28,11 +28,21 @@ const buttonVariants = cva(
         icon: "size-9",
         "icon-sm": "size-8",
         "icon-lg": "size-10",
+        none: "",
+      },
+      loadingColor: {
+        default: "[&_svg[class*='lucide-loader-circle']]:text-secondary",
+        destructive: "[&_svg[class*='lucide-loader-circle']]:text-white",
+        outline: "[&_svg[class*='lucide-loader-circle']]:text-foreground",
+        secondary: "[&_svg[class*='lucide-loader-circle']]:text-secondary-foreground",
+        ghost: "[&_svg[class*='lucide-loader-circle']]:text-foreground",
+        link: "[&_svg[class*='lucide-loader-circle']]:text-primary",
       },
     },
     defaultVariants: {
       variant: "default",
       size: "default",
+      loadingColor: "default",
     },
   },
 );
@@ -58,18 +68,11 @@ function Button({
       data-slot="button"
       data-variant={variant}
       data-size={size}
-      className={cn(buttonVariants({ variant, size, className }))}
+      className={cn(buttonVariants({ variant, size, loadingColor: variant, className }))}
       disabled={isLoading || disabled}
       {...props}
     >
-      {isLoading ? (
-        <>
-          <Loading isFullscreen={false} color="text-background" />
-          {children}
-        </>
-      ) : (
-        children
-      )}
+      {isLoading ? <Loading isFullscreen={false} /> : children}
     </Comp>
   );
 }
