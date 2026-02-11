@@ -1,3 +1,5 @@
+"use client";
+
 import { JSX } from "react";
 import { DateRangePicker } from "./date-range-picker";
 import { FilterItemType } from "./factory";
