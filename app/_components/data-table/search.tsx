@@ -1,7 +1,7 @@
 "use client";
 import { Search as SearchIcon, X } from "lucide-react";
 import { Input } from "../ui/input";
-import { useEffect, useState } from "react";
+import { useState, useCallback } from "react";
 import { Button } from "../ui/button";
 
 interface Props {
@@ -13,20 +13,19 @@ interface Props {
 export const Search = ({ search, placeholderSearch, onSearchChange }: Props) => {
   const [inputValue, setInputValue] = useState(search);
 
-  useEffect(() => {
-    setInputValue(search);
-  }, [search]);
+  const handleInputChange = useCallback(
+    (e: React.ChangeEvent<HTMLInputElement>) => {
+      const newValue = e.target.value;
+      setInputValue(newValue);
+      onSearchChange?.(newValue);
+    },
+    [onSearchChange],
+  );
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newValue = e.target.value;
-    setInputValue(newValue);
-    onSearchChange?.(newValue);
-  };
-
-  const handleClear = () => {
+  const handleClear = useCallback(() => {
     setInputValue("");
     onSearchChange?.("");
-  };
+  }, [onSearchChange]);
 
   return (
     <div className="relative w-full">

@@ -8,3 +8,19 @@ export const client = axios.create({
   },
   withCredentials: true,
 });
+
+let isInterceptorSetup = false;
+
+export const setupAuthInterceptor = (getToken: () => Promise<string | null>) => {
+  if (isInterceptorSetup) return;
+
+  client.interceptors.request.use(async (config) => {
+    const token = await getToken();
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
+    return config;
+  });
+
+  isInterceptorSetup = true;
+};
