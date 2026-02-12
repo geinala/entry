@@ -1,7 +1,7 @@
 "use client";
 
 import { Route } from "next";
-import { createContext, useContext, useState } from "react";
+import { createContext, useCallback, useContext, useState } from "react";
 
 export type BreadcrumbItem = {
   label: string;
@@ -14,7 +14,11 @@ const BreadcrumbContext = createContext<{
 } | null>(null);
 
 export function BreadcrumbProvider({ children }: { children: React.ReactNode }) {
-  const [breadcrumbs, setBreadcrumbs] = useState<BreadcrumbItem[]>([]);
+  const [breadcrumbs, setBreadcrumbsState] = useState<BreadcrumbItem[]>([]);
+
+  const setBreadcrumbs = useCallback((items: BreadcrumbItem[]) => {
+    setBreadcrumbsState(items);
+  }, []);
 
   return (
     <BreadcrumbContext.Provider value={{ breadcrumbs, setBreadcrumbs }}>
