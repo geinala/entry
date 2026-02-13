@@ -14,34 +14,34 @@ import {
 } from "../ui/dropdown-menu";
 import { Card, CardContent, CardFooter } from "../ui/card";
 
-export type SortDirection = "asc" | "desc";
+export type TSortDirection = "asc" | "desc";
 
-export type SortOptionType = {
+export type TSortOption = {
   label: string;
   key: string;
   options: Array<{
     label: string;
-    direction: SortDirection;
+    direction: TSortDirection;
   }>;
 };
 
-export type SortCriterion = {
+export type TSortCriterion = {
   key: string;
-  direction: SortDirection;
+  direction: TSortDirection;
 };
 
-interface Props {
-  sortOptions: SortOptionType[];
-  defaultValue?: SortCriterion[];
-  onSortChange?: (sorts: SortCriterion[]) => void;
+interface ISortButtonProps {
+  sortOptions: TSortOption[];
+  defaultValue?: TSortCriterion[];
+  onSortChange?: (sorts: TSortCriterion[]) => void;
 }
 
-export const SortButton = ({ sortOptions, defaultValue, onSortChange }: Props) => {
+export const SortButton = ({ sortOptions, defaultValue, onSortChange }: ISortButtonProps) => {
   const [selectedValues, setSelectedValues] = useState<string[]>(
     transformSortCriterionToString(defaultValue),
   );
 
-  const handleSelect = (key: string, direction: SortDirection) => {
+  const handleSelect = (key: string, direction: TSortDirection) => {
     const newValue = `${key}:${direction}`;
 
     setSelectedValues((prev) => {
@@ -107,8 +107,8 @@ export const SortButton = ({ sortOptions, defaultValue, onSortChange }: Props) =
             <Button
               size={"sm"}
               onClick={() => {
-                const sorts: SortCriterion[] = selectedValues.map((value) => {
-                  const [key, direction] = value.split(":") as [string, SortDirection];
+                const sorts: TSortCriterion[] = selectedValues.map((value) => {
+                  const [key, direction] = value.split(":") as [string, TSortDirection];
                   return { key, direction };
                 });
                 onSortChange?.(sorts);
@@ -123,7 +123,7 @@ export const SortButton = ({ sortOptions, defaultValue, onSortChange }: Props) =
   );
 };
 
-const transformSortCriterionToString = (sorts: SortCriterion[] | undefined): string[] => {
+const transformSortCriterionToString = (sorts: TSortCriterion[] | undefined): string[] => {
   if (!sorts) return [];
   return sorts.map((sort) => `${sort.key}:${sort.direction}`);
 };

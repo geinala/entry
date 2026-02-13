@@ -1,12 +1,12 @@
 "use client";
 
-import { FilterItemType } from "@/app/_components/data-table/filter-collections/factory";
-import { SortOptionType } from "@/app/_components/data-table/sort";
+import { TFilterItem } from "@/app/_components/data-table/filter-collections/factory";
+import { TSortOption } from "@/app/_components/data-table/sort";
 import { waitlistStatusEnum } from "@/drizzle/schema";
 import { toTitleCase } from "@/lib/utils";
-import { GetWaitlistQueryParamsType } from "@/server/waitlist/waitlist.schema";
+import { TGetWaitlistQueryParams } from "@/server/waitlist/waitlist.schema";
 
-export const getWaitlistSortingOptions = (): SortOptionType[] => {
+export const getWaitlistSortingOptions = (): TSortOption[] => {
   return [
     {
       key: "fullName",
@@ -27,9 +27,7 @@ export const getWaitlistSortingOptions = (): SortOptionType[] => {
   ];
 };
 
-export const getWaitlistFilteringOptions = (
-  filters: GetWaitlistQueryParamsType,
-): FilterItemType[] => {
+export const getWaitlistFilteringOptions = (filters: TGetWaitlistQueryParams): TFilterItem[] => {
   return [
     {
       label: "Status",

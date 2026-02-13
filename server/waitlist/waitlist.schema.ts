@@ -11,11 +11,11 @@ export const WaitlistFormSchema = z.object({
     .max(100, "Full name must be at most 100 characters long"),
 });
 
-export type WaitlistFormType = z.infer<typeof WaitlistFormSchema>;
+export type TWaitlistForm = z.infer<typeof WaitlistFormSchema>;
 
 export const GetWaitlistQueryParams = IndexQueryParams.extend({
   sort: createSortSchema(["fullName", "email"]),
   status: z.enum(waitlistStatusEnum.enumValues).optional(),
 });
 
-export type GetWaitlistQueryParamsType = z.infer<typeof GetWaitlistQueryParams>;
+export type TGetWaitlistQueryParams = z.infer<typeof GetWaitlistQueryParams>;

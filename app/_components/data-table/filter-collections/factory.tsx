@@ -2,36 +2,36 @@
 
 import { ReactNode } from "react";
 import { Label } from "../../ui/label";
-import { DateRangePickerProps } from "./date-range-picker";
-import { SelectFilterProps } from "./select";
-import { TimePickerProps } from "./time-picker";
 import { IFilterTableProps } from "../filter";
-import { FilterValue } from "../index";
+import { TFilterValue } from "../index";
 import { FilterCollections, FilterRenderers } from ".";
+import { TTimePickerProps } from "./time-picker";
+import { TSelectFilterProps } from "./select";
+import { TDateRangePickerProps } from "./date-range-picker";
 
-type BaseFilterItem<P extends Record<string, unknown>> = P & {
+type TBaseFilterItem<P extends Record<string, unknown>> = P & {
   name: string;
   label: string;
 };
 
-type TypedFilterItem<
+type TTypedFilterItem<
   P extends Record<string, unknown>,
   T extends keyof typeof FilterCollections,
-> = BaseFilterItem<P> & {
+> = TBaseFilterItem<P> & {
   type: T;
 };
 
-export type FilterItemType =
-  | TypedFilterItem<TimePickerProps, "TimePicker">
-  | TypedFilterItem<SelectFilterProps, "Select">
-  | TypedFilterItem<DateRangePickerProps, "DateRangePicker">;
+export type TFilterItem =
+  | TTypedFilterItem<TTimePickerProps, "TimePicker">
+  | TTypedFilterItem<TSelectFilterProps, "Select">
+  | TTypedFilterItem<TDateRangePickerProps, "DateRangePicker">;
 
-type ComponentFilterProps<T extends FilterItemType> = {
+interface IComponentFilterProps<T extends TFilterItem> {
   item: T;
   content: ReactNode;
-};
+}
 
-const ComponentFilter = <T extends FilterItemType>({ item, content }: ComponentFilterProps<T>) => {
+const ComponentFilter = <T extends TFilterItem>({ item, content }: IComponentFilterProps<T>) => {
   return (
     <div className="mb-2 last:mb-0">
       <Label className="mb-1">{item.label}</Label>
@@ -41,7 +41,7 @@ const ComponentFilter = <T extends FilterItemType>({ item, content }: ComponentF
 };
 
 export const FilterInputFactory = (
-  props: IFilterTableProps & { filterValues?: Record<string, FilterValue> },
+  props: IFilterTableProps & { filterValues?: Record<string, TFilterValue> },
 ) => {
   const { filterItems, onChange, filterValues = {} } = props;
 

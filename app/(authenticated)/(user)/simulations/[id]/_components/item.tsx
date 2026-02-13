@@ -5,7 +5,7 @@ import { Indicator } from "../../_components/indicator";
 import { Paragraph } from "@/app/_components/typography";
 import { ReactNode } from "react";
 
-interface StatItemProps {
+interface IStatItemProps {
   title: string;
   value: string | ReactNode;
   indicatorColor?: string;
@@ -19,7 +19,7 @@ export default function StatItem({
   indicatorColor = "blue",
   showIndicator = true,
   className,
-}: StatItemProps) {
+}: IStatItemProps) {
   return (
     <Item variant={"muted"} className={`gap-2 ${className || ""}`}>
       <ItemHeader>

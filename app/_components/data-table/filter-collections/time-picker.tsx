@@ -6,12 +6,12 @@ import { Input } from "../../ui/input";
 import { Popover, PopoverContent, PopoverTrigger } from "../../ui/popover";
 import { Button } from "../../ui/button";
 
-type TimeFormat = "24h" | "12h";
+type TTimeFormat = "24h" | "12h";
 
-export type TimePickerProps = {
+export type TTimePickerProps = {
   value?: string;
   onChange?: (value: string) => void;
-  format?: TimeFormat;
+  format?: TTimeFormat;
   allowClear?: boolean;
 };
 
@@ -20,7 +20,7 @@ export default function TimePicker({
   onChange,
   format = "12h",
   allowClear = false,
-}: TimePickerProps) {
+}: TTimePickerProps) {
   const emptyValue = "-- : -- : --";
   const [open, setOpen] = useState(false);
   const [time, setTime] = useState(value || emptyValue);

@@ -1,15 +1,15 @@
-import { MiddlewareResponse } from "@/lib/request";
+import { TMiddlewareResponse } from "@/lib/request";
 import { NextRequest, NextResponse } from "next/server";
 import { authService } from "@/services/auth.service";
 
-export type AuthMiddlewareData = {
+export type TAuthMiddlewareData = {
   clerkUserId: string;
   sessionId: string;
 };
 
 export const authMiddleware = async (
   req: NextRequest,
-): Promise<MiddlewareResponse<AuthMiddlewareData>> => {
+): Promise<TMiddlewareResponse<TAuthMiddlewareData>> => {
   try {
     const authData = await authService.authenticateRequest(req);
 

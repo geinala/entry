@@ -1,17 +1,17 @@
 "use client";
 
 import useAuthenticatedClient from "@/app/_hooks/use-authenticated-client";
-import { GetUsersQueryParamsType } from "@/server/user/user.schema";
-import { User } from "@/types/database";
+import { TGetUsersQueryParams } from "@/server/user/user.schema";
+import { TUser } from "@/types/database";
 import { TPaginationResponse } from "@/types/meta";
 import { useQuery } from "@tanstack/react-query";
 
-export const useGetUsers = (options: GetUsersQueryParamsType) => {
+export const useGetUsers = (options: TGetUsersQueryParams) => {
   const api = useAuthenticatedClient();
 
   return useQuery({
     queryKey: ["users", options],
-    queryFn: async (): Promise<TPaginationResponse<User>> => {
+    queryFn: async (): Promise<TPaginationResponse<TUser>> => {
       return await api.get("/users", { params: options });
     },
   });

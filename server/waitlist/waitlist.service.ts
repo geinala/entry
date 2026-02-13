@@ -1,27 +1,27 @@
-import { GetWaitlistQueryParamsType, WaitlistFormType } from "./waitlist.schema";
+import { TGetWaitlistQueryParams, TWaitlistForm } from "./waitlist.schema";
 import {
   createWaitlistEntryRepository,
   getWaitlistEntriesCountRepository,
   getWaitlistEntriesWithPaginationRepository,
 } from "./waitlist.repository";
 import { TPaginationResponse } from "@/types/meta";
-import { WaitlistEntry } from "@/types/database";
+import { TWaitlistEntry } from "@/types/database";
 import { paginationResponseMapper } from "@/lib/pagination";
 
-export const createWaitlistEntryService = async (data: WaitlistFormType) => {
+export const createWaitlistEntryService = async (data: TWaitlistForm) => {
   return await createWaitlistEntryRepository(data);
 };
 
 export const getWaitlistEntriesWithPaginationService = async (
-  queryParams: GetWaitlistQueryParamsType,
-): Promise<TPaginationResponse<WaitlistEntry>> => {
+  queryParams: TGetWaitlistQueryParams,
+): Promise<TPaginationResponse<TWaitlistEntry>> => {
   try {
     const [entries, total] = await Promise.all([
       getWaitlistEntriesWithPaginationRepository(queryParams),
       getWaitlistEntriesCountRepository(queryParams),
     ]);
 
-    return paginationResponseMapper<WaitlistEntry>(entries, {
+    return paginationResponseMapper<TWaitlistEntry>(entries, {
       currentPage: queryParams.page,
       pageSize: queryParams.pageSize,
       totalItems: total,

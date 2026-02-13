@@ -3,20 +3,20 @@
 import { Route } from "next";
 import { createContext, useCallback, useContext, useState } from "react";
 
-export type BreadcrumbItem = {
+type TBreadcrumbItem = {
   label: string;
   href?: Route;
 };
 
 const BreadcrumbContext = createContext<{
-  breadcrumbs: BreadcrumbItem[];
-  setBreadcrumbs: (items: BreadcrumbItem[]) => void;
+  breadcrumbs: TBreadcrumbItem[];
+  setBreadcrumbs: (items: TBreadcrumbItem[]) => void;
 } | null>(null);
 
 export function BreadcrumbProvider({ children }: { children: React.ReactNode }) {
-  const [breadcrumbs, setBreadcrumbsState] = useState<BreadcrumbItem[]>([]);
+  const [breadcrumbs, setBreadcrumbsState] = useState<TBreadcrumbItem[]>([]);
 
-  const setBreadcrumbs = useCallback((items: BreadcrumbItem[]) => {
+  const setBreadcrumbs = useCallback((items: TBreadcrumbItem[]) => {
     setBreadcrumbsState(items);
   }, []);
 

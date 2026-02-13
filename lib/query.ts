@@ -1,11 +1,11 @@
-import { SortCriterion } from "@/app/_components/data-table/sort";
+import { TSortCriterion } from "@/app/_components/data-table/sort";
 import { AnyColumn, SQL, asc, desc, eq, gt, gte, ilike, inArray, lt, lte, ne } from "drizzle-orm";
 
 export function buildSortingClause({
   sort,
   columns,
 }: {
-  sort: Array<SortCriterion> | undefined;
+  sort: Array<TSortCriterion> | undefined;
   columns: Record<string, AnyColumn>;
 }): SQL[] | undefined {
   if (!sort || sort.length === 0) return undefined;
@@ -20,11 +20,11 @@ export function buildSortingClause({
   }, []);
 }
 
-type FilterOperator = "eq" | "ne" | "lt" | "gt" | "lte" | "gte" | "in" | "ilike";
+type TFilterOperator = "eq" | "ne" | "lt" | "gt" | "lte" | "gte" | "in" | "ilike";
 
-export type FilterCriterion = {
+export type TFilterCriterion = {
   key: string;
-  operator: FilterOperator;
+  operator: TFilterOperator;
   value: string | number | boolean | (string | number)[] | undefined;
 };
 
@@ -32,7 +32,7 @@ export function buildFilterClause({
   columns,
   filters,
 }: {
-  filters: Array<FilterCriterion> | undefined;
+  filters: Array<TFilterCriterion> | undefined;
   columns: Record<string, AnyColumn>;
 }): SQL[] {
   if (!filters || filters.length === 0) return [];

@@ -2,16 +2,16 @@
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select";
 
-type SelectOptions = {
+type TSelectOptions = {
   value: string;
   label: string;
 }[];
 
-export type SelectFilterProps = Omit<
+export type TSelectFilterProps = Omit<
   React.ComponentProps<typeof Select>,
   "children" | "onValueChange"
 > & {
-  options: SelectOptions;
+  options: TSelectOptions;
   placeholder?: string;
   allowClear?: boolean;
   onChange?: (value: string) => void;
@@ -25,7 +25,7 @@ export const SelectFilter = ({
   onChange,
   value = "",
   ...selectProps
-}: SelectFilterProps) => {
+}: TSelectFilterProps) => {
   const handleClear = () => {
     onChange?.("");
   };

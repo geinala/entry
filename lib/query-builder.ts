@@ -2,22 +2,22 @@ import { and, asc, Column, desc, eq, ilike, InferSelectModel, or, sql, SQL } fro
 import { PgTable } from "drizzle-orm/pg-core";
 import { db } from "./db";
 import { calculateOffset } from "./pagination";
-import { IndexQueryParamsType } from "@/types/query-params";
+import { TIndexQueryParams } from "@/types/query-params";
 
-type PaginationParams<
+type TPaginationParams<
   TTable extends PgTable,
   TSearchable extends keyof TTable,
   TFilterable extends keyof TTable,
   TSortable extends keyof TTable,
 > = {
   table: TTable;
-  queryParams: IndexQueryParamsType & Partial<Record<TFilterable, unknown>>;
+  queryParams: TIndexQueryParams & Partial<Record<TFilterable, unknown>>;
   searchableColumns: readonly TSearchable[];
   filterableColumns: readonly TFilterable[];
   sortableColumns: readonly TSortable[];
 };
 
-type BuildWhereParams<
+type TBuildWhereParams<
   TTable extends PgTable,
   TSearchable extends keyof TTable,
   TFilterable extends keyof TTable,
@@ -30,7 +30,7 @@ type BuildWhereParams<
   filterableColumns: readonly TFilterable[];
 };
 
-export const buildGenericWhereClause = <
+const buildGenericWhereClause = <
   TTable extends PgTable,
   TSearchable extends keyof TTable,
   TFilterable extends keyof TTable,
@@ -39,7 +39,7 @@ export const buildGenericWhereClause = <
   queryParams,
   searchableColumns,
   filterableColumns,
-}: BuildWhereParams<TTable, TSearchable, TFilterable>) => {
+}: TBuildWhereParams<TTable, TSearchable, TFilterable>) => {
   const { search } = queryParams;
 
   const searchConditions: SQL[] = [];
@@ -79,7 +79,7 @@ export const buildCountQuery = async <
   queryParams,
   searchableColumns,
   filterableColumns,
-}: Omit<PaginationParams<TTable, TSearchable, TFilterable, never>, "sortableColumns">) => {
+}: Omit<TPaginationParams<TTable, TSearchable, TFilterable, never>, "sortableColumns">) => {
   const whereClause = buildGenericWhereClause({
     table,
     queryParams,
@@ -108,7 +108,7 @@ export const buildPaginatedQuery = async <
   searchableColumns,
   filterableColumns,
   sortableColumns,
-}: PaginationParams<TTable, TSearchable, TFilterable, TSortable>) => {
+}: TPaginationParams<TTable, TSearchable, TFilterable, TSortable>) => {
   const { page, pageSize, sort } = queryParams;
   const offset = calculateOffset(page, pageSize);
 

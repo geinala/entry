@@ -1,4 +1,4 @@
-export const env = {
+const env = {
   NODE_ENV: process.env.NODE_ENV || "development",
   NEXT_PUBLIC_NODE_TZ: process.env.NEXT_PUBLIC_NODE_TZ || "UTC",
   NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY,
@@ -15,8 +15,6 @@ export const env = {
   REDIS_PORT: process.env.REDIS_PORT ? Number(process.env.REDIS_PORT) : 6379,
   REDIS_PASSWORD: process.env.REDIS_PASSWORD || "",
 } as const;
-
-export type Env = typeof env;
 
 export const validateEnv = (): void => {
   const requiredVars = [
