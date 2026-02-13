@@ -26,9 +26,10 @@ const FilterRenderers = {
     <FilterCollections.TimePicker {...item} onChange={onChange} />
   ),
 
-  Select: (item: FilterItemMap["Select"], onChange: (value: string) => void) => (
-    <FilterCollections.Select {...item} onValueChange={onChange} />
-  ),
+  Select: (
+    item: FilterItemMap["Select"] & { value?: string },
+    onChange: (value: string) => void,
+  ) => <FilterCollections.Select {...item} onChange={onChange} />,
 
   DateRangePicker: (
     item: FilterItemMap["DateRangePicker"],
@@ -36,7 +37,7 @@ const FilterRenderers = {
   ) => <FilterCollections.DateRangePicker {...item} onChange={onChange} />,
 } satisfies {
   [K in keyof FilterItemMap]: (
-    item: FilterItemMap[K],
+    item: FilterItemMap[K] | (FilterItemMap[K] & { value?: string }),
     onChange: (value: string | DateRange | undefined) => void,
   ) => JSX.Element;
 };

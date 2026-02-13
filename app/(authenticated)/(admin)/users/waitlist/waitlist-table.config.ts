@@ -42,7 +42,7 @@ export const getWaitlistFilteringOptions = (
         })),
       ].flat(),
       defaultValue: filters.status?.toString(),
-      value: filters.status?.toString(),
+      allowClear: true,
     },
   ];
 };

@@ -1,50 +1,50 @@
 "use client";
 
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select";
-import { useState } from "react";
 
 type SelectOptions = {
   value: string;
   label: string;
 }[];
 
-export type SelectFilterProps = Omit<React.ComponentProps<typeof Select>, "children"> & {
+export type SelectFilterProps = Omit<
+  React.ComponentProps<typeof Select>,
+  "children" | "onValueChange"
+> & {
   options: SelectOptions;
   placeholder?: string;
   allowClear?: boolean;
+  onChange?: (value: string) => void;
+  value?: string;
 };
 
-export const SelectFilter = (props: SelectFilterProps) => {
-  const { allowClear, ...selectProps } = props;
-  const [value, setValue] = useState<string>("");
-
+export const SelectFilter = ({
+  allowClear,
+  placeholder,
+  options,
+  onChange,
+  value = "",
+  ...selectProps
+}: SelectFilterProps) => {
   const handleClear = () => {
-    setValue("");
-    if (selectProps.onValueChange) {
-      selectProps.onValueChange("");
-    }
+    onChange?.("");
+  };
+
+  const handleValueChange = (newValue: string) => {
+    onChange?.(newValue);
   };
 
   return (
-    <Select
-      value={value}
-      onValueChange={(val) => {
-        setValue(val);
-        if (selectProps.onValueChange) {
-          selectProps.onValueChange(val);
-        }
-      }}
-      {...selectProps}
-    >
+    <Select onValueChange={handleValueChange} value={value} {...selectProps}>
       <SelectTrigger
         isShowClearButton={allowClear && value !== ""}
         onClear={handleClear}
         className="w-full"
       >
-        <SelectValue placeholder={props.placeholder || "Select an option"} />
+        <SelectValue placeholder={placeholder || "Select an option"} />
       </SelectTrigger>
       <SelectContent position="popper">
-        {props.options.map((option) => (
+        {options.map((option) => (
           <SelectItem key={option.value} value={option.value}>
             {option.label}
           </SelectItem>

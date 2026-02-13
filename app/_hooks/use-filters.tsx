@@ -70,6 +70,12 @@ export const useFilters = (schema: ZodSchema) => {
     (filters: Record<string, FilterValue>) => {
       const updatedFilters: Record<string, z.infer<typeof schema>> = { page: 1 };
 
+      Object.keys(validFilters).forEach((key) => {
+        if (key !== "page" && key !== "pageSize" && key !== "search" && key !== "sort") {
+          updatedFilters[key] = null;
+        }
+      });
+
       Object.entries(filters).forEach(([key, value]) => {
         if (value === undefined || value === null || value === "") {
           updatedFilters[key] = null;
@@ -80,7 +86,7 @@ export const useFilters = (schema: ZodSchema) => {
 
       updateUrl(updatedFilters);
     },
-    [updateUrl],
+    [updateUrl, validFilters],
   );
 
   const pagination = useMemo(

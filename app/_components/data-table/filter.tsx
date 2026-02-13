@@ -28,14 +28,13 @@ export const FilterTable = (props: IFilterTableProps) => {
           Filter
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-56 p-0">
+      <DropdownMenuContent align="end" className="w-72 p-0">
         <Card className="p-1 border-none rounded-none gap-1">
           <CardContent className="p-0 bg-transparent">
             <FilterInputFactory
               {...props}
-              onChange={(value) => {
-                handleInputChange(value);
-              }}
+              onChange={handleInputChange}
+              filterValues={localFilterValues}
             />
           </CardContent>
           <CardFooter className="flex justify-between items-center p-0">
@@ -43,8 +42,8 @@ export const FilterTable = (props: IFilterTableProps) => {
               variant={"outline"}
               size={"sm"}
               onClick={() => {
-                setLocalFilterValues({});
                 props.onChange({});
+                setLocalFilterValues({});
               }}
             >
               Reset
