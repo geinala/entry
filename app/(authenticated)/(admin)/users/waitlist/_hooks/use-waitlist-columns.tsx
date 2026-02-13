@@ -1,7 +1,7 @@
 "use client";
 
 import { convertUtcToLocalTime } from "@/lib/utils";
-import { WaitlistEntry } from "@/types/database";
+import { TWaitlistEntry } from "@/types/database";
 import { ColumnDef } from "@tanstack/react-table";
 import { useMemo } from "react";
 import { WaitlistStatusBadge } from "../_components/waitlist-status.badge";
@@ -10,7 +10,7 @@ import { Send, XCircle } from "lucide-react";
 import { Button } from "@/app/_components/ui/button";
 
 export const useWaitlistColumns = () => {
-  return useMemo<ColumnDef<WaitlistEntry>[]>(
+  return useMemo<ColumnDef<TWaitlistEntry>[]>(
     () => [
       {
         accessorKey: "fullName",
@@ -39,10 +39,10 @@ export const useWaitlistColumns = () => {
       {
         id: "actions",
         accessorKey: "actions",
-        header: "Actions",
+        header: "",
         cell: () => {
           return (
-            <>
+            <div className="flex items-center justify-center space-x-2">
               <Button
                 variant={"ghost"}
                 size={"sm"}
@@ -59,7 +59,7 @@ export const useWaitlistColumns = () => {
               >
                 <XCircle /> Reject
               </Button>
-            </>
+            </div>
           );
         },
       },

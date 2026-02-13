@@ -6,4 +6,4 @@ export const GetUsersQueryParams = IndexQueryParams.extend({
   sort: createSortSchema(["fullName", "email"]),
 });
 
-export type GetUsersQueryParamsType = z.infer<typeof GetUsersQueryParams>;
+export type TGetUsersQueryParams = z.infer<typeof GetUsersQueryParams>;

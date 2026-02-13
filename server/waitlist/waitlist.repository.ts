@@ -1,12 +1,12 @@
 import { db } from "@/lib/db";
-import { GetWaitlistQueryParamsType, WaitlistFormType } from "./waitlist.schema";
+import { TGetWaitlistQueryParams, TWaitlistForm } from "./waitlist.schema";
 import { waitlistTable } from "@/drizzle/schema";
-import { NewWaitlistEntry } from "@/types/database";
-import { WaitlistSortableKey } from "./waitlist.type";
+import { TNewWaitlistEntry } from "@/types/database";
+import { TWaitlistSortableKey } from "./waitlist.type";
 import { buildCountQuery, buildPaginatedQuery } from "@/lib/query-builder";
 
-export const createWaitlistEntryRepository = async (data: WaitlistFormType) => {
-  const waitlistEntry: NewWaitlistEntry = {
+export const createWaitlistEntryRepository = async (data: TWaitlistForm) => {
+  const waitlistEntry: TNewWaitlistEntry = {
     email: data.email,
     fullName: data.name,
   };
@@ -15,20 +15,18 @@ export const createWaitlistEntryRepository = async (data: WaitlistFormType) => {
 };
 
 export const getWaitlistEntriesWithPaginationRepository = async (
-  queryParams: GetWaitlistQueryParamsType,
+  queryParams: TGetWaitlistQueryParams,
 ) => {
   return await buildPaginatedQuery({
     table: waitlistTable,
     filterableColumns: ["fullName", "email", "status"],
     searchableColumns: ["fullName", "email"],
-    sortableColumns: ["fullName", "email"] as WaitlistSortableKey[],
+    sortableColumns: ["fullName", "email"] as TWaitlistSortableKey[],
     queryParams,
   });
 };
 
-export const getWaitlistEntriesCountRepository = async (
-  queryParams: GetWaitlistQueryParamsType,
-) => {
+export const getWaitlistEntriesCountRepository = async (queryParams: TGetWaitlistQueryParams) => {
   return await buildCountQuery({
     table: waitlistTable,
     filterableColumns: ["fullName", "email", "status"],

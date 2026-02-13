@@ -3,19 +3,19 @@
 import { LayoutDashboard, Route, UserCog, Users } from "lucide-react";
 import { Route as RouteNext } from "next";
 
-export type MenuItem = {
+export type TMenuItem = {
   label: string;
   path: RouteNext;
   icon: React.ReactNode;
   roles?: string[];
 };
 
-export interface GroupedMenuItem {
+export interface IGroupedMenuItem {
   groupLabel: string;
-  items: MenuItem[];
+  items: TMenuItem[];
 }
 
-export const MENU_ITEMS: (MenuItem | GroupedMenuItem)[] = [
+export const MENU_ITEMS: (TMenuItem | IGroupedMenuItem)[] = [
   {
     groupLabel: "Main Menu",
     items: [

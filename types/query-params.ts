@@ -14,4 +14,4 @@ export const IndexQueryParams = z.object({
     .optional(),
 });
 
-export type IndexQueryParamsType = z.infer<typeof IndexQueryParams>;
+export type TIndexQueryParams = z.infer<typeof IndexQueryParams>;

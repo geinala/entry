@@ -16,14 +16,14 @@ import { Button } from "../ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Pagination, PaginationContent, PaginationItem } from "../ui/pagination";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
-import { SortButton, SortCriterion, SortOptionType } from "./sort";
+import { SortButton, TSortCriterion, TSortOption } from "./sort";
 import { Search } from "./search";
-import { FilterItemType } from "./filter-collections/factory";
+import { TFilterItem } from "./filter-collections/factory";
 import { FilterTable } from "./filter";
 import { DateRange } from "react-day-picker";
 import { TPaginationResponse } from "@/types/meta";
 
-export type FilterValue =
+export type TFilterValue =
   | string
   | number
   | boolean
@@ -31,7 +31,7 @@ export type FilterValue =
   | undefined
   | Array<string | number>;
 
-interface Props<TData, TValue = unknown> {
+interface IDataTableProps<TData, TValue = unknown> {
   source?: TPaginationResponse<TData>;
   columns: ColumnDef<TData, TValue>[];
   isLoading?: boolean;
@@ -42,18 +42,18 @@ interface Props<TData, TValue = unknown> {
     pageSize: number;
   };
   isSearchable?: boolean;
-  filterComponents?: FilterItemType[];
+  filterComponents?: TFilterItem[];
   handleChange: {
-    onFilterChange: (value: Record<string, FilterValue>) => void;
-    onSortingChange: (sorts: SortCriterion[]) => void;
+    onFilterChange: (value: Record<string, TFilterValue>) => void;
+    onSortingChange: (sorts: TSortCriterion[]) => void;
     onPaginationChange: (page: number, pageSize: number) => void;
     onSearch: (searchTerm: string) => void;
   };
-  sortOptions?: Array<SortOptionType>;
-  sortDefaultValue?: SortCriterion[];
+  sortOptions?: Array<TSortOption>;
+  sortDefaultValue?: TSortCriterion[];
 }
 
-const DataTable = <TData, TValue = unknown>(props: Props<TData, TValue>) => {
+const DataTable = <TData, TValue = unknown>(props: IDataTableProps<TData, TValue>) => {
   const {
     columns,
     source,
@@ -191,14 +191,14 @@ const TableEmpty = ({ colSpan }: { colSpan: number }) => {
   );
 };
 
-interface PaginationProps<TData> {
+interface IPaginationProps<TData> {
   table: TableType<TData>;
   pageSizeOptions?: number[];
   onPageChange: (page: number, pageSize: number) => void;
   totalItems?: number;
 }
 
-const TablePaginataion = <TData,>(props: PaginationProps<TData>) => {
+const TablePaginataion = <TData,>(props: IPaginationProps<TData>) => {
   const { table, pageSizeOptions = [10, 20, 30, 40, 50], onPageChange, totalItems } = props;
   const { getState, getPageCount } = table;
   const { pageIndex, pageSize } = getState().pagination;

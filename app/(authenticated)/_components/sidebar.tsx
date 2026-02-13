@@ -14,7 +14,7 @@ import {
   SidebarTrigger,
 } from "@/app/_components/ui/sidebar";
 import { useUserContext } from "@/app/_contexts/user.context";
-import { GroupedMenuItem, MENU_ITEMS, MenuItem } from "@/common/constants/menu";
+import { IGroupedMenuItem, MENU_ITEMS, TMenuItem } from "@/common/constants/menu";
 import { X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -51,7 +51,7 @@ export default function AuthenticatedSidebar() {
         }
         return acc;
       },
-      [] as (MenuItem | GroupedMenuItem)[],
+      [] as (TMenuItem | IGroupedMenuItem)[],
     );
   }, [role]);
 
@@ -84,7 +84,7 @@ const GroupedSidebarMenuWithLabel = ({
   item,
   isMenuActive,
 }: {
-  item: GroupedMenuItem;
+  item: IGroupedMenuItem;
   isMenuActive: (menuPath: string) => boolean;
 }) => {
   return (
@@ -108,7 +108,7 @@ const GroupedSidebarMenuWithLabel = ({
   );
 };
 
-const SidebarMenuWithoutLabel = ({ item, isActive }: { item: MenuItem; isActive: boolean }) => {
+const SidebarMenuWithoutLabel = ({ item, isActive }: { item: TMenuItem; isActive: boolean }) => {
   return (
     <SidebarGroup>
       <SidebarGroupContent>

@@ -1,13 +1,13 @@
 "use client";
 
 import { Badge } from "@/app/_components/ui/badge";
-import { WaitlistStatus } from "@/types/database";
+import { TWaitlistStatus } from "@/types/database";
 
-interface WaitlistStatusBadgeProps {
-  status: WaitlistStatus;
+interface IWaitlistStatusBadgeProps {
+  status: TWaitlistStatus;
 }
 
-const STATUS_CONFIG: Record<WaitlistStatus, { color: string; label: WaitlistStatus }> = {
+const STATUS_CONFIG: Record<TWaitlistStatus, { color: string; label: TWaitlistStatus }> = {
   pending: { color: "bg-amber-100 text-amber-800", label: "pending" },
   confirmed: { color: "bg-green-100 text-green-800", label: "confirmed" },
   rejected: { color: "bg-red-100 text-red-800", label: "rejected" },
@@ -15,7 +15,7 @@ const STATUS_CONFIG: Record<WaitlistStatus, { color: string; label: WaitlistStat
   expired: { color: "bg-gray-100 text-gray-800", label: "expired" },
 };
 
-export const WaitlistStatusBadge = ({ status }: WaitlistStatusBadgeProps) => {
+export const WaitlistStatusBadge = ({ status }: IWaitlistStatusBadgeProps) => {
   const config = STATUS_CONFIG[status] || {
     color: "bg-gray-500",
     label: status,

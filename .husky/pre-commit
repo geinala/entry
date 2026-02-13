@@ -1,3 +1,5 @@
-pnpm format
-pnpm lint
-pnpm build
+pnpm check:types || exit 1
+npx knip || exit 1
+pnpm format || exit 1
+pnpm lint || exit 1
+pnpm build || exit 1

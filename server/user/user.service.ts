@@ -6,9 +6,9 @@ import {
 } from "./user.repository";
 import { UserType } from "./user.types";
 import { paginationResponseMapper } from "@/lib/pagination";
-import { User } from "@/types/database";
+import { TUser } from "@/types/database";
 import { TPaginationResponse } from "@/types/meta";
-import { GetUsersQueryParamsType } from "./user.schema";
+import { TGetUsersQueryParams } from "./user.schema";
 
 export const validateUserService = async (clerkUserId: string) => {
   try {
@@ -51,15 +51,15 @@ export const findUserWithRoleAndPermissionsService = async (clerkUserId: string)
 };
 
 export const getUsersWithPaginationService = async (
-  queryParams: GetUsersQueryParamsType,
-): Promise<TPaginationResponse<User>> => {
+  queryParams: TGetUsersQueryParams,
+): Promise<TPaginationResponse<TUser>> => {
   try {
     const [users, total] = await Promise.all([
       getUsersWithPaginationRepository(queryParams),
       getUsersCountRepository(queryParams),
     ]);
 
-    return paginationResponseMapper<User>(users, {
+    return paginationResponseMapper<TUser>(users, {
       currentPage: queryParams.page,
       pageSize: queryParams.pageSize,
       totalItems: total,

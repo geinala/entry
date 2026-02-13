@@ -6,7 +6,7 @@ interface IPaginationParams {
   totalItems: number;
 }
 
-export const convertPaginationMeta = ({
+const convertPaginationMeta = ({
   currentPage,
   pageSize,
   totalItems,

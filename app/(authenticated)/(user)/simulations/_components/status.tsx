@@ -22,11 +22,11 @@ const statusConfig = {
   },
 };
 
-interface SimulationStatusProps {
+interface ISimulationStatusProps {
   status?: "completed" | "pending" | "failed"; // TODO: Adjust according to actual status types
 }
 
-export default function SimulationStatus({ status = "completed" }: SimulationStatusProps) {
+export default function SimulationStatus({ status = "completed" }: ISimulationStatusProps) {
   const config = statusConfig[status];
   const IconComponent = config.icon;
 

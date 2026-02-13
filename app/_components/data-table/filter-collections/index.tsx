@@ -2,42 +2,42 @@
 
 import { JSX } from "react";
 import { DateRangePicker } from "./date-range-picker";
-import { FilterItemType } from "./factory";
+import { TFilterItem } from "./factory";
 import { SelectFilter } from "./select";
 import TimePicker from "./time-picker";
 import { DateRange } from "react-day-picker";
 
 const FilterCollections = {
-  TimePicker: (item: Extract<FilterItemType, { type: "TimePicker" }>) => <TimePicker {...item} />,
-  Select: (item: Extract<FilterItemType, { type: "Select" }>) => <SelectFilter {...item} />,
-  DateRangePicker: (item: Extract<FilterItemType, { type: "DateRangePicker" }>) => (
+  TimePicker: (item: Extract<TFilterItem, { type: "TimePicker" }>) => <TimePicker {...item} />,
+  Select: (item: Extract<TFilterItem, { type: "Select" }>) => <SelectFilter {...item} />,
+  DateRangePicker: (item: Extract<TFilterItem, { type: "DateRangePicker" }>) => (
     <DateRangePicker {...item} />
   ),
 };
 
-type FilterItemMap = {
-  TimePicker: Extract<FilterItemType, { type: "TimePicker" }>;
-  Select: Extract<FilterItemType, { type: "Select" }>;
-  DateRangePicker: Extract<FilterItemType, { type: "DateRangePicker" }>;
+type TFilterItemMap = {
+  TimePicker: Extract<TFilterItem, { type: "TimePicker" }>;
+  Select: Extract<TFilterItem, { type: "Select" }>;
+  DateRangePicker: Extract<TFilterItem, { type: "DateRangePicker" }>;
 };
 
 const FilterRenderers = {
-  TimePicker: (item: FilterItemMap["TimePicker"], onChange: (value: string) => void) => (
+  TimePicker: (item: TFilterItemMap["TimePicker"], onChange: (value: string) => void) => (
     <FilterCollections.TimePicker {...item} onChange={onChange} />
   ),
 
   Select: (
-    item: FilterItemMap["Select"] & { value?: string },
+    item: TFilterItemMap["Select"] & { value?: string },
     onChange: (value: string) => void,
   ) => <FilterCollections.Select {...item} onChange={onChange} />,
 
   DateRangePicker: (
-    item: FilterItemMap["DateRangePicker"],
+    item: TFilterItemMap["DateRangePicker"],
     onChange: (value: string | DateRange | undefined) => void,
   ) => <FilterCollections.DateRangePicker {...item} onChange={onChange} />,
 } satisfies {
-  [K in keyof FilterItemMap]: (
-    item: FilterItemMap[K] | (FilterItemMap[K] & { value?: string }),
+  [K in keyof TFilterItemMap]: (
+    item: TFilterItemMap[K] | (TFilterItemMap[K] & { value?: string }),
     onChange: (value: string | DateRange | undefined) => void,
   ) => JSX.Element;
 };

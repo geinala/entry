@@ -4,13 +4,13 @@ import { Input } from "../ui/input";
 import { useState, useCallback } from "react";
 import { Button } from "../ui/button";
 
-interface Props {
+interface ISearchProps {
   search: string;
   placeholderSearch?: string;
   onSearchChange?: (search: string) => void;
 }
 
-export const Search = ({ search, placeholderSearch, onSearchChange }: Props) => {
+export const Search = ({ search, placeholderSearch, onSearchChange }: ISearchProps) => {
   const [inputValue, setInputValue] = useState(search);
 
   const handleInputChange = useCallback(

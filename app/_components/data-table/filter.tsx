@@ -4,19 +4,19 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuTrigger } from "../ui/dr
 import { Button } from "../ui/button";
 import { ListFilter } from "lucide-react";
 import { Card, CardContent, CardFooter } from "../ui/card";
-import { FilterInputFactory, FilterItemType } from "./filter-collections/factory";
-import { FilterValue } from ".";
+import { FilterInputFactory, TFilterItem } from "./filter-collections/factory";
+import { TFilterValue } from ".";
 import { useState } from "react";
 
 export interface IFilterTableProps {
-  filterItems: FilterItemType[];
-  onChange: (value: Record<string, FilterValue>) => void;
+  filterItems: TFilterItem[];
+  onChange: (value: Record<string, TFilterValue>) => void;
 }
 
 export const FilterTable = (props: IFilterTableProps) => {
-  const [localFilterValues, setLocalFilterValues] = useState<Record<string, FilterValue>>({});
+  const [localFilterValues, setLocalFilterValues] = useState<Record<string, TFilterValue>>({});
 
-  const handleInputChange = (value: Record<string, FilterValue>) => {
+  const handleInputChange = (value: Record<string, TFilterValue>) => {
     setLocalFilterValues((prev) => ({ ...prev, ...value }));
   };
 
