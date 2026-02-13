@@ -6,7 +6,8 @@ import { ListFilter } from "lucide-react";
 import { Card, CardContent, CardFooter } from "../ui/card";
 import { FilterInputFactory, TFilterItem } from "./filter-collections/factory";
 import { TFilterValue } from ".";
-import { useState } from "react";
+import { useMemo, useState } from "react";
+import { Badge } from "../ui/badge";
 
 export interface IFilterTableProps {
   filterItems: TFilterItem[];
@@ -20,16 +21,33 @@ export const FilterTable = (props: IFilterTableProps) => {
     setLocalFilterValues((prev) => ({ ...prev, ...value }));
   };
 
+  const getActiveFilterCount = useMemo(() => {
+    return () => {
+      return props.filterItems.reduce((count, item) => {
+        const filterValue = item.defaultValue;
+        if (filterValue !== undefined && filterValue !== null && filterValue !== "") {
+          return count + 1;
+        }
+        return count;
+      }, 0);
+    };
+  }, [props.filterItems]);
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm">
           <ListFilter className="h-4 w-4" />
-          Filter
+          Filter{" "}
+          {getActiveFilterCount() > 0 && (
+            <Badge className="ml-1" variant={"info"}>
+              {getActiveFilterCount()}
+            </Badge>
+          )}
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end" className="w-72 p-0">
-        <Card className="p-1 border-none rounded-none gap-1">
+      <DropdownMenuContent align="end" className="w-80 p-0">
+        <Card className="p-2 border-none rounded-none gap-1 shadow-none">
           <CardContent className="p-0 bg-transparent">
             <FilterInputFactory
               {...props}
@@ -37,7 +55,7 @@ export const FilterTable = (props: IFilterTableProps) => {
               filterValues={localFilterValues}
             />
           </CardContent>
-          <CardFooter className="flex justify-between items-center p-0">
+          <CardFooter className="flex justify-between items-center p-0 mt-2">
             <Button
               variant={"outline"}
               size={"sm"}

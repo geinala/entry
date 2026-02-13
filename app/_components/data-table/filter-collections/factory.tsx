@@ -12,6 +12,7 @@ import { TDateRangePickerProps } from "./date-range-picker";
 type TBaseFilterItem<P extends Record<string, unknown>> = P & {
   name: string;
   label: string;
+  defaultValue?: unknown;
 };
 
 type TTypedFilterItem<
