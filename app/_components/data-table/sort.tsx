@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { ArrowDownUp } from "lucide-react";
 import { Button } from "../ui/button";
 import {
@@ -13,6 +13,7 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Card, CardContent, CardFooter } from "../ui/card";
+import { Badge } from "../ui/badge";
 
 export type TSortDirection = "asc" | "desc";
 
@@ -55,17 +56,28 @@ export const SortButton = ({ sortOptions, defaultValue, onSortChange }: ISortBut
     });
   };
 
+  const getActiveSortCount = useMemo(() => {
+    return () => {
+      return defaultValue ? defaultValue.length : 0;
+    };
+  }, [defaultValue]);
+
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         <Button variant="outline" size="sm">
           <ArrowDownUp className="h-4 w-4" />
-          Sort
+          Sort{" "}
+          {getActiveSortCount() > 0 && (
+            <Badge className="ml-1" variant={"info"}>
+              {getActiveSortCount()}
+            </Badge>
+          )}
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align="end" className="w-56 p-0">
-        <Card className="p-1 border-none rounded-none gap-1">
+      <DropdownMenuContent align="end" className="w-80 p-0">
+        <Card className="p-2 border-none rounded-none gap-1 shadow-none">
           <CardContent className="p-0 bg-transparent">
             {sortOptions.map((sortOption) => (
               <DropdownMenuGroup key={sortOption.key}>
