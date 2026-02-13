@@ -6,6 +6,7 @@ import { DateRangePickerProps } from "./date-range-picker";
 import { SelectFilterProps } from "./select";
 import { TimePickerProps } from "./time-picker";
 import { IFilterTableProps } from "../filter";
+import { FilterValue } from "../index";
 import { FilterCollections, FilterRenderers } from ".";
 
 type BaseFilterItem<P extends Record<string, unknown>> = P & {
@@ -39,8 +40,10 @@ const ComponentFilter = <T extends FilterItemType>({ item, content }: ComponentF
   );
 };
 
-export const FilterInputFactory = (props: IFilterTableProps) => {
-  const { filterItems, onChange } = props;
+export const FilterInputFactory = (
+  props: IFilterTableProps & { filterValues?: Record<string, FilterValue> },
+) => {
+  const { filterItems, onChange, filterValues = {} } = props;
 
   return filterItems.map((filterItem) => {
     switch (filterItem.type) {
@@ -49,18 +52,23 @@ export const FilterInputFactory = (props: IFilterTableProps) => {
           <ComponentFilter
             key={filterItem.name}
             item={filterItem}
-            content={FilterRenderers.TimePicker(filterItem, (value) =>
-              onChange({ [filterItem.name]: value }),
-            )}
+            content={FilterRenderers.TimePicker(filterItem, (value) => {
+              onChange({ [filterItem.name]: value });
+            })}
           />
         );
 
       case "Select":
+        const selectItem = {
+          ...filterItem,
+          value: (filterValues[filterItem.name] as string) || "",
+        };
+
         return (
           <ComponentFilter
             key={filterItem.name}
             item={filterItem}
-            content={FilterRenderers.Select(filterItem, (value) =>
+            content={FilterRenderers.Select(selectItem, (value) =>
               onChange({ [filterItem.name]: value }),
             )}
           />

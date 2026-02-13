@@ -269,17 +269,17 @@ const TablePaginataion = <TData,>(props: PaginationProps<TData>) => {
             onValueChange={(value) => onPageChange?.(currentPage, Number(value))}
           >
             <SelectTrigger>
-              <SelectValue placeholder={pageSize} />
+              <SelectValue placeholder={pageSize || 0} />
             </SelectTrigger>
             <SelectContent position="popper">
               {!pageSizeOptions.includes(pageSize) && (
                 <SelectItem key={pageSize} value={String(pageSize)} hidden>
-                  {pageSize}
+                  {pageSize || 0}
                 </SelectItem>
               )}
               {pageSizeOptions.map((size) => (
                 <SelectItem key={size} value={String(size)}>
-                  {size}
+                  {size || 0}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -288,7 +288,7 @@ const TablePaginataion = <TData,>(props: PaginationProps<TData>) => {
       </div>
 
       <div className="flex w-full flex-col items-center justify-center gap-3 lg:w-min lg:flex-row">
-        <p className="lg:w-max lg:flex-1">{`${start}-${totalItems} of ${totalItems} items`}</p>
+        <p className="lg:w-max lg:flex-1">{`${start || 1}-${totalItems || 0} of ${totalItems || 0} items`}</p>
         <Pagination className="lg:flex-1">
           <PaginationContent className="max-lg:flex max-lg:flex-wrap">
             <PaginationItem>
