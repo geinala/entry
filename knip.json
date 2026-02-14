@@ -6,6 +6,7 @@
     "public/**",
     "tests/**",
     "lib/db/migrations/**",
-    ".husky/**"
+    ".husky/**",
+    ".agents/**"
   ]
 }

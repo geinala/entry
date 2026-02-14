@@ -2,16 +2,27 @@ import { db } from "@/lib/db";
 import { TGetWaitlistQueryParams, TWaitlistForm } from "./waitlist.schema";
 import { waitlistTable } from "@/drizzle/schema";
 import { TNewWaitlistEntry } from "@/types/database";
-import { TWaitlistSortableKey } from "./waitlist.type";
-import { buildCountQuery, buildPaginatedQuery } from "@/lib/query-builder";
+import { buildCountQuery, buildPaginatedQuery, TColumnsDefinition } from "@/lib/query-builder";
+import { sql } from "drizzle-orm";
 
 export const createWaitlistEntryRepository = async (data: TWaitlistForm) => {
   const waitlistEntry: TNewWaitlistEntry = {
     email: data.email,
-    fullName: data.name,
+    firstName: data.firstName,
+    lastName: data.lastName,
   };
 
   return db.insert(waitlistTable).values(waitlistEntry);
+};
+
+const WAITLIST_COLUMNS: TColumnsDefinition<typeof waitlistTable> = {
+  email: { searchable: true, sortable: true },
+  status: { filterable: true },
+  fullName: {
+    searchable: true,
+    sortable: true,
+    compute: (table) => sql`concat(${table.firstName}, ' ', ${table.lastName})`,
+  },
 };
 
 export const getWaitlistEntriesWithPaginationRepository = async (
@@ -19,9 +30,7 @@ export const getWaitlistEntriesWithPaginationRepository = async (
 ) => {
   return await buildPaginatedQuery({
     table: waitlistTable,
-    filterableColumns: ["fullName", "email", "status"],
-    searchableColumns: ["fullName", "email"],
-    sortableColumns: ["fullName", "email"] as TWaitlistSortableKey[],
+    columns: WAITLIST_COLUMNS,
     queryParams,
   });
 };
@@ -29,8 +38,7 @@ export const getWaitlistEntriesWithPaginationRepository = async (
 export const getWaitlistEntriesCountRepository = async (queryParams: TGetWaitlistQueryParams) => {
   return await buildCountQuery({
     table: waitlistTable,
-    filterableColumns: ["fullName", "email", "status"],
-    searchableColumns: ["fullName", "email"],
+    columns: WAITLIST_COLUMNS,
     queryParams,
   });
 };

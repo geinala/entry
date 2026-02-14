@@ -15,6 +15,10 @@ export const useWaitlistColumns = () => {
       {
         accessorKey: "fullName",
         header: "Name",
+        cell: ({ row }) => {
+          const entry = row.original;
+          return `${entry.firstName} ${entry.lastName}`;
+        },
       },
       {
         accessorKey: "email",

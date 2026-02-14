@@ -5,17 +5,15 @@ import { waitlistStatusEnum } from "@/drizzle/schema";
 
 export const WaitlistFormSchema = z.object({
   email: z.string().email("Invalid email address"),
-  name: z
-    .string()
-    .min(2, "Full name must be at least 2 characters long")
-    .max(100, "Full name must be at most 100 characters long"),
+  firstName: z.string().min(1, "First name is required"),
+  lastName: z.string().min(1, "Last name is required"),
 });
 
 export type TWaitlistForm = z.infer<typeof WaitlistFormSchema>;
 
 export const GetWaitlistQueryParams = IndexQueryParams.extend({
-  sort: createSortSchema(["fullName", "email"]),
-  status: z.enum(waitlistStatusEnum.enumValues).optional(),
+  sort: createSortSchema(["firstName", "lastName", "email"]),
+  status: z.enum(waitlistStatusEnum.enumValues).optional().default("pending"),
 });
 
 export type TGetWaitlistQueryParams = z.infer<typeof GetWaitlistQueryParams>;
