@@ -2,12 +2,12 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { Toaster } from "./_components/ui/sonner";
-import { validateEnv } from "@/common/config/environtment";
 import { QueryProvider } from "@/lib/tanstack";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { SidebarProvider } from "./_components/ui/sidebar";
+import { ensureEnvValidated } from "@/lib/validate-env";
 
-validateEnv();
+ensureEnvValidated();
 
 export const metadata: Metadata = {
   title: "Routify",

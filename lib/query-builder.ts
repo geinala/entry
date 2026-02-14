@@ -4,59 +4,83 @@ import { db } from "./db";
 import { calculateOffset } from "./pagination";
 import { TIndexQueryParams } from "@/types/query-params";
 
-type TPaginationParams<
-  TTable extends PgTable,
-  TSearchable extends keyof TTable,
-  TFilterable extends keyof TTable,
-  TSortable extends keyof TTable,
-> = {
-  table: TTable;
-  queryParams: TIndexQueryParams & Partial<Record<TFilterable, unknown>>;
-  searchableColumns: readonly TSearchable[];
-  filterableColumns: readonly TFilterable[];
-  sortableColumns: readonly TSortable[];
+/**
+ * Metadata untuk single column (regular atau computed)
+ */
+export type TColumnDefinition<TTable extends PgTable> = {
+  /** Bisa di-search (text search dengan ILIKE) */
+  searchable?: boolean;
+  /** Bisa di-filter (exact match) */
+  filterable?: boolean;
+  /** Bisa di-sort */
+  sortable?: boolean;
+  /** SQL expression untuk computed column (jika ada) */
+  compute?: (table: TTable) => SQL;
 };
 
-type TBuildWhereParams<
-  TTable extends PgTable,
-  TSearchable extends keyof TTable,
-  TFilterable extends keyof TTable,
-> = {
+/**
+ * Definisi semua columns (regular dan computed)
+ */
+export type TColumnsDefinition<TTable extends PgTable> = Record<string, TColumnDefinition<TTable>>;
+
+type TPaginationParams<TTable extends PgTable> = {
   table: TTable;
+  columns: TColumnsDefinition<TTable>;
+  queryParams: TIndexQueryParams;
+};
+
+type TBuildWhereParams<TTable extends PgTable> = {
+  table: TTable;
+  columns: TColumnsDefinition<TTable>;
   queryParams: {
     search?: string;
-  } & Partial<Record<TFilterable, unknown>>;
-  searchableColumns: readonly TSearchable[];
-  filterableColumns: readonly TFilterable[];
+  } & Record<string, unknown>;
 };
 
-const buildGenericWhereClause = <
-  TTable extends PgTable,
-  TSearchable extends keyof TTable,
-  TFilterable extends keyof TTable,
->({
+const buildGenericWhereClause = <TTable extends PgTable>({
   table,
   queryParams,
-  searchableColumns,
-  filterableColumns,
-}: TBuildWhereParams<TTable, TSearchable, TFilterable>) => {
+  columns,
+}: TBuildWhereParams<TTable>) => {
   const { search } = queryParams;
 
   const searchConditions: SQL[] = [];
   const filterConditions: SQL[] = [];
 
+  // Search in searchable columns
   if (search) {
-    searchableColumns.forEach((columnKey) => {
-      const column = table[columnKey] as Column;
-      searchConditions.push(ilike(column, `%${search}%`));
+    Object.entries(columns).forEach(([columnKey, config]) => {
+      if (!config.searchable) return;
+
+      // Handle computed columns
+      if (config.compute) {
+        searchConditions.push(ilike(config.compute(table), `%${search}%`));
+      } else {
+        // Handle regular columns
+        const column = table[columnKey as keyof typeof table] as Column;
+        if (column) {
+          searchConditions.push(ilike(column, `%${search}%`));
+        }
+      }
     });
   }
 
-  filterableColumns.forEach((columnKey) => {
-    const value = queryParams[columnKey as keyof typeof queryParams];
-    if (value !== undefined && value !== null) {
-      const column = table[columnKey] as Column;
-      filterConditions.push(eq(column, value));
+  // Filter by filterable columns
+  Object.entries(columns).forEach(([columnKey, config]) => {
+    if (!config.filterable) return;
+
+    const value = queryParams[columnKey];
+    if (value === undefined || value === null) return;
+
+    // Handle computed columns
+    if (config.compute) {
+      filterConditions.push(eq(config.compute(table), value));
+    } else {
+      // Handle regular columns
+      const column = table[columnKey as keyof typeof table] as Column;
+      if (column) {
+        filterConditions.push(eq(column, value));
+      }
     }
   });
 
@@ -70,21 +94,17 @@ const buildGenericWhereClause = <
   );
 };
 
-export const buildCountQuery = async <
-  TTable extends PgTable,
-  TSearchable extends keyof TTable,
-  TFilterable extends keyof TTable,
->({
+export const buildCountQuery = async <TTable extends PgTable>({
   table,
+  columns,
   queryParams,
-  searchableColumns,
-  filterableColumns,
-}: Omit<TPaginationParams<TTable, TSearchable, TFilterable, never>, "sortableColumns">) => {
+}: Omit<TPaginationParams<TTable>, "queryParams"> & {
+  queryParams: Pick<TIndexQueryParams, "search"> & Record<string, unknown>;
+}) => {
   const whereClause = buildGenericWhereClause({
     table,
     queryParams,
-    searchableColumns,
-    filterableColumns,
+    columns,
   });
 
   const result = await db
@@ -97,26 +117,18 @@ export const buildCountQuery = async <
   return result[0]?.count ?? 0;
 };
 
-export const buildPaginatedQuery = async <
-  TTable extends PgTable,
-  TSearchable extends keyof TTable,
-  TFilterable extends keyof TTable,
-  TSortable extends keyof TTable,
->({
+export const buildPaginatedQuery = async <TTable extends PgTable>({
   table,
+  columns,
   queryParams,
-  searchableColumns,
-  filterableColumns,
-  sortableColumns,
-}: TPaginationParams<TTable, TSearchable, TFilterable, TSortable>) => {
+}: TPaginationParams<TTable>) => {
   const { page, pageSize, sort } = queryParams;
   const offset = calculateOffset(page, pageSize);
 
   const whereClause = buildGenericWhereClause({
     table,
     queryParams,
-    searchableColumns,
-    filterableColumns,
+    columns,
   });
 
   const query = db
@@ -128,10 +140,19 @@ export const buildPaginatedQuery = async <
 
   if (sort && sort.length > 0) {
     for (const { key: columnKey, direction } of sort) {
-      if (sortableColumns.includes(columnKey as TSortable)) {
-        const key = columnKey as keyof typeof table;
-        const column = table[key] as Column;
-        query.orderBy(direction === "asc" ? asc(column) : desc(column));
+      const config = columns[columnKey];
+      if (!config?.sortable) continue;
+
+      // Handle computed columns
+      if (config.compute) {
+        const computedExpr = config.compute(table);
+        query.orderBy(direction === "asc" ? asc(computedExpr) : desc(computedExpr));
+      } else {
+        // Handle regular columns
+        const column = table[columnKey as keyof typeof table] as Column;
+        if (column) {
+          query.orderBy(direction === "asc" ? asc(column) : desc(column));
+        }
       }
     }
   }

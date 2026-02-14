@@ -82,9 +82,9 @@ export const waitlistTable = pgTable(
   {
     id: serial().primaryKey(),
     email: varchar("email").notNull().unique(),
-    fullName: varchar("full_name").notNull(),
+    firstName: varchar("first_name").notNull(),
+    lastName: varchar("last_name").notNull(),
     status: waitlistStatusEnum("status").notNull().default("pending"),
-    ticketId: varchar("ticket_id").unique(),
     invitedAt: timestamp("invited_at", { withTimezone: true }),
     expiredAt: timestamp("expired_at", { withTimezone: true }),
     confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
@@ -93,6 +93,5 @@ export const waitlistTable = pgTable(
   (table) => [
     index("idx_waitlist_status").on(table.status),
     index("idx_waitlist_email").on(table.email),
-    index("idx_waitlist_ticket_id").on(table.ticketId),
   ],
 );
