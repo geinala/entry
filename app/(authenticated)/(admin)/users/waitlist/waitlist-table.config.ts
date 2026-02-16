@@ -4,7 +4,7 @@ import { TFilterItem } from "@/app/_components/data-table/filter-collections/fac
 import { TSortOption } from "@/app/_components/data-table/sort";
 import { waitlistStatusEnum } from "@/drizzle/schema";
 import { toTitleCase } from "@/lib/utils";
-import { TGetWaitlistQueryParams } from "@/server/waitlist/waitlist.schema";
+import { TGetWaitlistQueryParams } from "@/schemas/waitlist.schema";
 
 export const getWaitlistSortingOptions = (): TSortOption[] => {
   return [

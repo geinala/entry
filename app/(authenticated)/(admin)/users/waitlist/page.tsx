@@ -6,7 +6,7 @@ import { useBreadcrumb } from "@/app/_contexts/breadcrumb.context";
 import { useEffect } from "react";
 import { useGetWaitlistEntriesQuery } from "./_hooks/use-queries";
 import { useFilters } from "@/app/_hooks/use-filters";
-import { GetWaitlistQueryParams } from "@/server/waitlist/waitlist.schema";
+import { GetWaitlistQueryParams } from "@/schemas/waitlist.schema";
 import { useWaitlistColumns } from "./_hooks/use-waitlist-columns";
 import { getWaitlistFilteringOptions, getWaitlistSortingOptions } from "./waitlist-table.config";
 

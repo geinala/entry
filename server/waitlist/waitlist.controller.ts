@@ -1,29 +1,38 @@
-"use server";
+import "server-only";
 
 import { parseQueryParams, validateSchema } from "@/lib/validation";
 import { NextRequest, NextResponse } from "next/server";
-import { GetWaitlistQueryParams, WaitlistFormSchema } from "./waitlist.schema";
 import {
   createWaitlistEntryService,
   getWaitlistEntriesWithPaginationService,
 } from "./waitlist.service";
 import { parseSortParams } from "@/lib/query-param";
+import { responseFormatter } from "@/lib/response-formatter";
+import { TWaitlistEntry } from "@/types/database";
+import { GetWaitlistQueryParams, WaitlistFormSchema } from "@/schemas/waitlist.schema";
 
-export const createWaitlistEntryController = async (req: NextRequest) => {
+export const createWaitlistEntryController = async (req: NextRequest): Promise<NextResponse> => {
   try {
     const body = await req.json();
 
     const result = validateSchema(WaitlistFormSchema, body);
 
-    if (!result.success) {
-      return NextResponse.json({ message: "Invalid request data" }, { status: 400 });
+    if (!result.success && result.error) {
+      return responseFormatter.validationError({
+        error: result.error,
+        message: "Invalid request data",
+      });
     }
 
     await createWaitlistEntryService(result.data);
 
-    return NextResponse.json({ message: "Waitlist entry created successfully" }, { status: 201 });
+    return responseFormatter.created({
+      message: "Successfully joined the waitlist",
+    });
   } catch {
-    return NextResponse.json({ message: "Something went wrong" }, { status: 500 });
+    return responseFormatter.error({
+      message: "Something went wrong",
+    });
   }
 };
 
@@ -38,21 +47,30 @@ export const getWaitlistEntriesWithPaginationController = async (
       pageSize: searchParams.get("pageSize"),
       search: searchParams.get("search") || undefined,
       sort: parseSortParams(searchParams),
-      status: searchParams.get("status") || undefined,
+      status: searchParams.get("status") || "pending",
     };
 
     const result = parseQueryParams(GetWaitlistQueryParams, rawQueryParams);
 
     if (!result.success) {
-      return NextResponse.json({ message: "Invalid query parameters" }, { status: 400 });
+      return responseFormatter.validationError({
+        error: result.error,
+        message: "Invalid query parameters",
+      });
     }
 
     const queryParams = result.data;
 
-    const data = await getWaitlistEntriesWithPaginationService(queryParams);
+    const { data, meta } = await getWaitlistEntriesWithPaginationService(queryParams);
 
-    return NextResponse.json(data, { status: 200 });
+    return responseFormatter.successWithPagination<TWaitlistEntry>({
+      data,
+      meta,
+      message: "Waitlist entries retrieved successfully",
+    });
   } catch {
-    return NextResponse.json({ message: "Something went wrong" }, { status: 500 });
+    return responseFormatter.error({
+      message: "Something went wrong",
+    });
   }
 };

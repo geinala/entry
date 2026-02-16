@@ -1,4 +1,4 @@
-"use server";
+import "server-only";
 
 import { NextRequest, NextResponse } from "next/server";
 import {
@@ -6,10 +6,10 @@ import {
   getUsersWithPaginationService,
   validateUserService,
 } from "./user.service";
-import { authService } from "@/services/auth.service";
+import { authService } from "@/server/auth/auth.service";
 import { parseQueryParams } from "@/lib/validation";
-import { GetUsersQueryParams } from "./user.schema";
 import { parseSortParams } from "@/lib/query-param";
+import { GetUsersQueryParams } from "@/schemas/user.schema";
 
 export const onBoardingUserController = async (clerkUserId: string): Promise<NextResponse> => {
   try {

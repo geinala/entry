@@ -1,3 +1,5 @@
+import "server-only";
+
 import env from "@/common/config/environtment";
 import { clerkClient } from "@clerk/nextjs/server";
 import { NextRequest } from "next/server";

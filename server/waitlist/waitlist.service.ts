@@ -1,12 +1,14 @@
-import { TGetWaitlistQueryParams, TWaitlistForm } from "./waitlist.schema";
+import "server-only";
+
 import {
   createWaitlistEntryRepository,
   getWaitlistEntriesCountRepository,
   getWaitlistEntriesWithPaginationRepository,
 } from "./waitlist.repository";
-import { TPaginationResponse } from "@/types/meta";
 import { TWaitlistEntry } from "@/types/database";
 import { paginationResponseMapper } from "@/lib/pagination";
+import { TPaginationResponse } from "@/types/meta";
+import { TGetWaitlistQueryParams, TWaitlistForm } from "@/schemas/waitlist.schema";
 
 export const createWaitlistEntryService = async (data: TWaitlistForm) => {
   return await createWaitlistEntryRepository(data);

@@ -24,3 +24,10 @@ export const setupAuthInterceptor = (getToken: () => Promise<string | null>) => 
 
   isInterceptorSetup = true;
 };
+
+export const server = axios.create({
+  baseURL: env.BACKEND_API_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+});

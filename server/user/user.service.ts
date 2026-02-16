@@ -1,3 +1,5 @@
+import "server-only";
+
 import {
   findUserByClerkIdRepository,
   findUserWithRoleAndPermissionsRepository,
@@ -8,7 +10,7 @@ import { UserType } from "./user.types";
 import { paginationResponseMapper } from "@/lib/pagination";
 import { TUser } from "@/types/database";
 import { TPaginationResponse } from "@/types/meta";
-import { TGetUsersQueryParams } from "./user.schema";
+import { TGetUsersQueryParams } from "@/schemas/user.schema";
 
 export const validateUserService = async (clerkUserId: string) => {
   try {

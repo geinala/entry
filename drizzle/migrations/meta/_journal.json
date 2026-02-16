@@ -15,6 +15,13 @@
       "when": 1771063006376,
       "tag": "0001_low_chimera",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1771067372944,
+      "tag": "0002_lumpy_thunderbird",
+      "breakpoints": true
     }
   ]
 }

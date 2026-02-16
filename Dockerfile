@@ -1,22 +1,36 @@
-FROM imbios/bun-node:22-slim as builder
-ARG DEBIAN_FRONTEND=noninteractive
+FROM imbios/bun-node:22-slim as base
 
-WORKDIR /app
-
-COPY package.json pnpm-lock.yaml ./ 
-
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get -y update \
-  && apt-get install -yq openssl git ca-certificates tzdata \
+  && apt-get install -yq openssl ca-certificates tzdata \
   && ln -fs /usr/share/zoneinfo/Asia/Jakarta /etc/localtime \
   && dpkg-reconfigure -f noninteractive tzdata \
   && npm i -g corepack \
   && corepack enable \
-  && pnpm install
+  && rm -rf /var/lib/apt/lists/*
 
+WORKDIR /app
+
+FROM base as deps
+COPY package.json pnpm-lock.yaml ./
+RUN pnpm install --frozen-lockfile
+
+FROM base as builder
+COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 
 RUN pnpm build
 
-FROM nginx:alpine
+FROM base as runner
 
-COPY --from=builder /app/dist /usr/share/nginx/html
+ENV NODE_ENV=production
+
+COPY package.json pnpm-lock.yaml ./
+
+RUN pnpm install --prod --frozen-lockfile
+
+COPY --from=builder /app/dist ./dist
+
+EXPOSE 3000
+
+CMD ["pnpm", "start"]

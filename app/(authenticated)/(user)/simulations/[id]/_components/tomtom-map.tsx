@@ -18,7 +18,7 @@ const TomTomMap = () => {
     if (mapInstanceRef.current || !mapContainerRef.current) return;
 
     TomTomConfig.instance.put({
-      apiKey: env.NEXT_PUBLIC_TOMTOM_API_KEY,
+      apiKey: env.TOMTOM_API_KEY,
       language: "id-ID",
     });
 

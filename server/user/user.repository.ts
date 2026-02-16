@@ -1,12 +1,12 @@
-"use server";
+import "server-only";
 
 import { db } from "@/lib/db";
 import { permissionTable, rolePermissionTable, roleTable, userTable } from "@/drizzle/schema";
 import { AnyColumn, eq, or, sql } from "drizzle-orm";
-import { TGetUsersQueryParams } from "./user.schema";
 import { buildFilterClause, buildSortingClause, TFilterCriterion } from "@/lib/query";
 import { PgColumn } from "drizzle-orm/pg-core";
 import { calculateOffset } from "@/lib/pagination";
+import { TGetUsersQueryParams } from "@/schemas/user.schema";
 
 export const findUserByClerkIdRepository = async (clerkUserId: string) => {
   return await db.select().from(userTable).where(eq(userTable.clerkUserId, clerkUserId)).limit(1);
