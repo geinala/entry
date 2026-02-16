@@ -1,16 +1,16 @@
 "use client";
 
-import useAuthenticatedClient from "@/app/_hooks/use-authenticated-client";
-import { TGetWaitlistQueryParams } from "@/server/waitlist/waitlist.schema";
+import { TAuthenticatedClient } from "@/app/_hooks/use-authenticated-client";
+import { TGetWaitlistQueryParams } from "@/schemas/waitlist.schema";
 import { TWaitlistEntry } from "@/types/database";
-import { TPaginationResponse } from "@/types/meta";
+import { TApiListResponse } from "@/types/response";
 import { queryOptions } from "@tanstack/react-query";
 
 export const waitlistQueries = {
-  list: (params: TGetWaitlistQueryParams, api: ReturnType<typeof useAuthenticatedClient>) => {
+  list: (params: TGetWaitlistQueryParams, api: TAuthenticatedClient) => {
     return queryOptions({
-      queryKey: [waitlistKeys.list(params)],
-      queryFn: async (): Promise<TPaginationResponse<TWaitlistEntry>> => {
+      queryKey: [...waitlistKeys.list, params],
+      queryFn: async (): Promise<TApiListResponse<TWaitlistEntry>> => {
         return await api.get("/waitlist", { params });
       },
     });
@@ -18,5 +18,5 @@ export const waitlistQueries = {
 };
 
 const waitlistKeys = {
-  list: (params: TGetWaitlistQueryParams) => ["waitlist-entries", params] as const,
+  list: ["waitlist-entries"] as const,
 };

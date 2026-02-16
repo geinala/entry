@@ -1,6 +1,6 @@
 import { TMiddlewareResponse } from "@/lib/request";
 import { NextRequest, NextResponse } from "next/server";
-import { authService } from "@/services/auth.service";
+import { authService } from "@/server/auth/auth.service";
 
 export type TAuthMiddlewareData = {
   clerkUserId: string;

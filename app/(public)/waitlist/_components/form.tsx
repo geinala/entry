@@ -10,7 +10,7 @@ import { Field, FieldError, FieldGroup, FieldLabel } from "@/app/_components/ui/
 import { Input } from "@/app/_components/ui/input";
 import Link from "next/link";
 import { useForm } from "@tanstack/react-form";
-import { WaitlistFormSchema } from "@/server/waitlist/waitlist.schema";
+import { WaitlistFormSchema } from "@/schemas/waitlist.schema";
 import { useCreateWaitlistEntryMutation } from "../_hooks/use-mutations";
 
 export const WaitlistForm = () => {

@@ -10,7 +10,7 @@ import { useGetUsers } from "./_hooks/use-get-users";
 import { useFilters } from "@/app/_hooks/use-filters";
 import Page from "@/app/_components/page";
 import { TSortOption } from "@/app/_components/data-table/sort";
-import { GetUsersQueryParams } from "@/server/user/user.schema";
+import { GetUsersQueryParams } from "@/schemas/user.schema";
 
 export default function UsersPage() {
   const { setBreadcrumbs } = useBreadcrumb();

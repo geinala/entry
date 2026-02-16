@@ -1,7 +1,7 @@
 "use client";
 
 import useAuthenticatedClient from "@/app/_hooks/use-authenticated-client";
-import { TGetWaitlistQueryParams } from "@/server/waitlist/waitlist.schema";
+import { TGetWaitlistQueryParams } from "@/schemas/waitlist.schema";
 import { useQuery } from "@tanstack/react-query";
 import { waitlistQueries } from "../_api/queries";
 
