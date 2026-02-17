@@ -1,46 +1,54 @@
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select";
-import { useState } from "react";
+"use client";
 
-type SelectOptions = {
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../../ui/select";
+
+type TSelectOptions = {
   value: string;
   label: string;
 }[];
 
-export type SelectFilterProps = Omit<React.ComponentProps<typeof Select>, "children"> & {
-  options: SelectOptions;
+export type TSelectFilterProps = Omit<
+  React.ComponentProps<typeof Select>,
+  "children" | "onValueChange"
+> & {
+  options: TSelectOptions;
   placeholder?: string;
   allowClear?: boolean;
+  onChange?: (value: string) => void;
+  value?: string;
+  defaultValue?: string;
 };
 
-export const SelectFilter = (props: SelectFilterProps) => {
-  const { allowClear, ...selectProps } = props;
-  const [value, setValue] = useState<string>("");
-
+export const SelectFilter = ({
+  allowClear,
+  placeholder,
+  options,
+  onChange,
+  value = "",
+  defaultValue,
+  ...selectProps
+}: TSelectFilterProps) => {
   const handleClear = () => {
-    setValue("");
-    if (selectProps.onValueChange) {
-      selectProps.onValueChange("");
-    }
+    onChange?.("");
+  };
+
+  const handleValueChange = (newValue: string) => {
+    onChange?.(newValue);
   };
 
   return (
-    <Select
-      value={value}
-      onValueChange={(val) => {
-        setValue(val);
-        if (selectProps.onValueChange) {
-          selectProps.onValueChange(val);
-        }
-      }}
-      {...selectProps}
-    >
-      <SelectTrigger isShowClearButton={allowClear && value !== ""} onClear={handleClear}>
-        <SelectValue placeholder={props.placeholder || "Select an option"} />
+    <Select onValueChange={handleValueChange} value={value} {...selectProps}>
+      <SelectTrigger
+        isShowClearButton={allowClear && value !== ""}
+        onClear={handleClear}
+        className="w-full"
+      >
+        <SelectValue placeholder={placeholder || "Select an option"} />
       </SelectTrigger>
       <SelectContent position="popper">
-        {props.options.map((option) => (
+        {options.map((option) => (
           <SelectItem key={option.value} value={option.value}>
-            {option.label}
+            {option.value === defaultValue ? `${option.label} (default)` : option.label}
           </SelectItem>
         ))}
       </SelectContent>

@@ -2,6 +2,7 @@ import {
   foreignKey,
   index,
   integer,
+  pgEnum,
   pgTable,
   serial,
   timestamp,
@@ -16,6 +17,10 @@ export const userTable = pgTable(
     clerkUserId: varchar("clerk_user_id").notNull(),
     email: varchar("email").notNull().unique(),
     fullName: varchar("full_name").notNull(),
+    imageUrl: varchar("image_url"),
+    hasImage: integer("has_image").notNull().default(0),
+    lastSignInAt: timestamp("last_sign_in_at", { withTimezone: true }),
+    lastActiveAt: timestamp("last_active_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
@@ -61,5 +66,35 @@ export const rolePermissionTable = pgTable(
     }),
     index("role_permissions_role_id_idx").on(table.roleId),
     index("role_permissions_permission_id_idx").on(table.permissionId),
+  ],
+);
+
+export const waitlistStatusEnum = pgEnum("waitlist_status_enum", [
+  "pending",
+  "sending",
+  "confirmed",
+  "rejected",
+  "invited",
+  "expired",
+]);
+
+export const waitlistTable = pgTable(
+  "waitlist",
+  {
+    id: serial().primaryKey(),
+    email: varchar("email").notNull().unique(),
+    firstName: varchar("first_name").notNull(),
+    lastName: varchar("last_name").notNull(),
+    status: waitlistStatusEnum("status").notNull().default("pending"),
+    ticketId: varchar("ticket_id").unique(),
+    invitedAt: timestamp("invited_at", { withTimezone: true }),
+    expiredAt: timestamp("expired_at", { withTimezone: true }),
+    confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("idx_waitlist_status").on(table.status),
+    index("idx_waitlist_email").on(table.email),
+    index("idx_waitlist_ticket_id").on(table.ticketId),
   ],
 );

@@ -16,13 +16,14 @@ import { Button } from "../ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../ui/select";
 import { Pagination, PaginationContent, PaginationItem } from "../ui/pagination";
 import { ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight } from "lucide-react";
-import { SortButton, SortCriterion, SortOptionType } from "./sort";
+import { SortButton, TSortCriterion, TSortOption } from "./sort";
 import { Search } from "./search";
-import { FilterItemType } from "./filter-collections/factory";
+import { TFilterItem } from "./filter-collections/factory";
 import { FilterTable } from "./filter";
 import { DateRange } from "react-day-picker";
+import { TPaginationResponse } from "@/types/meta";
 
-export type FilterValue =
+export type TFilterValue =
   | string
   | number
   | boolean
@@ -30,15 +31,8 @@ export type FilterValue =
   | undefined
   | Array<string | number>;
 
-interface Props<TData, TValue> {
-  source: {
-    data?: TData[];
-    meta?: {
-      currentPage?: number;
-      pageSize?: number;
-      total?: number;
-    };
-  };
+interface IDataTableProps<TData, TValue = unknown> {
+  source?: TPaginationResponse<TData>;
   columns: ColumnDef<TData, TValue>[];
   isLoading?: boolean;
   placeholderSearch?: string;
@@ -48,18 +42,19 @@ interface Props<TData, TValue> {
     pageSize: number;
   };
   isSearchable?: boolean;
-  filterComponents?: FilterItemType[];
+  filterComponents?: TFilterItem[];
   handleChange: {
-    onFilterChange: (value: Record<string, FilterValue>) => void;
-    onSortingChange: (sorts: SortCriterion[]) => void;
+    onFilterChange: (value: Record<string, TFilterValue>) => void;
+    onSortingChange: (sorts: TSortCriterion[]) => void;
     onPaginationChange: (page: number, pageSize: number) => void;
     onSearch: (searchTerm: string) => void;
   };
-  sortOptions?: Array<SortOptionType>;
-  sortDefaultValue?: SortCriterion[];
+  sortOptions?: Array<TSortOption>;
+  sortDefaultValue?: TSortCriterion[];
+  selectable?: boolean;
 }
 
-const DataTable = <TData, TValue>(props: Props<TData, TValue>) => {
+const DataTable = <TData, TValue = unknown>(props: IDataTableProps<TData, TValue>) => {
   const {
     columns,
     source,
@@ -72,8 +67,9 @@ const DataTable = <TData, TValue>(props: Props<TData, TValue>) => {
     sortOptions,
     sortDefaultValue,
     placeholderSearch,
+    selectable,
   } = props;
-  const { data, meta } = source;
+  const { data = [], meta } = source || {};
   const { page, pageSize } = pagination;
   const { total } = meta || {};
 
@@ -133,17 +129,19 @@ const DataTable = <TData, TValue>(props: Props<TData, TValue>) => {
           <TableHeader>
             {table.getHeaderGroups().map((headerGroup) => (
               <TableRow className="bg-background border-none" key={headerGroup.id}>
-                {headerGroup.headers.map((header, index) => (
-                  <TableHead
-                    key={header.id}
-                    colSpan={header.colSpan}
-                    className={index === 0 ? "pl-6" : ""}
-                  >
-                    {header.isPlaceholder
-                      ? null
-                      : flexRender(header.column.columnDef.header, header.getContext())}
-                  </TableHead>
-                ))}
+                {headerGroup.headers
+                  .filter((header) => !(header.id === "select" && !selectable))
+                  .map((header, index) => (
+                    <TableHead
+                      key={header.id}
+                      colSpan={header.colSpan}
+                      className={index === 0 ? "pl-6" : ""}
+                    >
+                      {header.isPlaceholder
+                        ? null
+                        : flexRender(header.column.columnDef.header, header.getContext())}
+                    </TableHead>
+                  ))}
               </TableRow>
             ))}
           </TableHeader>
@@ -153,18 +151,21 @@ const DataTable = <TData, TValue>(props: Props<TData, TValue>) => {
             <TableBody>
               {table.getRowModel().rows.map((row) => (
                 <TableRow key={row.id}>
-                  {row.getVisibleCells().map((cell, index) => (
-                    <TableCell key={cell.id} className={index === 0 ? "pl-6" : ""}>
-                      {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                    </TableCell>
-                  ))}
+                  {row
+                    .getVisibleCells()
+                    .filter((cell) => !(cell.column.id === "select" && !selectable))
+                    .map((cell, index) => (
+                      <TableCell key={cell.id} className={index === 0 ? "pl-6" : ""}>
+                        {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                      </TableCell>
+                    ))}
                 </TableRow>
               ))}
             </TableBody>
           )}
         </Table>
       </CardContent>
-      <TablePaginataion
+      <TablePagination
         table={table}
         onPageChange={handleChange.onPaginationChange}
         totalItems={total}
@@ -197,18 +198,17 @@ const TableEmpty = ({ colSpan }: { colSpan: number }) => {
   );
 };
 
-interface PaginationProps<TData> {
+interface IPaginationProps<TData> {
   table: TableType<TData>;
   pageSizeOptions?: number[];
   onPageChange: (page: number, pageSize: number) => void;
   totalItems?: number;
 }
 
-const TablePaginataion = <TData,>(props: PaginationProps<TData>) => {
+const TablePagination = <TData,>(props: IPaginationProps<TData>) => {
   const { table, pageSizeOptions = [10, 20, 30, 40, 50], onPageChange, totalItems } = props;
   const { getState, getPageCount } = table;
   const { pageIndex, pageSize } = getState().pagination;
-  const currentPage = pageIndex;
   const pageCount = getPageCount();
 
   const isMobile = useIsMobile();
@@ -223,15 +223,15 @@ const TablePaginataion = <TData,>(props: PaginationProps<TData>) => {
     }
 
     const pages: (number | string)[] = [];
-    if (currentPage <= pageRange + 1) {
+    if (pageIndex <= pageRange + 1) {
       pages.push(...Array.from({ length: pageRange + 2 }, (_, i) => i + 1), "...");
-    } else if (currentPage >= pageCount - pageRange) {
+    } else if (pageIndex >= pageCount - pageRange) {
       pages.push(
         "...",
         ...Array.from({ length: pageRange + 2 }, (_, i) => pageCount - pageRange - 1 + i),
       );
     } else {
-      pages.push("...", currentPage - pageRange, currentPage, currentPage + pageRange, "...");
+      pages.push("...", pageIndex - pageRange, pageIndex, pageIndex + pageRange, "...");
     }
 
     return pages;
@@ -241,8 +241,8 @@ const TablePaginataion = <TData,>(props: PaginationProps<TData>) => {
     const isFirstEllipsis = index === 0;
     const jumpAmount = Math.floor(pageCount / 3);
     const newPage = isFirstEllipsis
-      ? Math.max(1, currentPage - jumpAmount)
-      : Math.min(pageCount, currentPage + jumpAmount);
+      ? Math.max(1, pageIndex - jumpAmount)
+      : Math.min(pageCount, pageIndex + jumpAmount);
     onPageChange?.(newPage, pageSize);
   };
 
@@ -250,7 +250,7 @@ const TablePaginataion = <TData,>(props: PaginationProps<TData>) => {
     if (typeof page === "number") {
       return (
         <Button
-          variant={currentPage === page ? "default" : "outline"}
+          variant={pageIndex === page ? "default" : "outline"}
           className="h-8 w-8"
           onClick={() => onPageChange?.(page, pageSize)}
         >
@@ -272,20 +272,20 @@ const TablePaginataion = <TData,>(props: PaginationProps<TData>) => {
         <div className="w-20">
           <Select
             value={String(pageSize)}
-            onValueChange={(value) => onPageChange?.(currentPage, Number(value))}
+            onValueChange={(value) => onPageChange?.(pageIndex, Number(value))}
           >
             <SelectTrigger>
-              <SelectValue placeholder={pageSize} />
+              <SelectValue placeholder={pageSize || 0} />
             </SelectTrigger>
             <SelectContent position="popper">
               {!pageSizeOptions.includes(pageSize) && (
                 <SelectItem key={pageSize} value={String(pageSize)} hidden>
-                  {pageSize}
+                  {pageSize || 0}
                 </SelectItem>
               )}
               {pageSizeOptions.map((size) => (
                 <SelectItem key={size} value={String(size)}>
-                  {size}
+                  {size || 0}
                 </SelectItem>
               ))}
             </SelectContent>
@@ -294,7 +294,7 @@ const TablePaginataion = <TData,>(props: PaginationProps<TData>) => {
       </div>
 
       <div className="flex w-full flex-col items-center justify-center gap-3 lg:w-min lg:flex-row">
-        <p className="lg:w-max lg:flex-1">{`${start}-${totalItems} of ${totalItems} items`}</p>
+        <p className="lg:w-max lg:flex-1">{`${Math.min(start || 1, totalItems || 0)}-${Math.min(start + pageSize - 1, totalItems || 0)} of ${totalItems || 0} items`}</p>
         <Pagination className="lg:flex-1">
           <PaginationContent className="max-lg:flex max-lg:flex-wrap">
             <PaginationItem>
@@ -302,7 +302,7 @@ const TablePaginataion = <TData,>(props: PaginationProps<TData>) => {
                 variant="outline"
                 className="h-8 w-8"
                 onClick={() => onPageChange(1, pageSize)}
-                disabled={currentPage === 1}
+                disabled={pageIndex === 1}
               >
                 <ChevronsLeft className="h-4 w-4" />
               </Button>
@@ -311,8 +311,8 @@ const TablePaginataion = <TData,>(props: PaginationProps<TData>) => {
               <Button
                 variant="outline"
                 className="h-8 w-8"
-                onClick={() => onPageChange(currentPage - 1, pageSize)}
-                disabled={currentPage === 1}
+                onClick={() => onPageChange(pageIndex - 1, pageSize)}
+                disabled={pageIndex === 1}
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
@@ -326,8 +326,8 @@ const TablePaginataion = <TData,>(props: PaginationProps<TData>) => {
               <Button
                 variant="outline"
                 className="h-8 w-8"
-                onClick={() => onPageChange(currentPage + 1, pageSize)}
-                disabled={currentPage === pageCount}
+                onClick={() => onPageChange(pageIndex + 1, pageSize)}
+                disabled={pageIndex === pageCount}
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
@@ -337,7 +337,7 @@ const TablePaginataion = <TData,>(props: PaginationProps<TData>) => {
                 variant="outline"
                 className="h-8 w-8"
                 onClick={() => onPageChange(pageCount, pageSize)}
-                disabled={currentPage === pageCount}
+                disabled={pageIndex === pageCount}
               >
                 <ChevronsRight className="h-4 w-4" />
               </Button>

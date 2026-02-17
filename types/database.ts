@@ -1,31 +1,30 @@
 import { InferSelectModel, InferInsertModel } from "drizzle-orm";
-import { userTable, roleTable, permissionTable, rolePermissionTable } from "@/drizzle/schema";
+import {
+  userTable,
+  roleTable,
+  permissionTable,
+  waitlistTable,
+  waitlistStatusEnum,
+} from "@/drizzle/schema";
 
 // User Types
-export type User = InferSelectModel<typeof userTable>;
-export type NewUser = InferInsertModel<typeof userTable>;
+export type TUser = InferSelectModel<typeof userTable>;
 
 // Role Types
-export type Role = InferSelectModel<typeof roleTable>;
-export type NewRole = InferInsertModel<typeof roleTable>;
+type TRole = InferSelectModel<typeof roleTable>;
 
 // Permission Types
-export type Permission = InferSelectModel<typeof permissionTable>;
-export type NewPermission = InferInsertModel<typeof permissionTable>;
+type TPermission = InferSelectModel<typeof permissionTable>;
 
-// Role Permission Types
-export type RolePermission = InferSelectModel<typeof rolePermissionTable>;
-export type NewRolePermission = InferInsertModel<typeof rolePermissionTable>;
-
-// Extended Types for API Responses
-export type UserDetails = User & {
-  role?: Role;
+export type TRoleWithPermissions = TRole & {
+  permissions?: TPermission[];
 };
 
-export type RoleWithPermissions = Role & {
-  permissions?: Permission[];
+export type TUserWithRoleAndPermissions = TUser & {
+  role?: TRoleWithPermissions;
 };
 
-export type UserWithRoleAndPermissions = User & {
-  role?: RoleWithPermissions;
-};
+// Waitlist Types
+export type TWaitlistEntry = InferSelectModel<typeof waitlistTable>;
+export type TNewWaitlistEntry = InferInsertModel<typeof waitlistTable>;
+export type TWaitlistStatus = (typeof waitlistStatusEnum.enumValues)[number];

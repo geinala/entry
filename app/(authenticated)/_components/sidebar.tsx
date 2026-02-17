@@ -14,41 +14,45 @@ import {
   SidebarTrigger,
 } from "@/app/_components/ui/sidebar";
 import { useUserContext } from "@/app/_contexts/user.context";
-import { GroupedMenuItem, MENU_ITEMS, MenuItem } from "@/common/constants/menu";
+import { IGroupedMenuItem, MENU_ITEMS, TMenuItem } from "@/common/constants/menu";
 import { X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useMemo } from "react";
 
+const checkIsMenuActive = (menuPath: string, currentPath: string) => {
+  const path = currentPath.split("?")[0];
+  return path === menuPath;
+};
+
 export default function AuthenticatedSidebar() {
   const { userDetails } = useUserContext();
   const role = userDetails?.role?.name;
   const pathname = usePathname();
-  const isMenuActive = (href: string) => {
-    return pathname.startsWith(href);
-  };
+
+  const isMenuActive = useMemo(() => {
+    return (menuPath: string) => checkIsMenuActive(menuPath, pathname);
+  }, [pathname]);
 
   const allowedSidebarMenus = useMemo(() => {
-    return MENU_ITEMS.map((item: MenuItem | GroupedMenuItem) => {
-      if ("groupLabel" in item) {
-        const filteredItems = item.items.filter(
-          (menuItem: MenuItem) => !menuItem.roles || menuItem.roles.includes(role || ""),
-        );
-
-        return {
-          ...item,
-          items: filteredItems,
-        };
-      }
-
-      return item;
-    }).filter((item) => {
-      if ("groupLabel" in item) {
-        return item.items.length > 0;
-      }
-
-      return !item.roles || item.roles.includes(role || "");
-    });
+    return MENU_ITEMS.reduce(
+      (acc, item) => {
+        if ("groupLabel" in item) {
+          const filteredSubItems = item.items.filter(
+            (sub) => !sub.roles || sub.roles.includes(role || ""),
+          );
+          if (filteredSubItems.length > 0) {
+            acc.push({ ...item, items: filteredSubItems });
+          }
+        } else {
+          if (!item.roles || item.roles.includes(role || "")) {
+            acc.push(item);
+          }
+        }
+        return acc;
+      },
+      [] as (TMenuItem | IGroupedMenuItem)[],
+    );
   }, [role]);
 
   return (
@@ -63,40 +67,11 @@ export default function AuthenticatedSidebar() {
         {allowedSidebarMenus.map((item, index) => {
           if ("groupLabel" in item) {
             return (
-              <SidebarGroup key={index}>
-                <SidebarGroupLabel>{item.groupLabel}</SidebarGroupLabel>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    {item.items.map((subItem, subIndex) => (
-                      <SidebarMenuItem key={subIndex}>
-                        <Link href={subItem.href}>
-                          <SidebarMenuButton isActive={isMenuActive(subItem.href)}>
-                            {subItem.icon}
-                            {subItem.label}
-                          </SidebarMenuButton>
-                        </Link>
-                      </SidebarMenuItem>
-                    ))}
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
+              <GroupedSidebarMenuWithLabel key={index} item={item} isMenuActive={isMenuActive} />
             );
           } else {
             return (
-              <SidebarGroup key={index}>
-                <SidebarGroupContent>
-                  <SidebarMenu>
-                    <SidebarMenuItem>
-                      <Link href={item.href}>
-                        <SidebarMenuButton isActive={isMenuActive(item.href)}>
-                          {item.icon}
-                          {item.label}
-                        </SidebarMenuButton>
-                      </Link>
-                    </SidebarMenuItem>
-                  </SidebarMenu>
-                </SidebarGroupContent>
-              </SidebarGroup>
+              <SidebarMenuWithoutLabel key={index} item={item} isActive={isMenuActive(item.path)} />
             );
           }
         })}
@@ -104,3 +79,50 @@ export default function AuthenticatedSidebar() {
     </Sidebar>
   );
 }
+
+const GroupedSidebarMenuWithLabel = ({
+  item,
+  isMenuActive,
+}: {
+  item: IGroupedMenuItem;
+  isMenuActive: (menuPath: string) => boolean;
+}) => {
+  return (
+    <SidebarGroup>
+      <SidebarGroupLabel>{item.groupLabel}</SidebarGroupLabel>
+      <SidebarGroupContent>
+        <SidebarMenu>
+          {item.items.map((subItem, subIndex) => (
+            <SidebarMenuItem key={subIndex}>
+              <Link href={subItem.path}>
+                <SidebarMenuButton isActive={isMenuActive(subItem.path)}>
+                  {subItem.icon}
+                  {subItem.label}
+                </SidebarMenuButton>
+              </Link>
+            </SidebarMenuItem>
+          ))}
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
+  );
+};
+
+const SidebarMenuWithoutLabel = ({ item, isActive }: { item: TMenuItem; isActive: boolean }) => {
+  return (
+    <SidebarGroup>
+      <SidebarGroupContent>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <Link href={item.path}>
+              <SidebarMenuButton isActive={isActive}>
+                {item.icon}
+                {item.label}
+              </SidebarMenuButton>
+            </Link>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarGroupContent>
+    </SidebarGroup>
+  );
+};

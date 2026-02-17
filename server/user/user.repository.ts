@@ -1,11 +1,12 @@
-"use server";
+import "server-only";
 
 import { db } from "@/lib/db";
 import { permissionTable, rolePermissionTable, roleTable, userTable } from "@/drizzle/schema";
 import { AnyColumn, eq, or, sql } from "drizzle-orm";
-import { GetUsersQueryParamsType } from "./user.schema";
-import { buildFilterClause, buildSortingClause, FilterCriterion } from "@/lib/query";
+import { buildFilterClause, buildSortingClause, TFilterCriterion } from "@/lib/query";
 import { PgColumn } from "drizzle-orm/pg-core";
+import { calculateOffset } from "@/lib/pagination";
+import { TGetUsersQueryParams } from "@/schemas/user.schema";
 
 export const findUserByClerkIdRepository = async (clerkUserId: string) => {
   return await db.select().from(userTable).where(eq(userTable.clerkUserId, clerkUserId)).limit(1);
@@ -21,10 +22,11 @@ export const findUserWithRoleAndPermissionsRepository = async (clerkUserId: stri
     .where(eq(userTable.clerkUserId, clerkUserId));
 };
 
-export const getUsersWithPaginationRepository = async (queryParams: GetUsersQueryParamsType) => {
+export const getUsersWithPaginationRepository = async (queryParams: TGetUsersQueryParams) => {
   const { page, pageSize, search, sort } = queryParams;
-  const offset = (page - 1) * pageSize;
-  const filters: FilterCriterion[] = [
+  const offset = calculateOffset(page, pageSize);
+
+  const filters: TFilterCriterion[] = [
     { key: "email", operator: "ilike", value: search },
     {
       key: "fullName",
@@ -32,10 +34,12 @@ export const getUsersWithPaginationRepository = async (queryParams: GetUsersQuer
       value: search,
     },
   ];
+
   const sortableColumns: Record<string, PgColumn> = {
     fullName: userTable.fullName,
     email: userTable.email,
   } as const;
+
   const columns: Record<string, PgColumn> = {
     fullName: userTable.fullName,
     email: userTable.email,
@@ -64,13 +68,13 @@ export const getUsersWithPaginationRepository = async (queryParams: GetUsersQuer
   return data;
 };
 
-export const getUsersCountRepository = async (queryParams: GetUsersQueryParamsType) => {
+export const getUsersCountRepository = async (queryParams: TGetUsersQueryParams) => {
   const { search } = queryParams;
   const columns: Record<string, AnyColumn> = {
     fullName: userTable.fullName,
     email: userTable.email,
   };
-  const filters: FilterCriterion[] = [
+  const filters: TFilterCriterion[] = [
     { key: "email", operator: "ilike", value: search },
     {
       key: "fullName",
