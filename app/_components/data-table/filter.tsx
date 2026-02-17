@@ -8,29 +8,41 @@ import { FilterInputFactory, TFilterItem } from "./filter-collections/factory";
 import { TFilterValue } from ".";
 import { useMemo, useState } from "react";
 import { Badge } from "../ui/badge";
+import { isValidFilterValue, EMPTY_VALUE } from "./filter-utils";
 
 export interface IFilterTableProps {
   filterItems: TFilterItem[];
   onChange: (value: Record<string, TFilterValue>) => void;
 }
 
+const initializeFilterValues = (filterItems: TFilterItem[]): Record<string, TFilterValue> => {
+  return filterItems.reduce<Record<string, TFilterValue>>((acc, item) => {
+    if (isValidFilterValue(item.value)) {
+      acc[item.name] = item.value as TFilterValue;
+    }
+    return acc;
+  }, {});
+};
+
+const resetFilterValues = (filterItems: TFilterItem[]): Record<string, TFilterValue> => {
+  return filterItems.reduce<Record<string, TFilterValue>>((acc, item) => {
+    acc[item.name] =
+      item.defaultValue !== undefined ? (item.defaultValue as TFilterValue) : EMPTY_VALUE;
+    return acc;
+  }, {});
+};
+
 export const FilterTable = (props: IFilterTableProps) => {
-  const [localFilterValues, setLocalFilterValues] = useState<Record<string, TFilterValue>>({});
+  const [localFilterValues, setLocalFilterValues] = useState<Record<string, TFilterValue>>(() =>
+    initializeFilterValues(props.filterItems),
+  );
 
   const handleInputChange = (value: Record<string, TFilterValue>) => {
     setLocalFilterValues((prev) => ({ ...prev, ...value }));
   };
 
-  const getActiveFilterCount = useMemo(() => {
-    return () => {
-      return props.filterItems.reduce((count, item) => {
-        const filterValue = item.defaultValue;
-        if (filterValue !== undefined && filterValue !== null && filterValue !== "") {
-          return count + 1;
-        }
-        return count;
-      }, 0);
-    };
+  const activeFilterCount = useMemo(() => {
+    return props.filterItems.filter((item) => isValidFilterValue(item.value)).length;
   }, [props.filterItems]);
 
   return (
@@ -39,9 +51,9 @@ export const FilterTable = (props: IFilterTableProps) => {
         <Button variant="outline" size="sm">
           <ListFilter className="h-4 w-4" />
           Filter{" "}
-          {getActiveFilterCount() > 0 && (
+          {activeFilterCount > 0 && (
             <Badge className="ml-1" variant={"info"}>
-              {getActiveFilterCount()}
+              {activeFilterCount}
             </Badge>
           )}
         </Button>
@@ -60,8 +72,9 @@ export const FilterTable = (props: IFilterTableProps) => {
               variant={"outline"}
               size={"sm"}
               onClick={() => {
-                props.onChange({});
-                setLocalFilterValues({});
+                const resetValues = resetFilterValues(props.filterItems);
+                props.onChange(resetValues);
+                setLocalFilterValues(resetValues);
               }}
             >
               Reset

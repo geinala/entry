@@ -39,7 +39,8 @@ export const getWaitlistFilteringOptions = (filters: TGetWaitlistQueryParams): T
           value: status,
         })),
       ].flat(),
-      defaultValue: filters.status?.toString(),
+      defaultValue: "pending",
+      value: filters.status?.toString(),
       allowClear: true,
     },
   ];

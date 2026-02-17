@@ -1,22 +1,22 @@
 "use client";
 
-import { TAuthenticatedClient } from "@/app/_hooks/use-authenticated-client";
 import { TGetWaitlistQueryParams } from "@/schemas/waitlist.schema";
 import { TWaitlistEntry } from "@/types/database";
-import { TApiListResponse } from "@/types/response";
+import { TPaginationResponse } from "@/types/meta";
 import { queryOptions } from "@tanstack/react-query";
+import { AxiosInstance } from "axios";
 
 export const waitlistQueries = {
-  list: (params: TGetWaitlistQueryParams, api: TAuthenticatedClient) => {
+  list: (params: TGetWaitlistQueryParams, api: AxiosInstance) => {
     return queryOptions({
-      queryKey: [...waitlistKeys.list, params],
-      queryFn: async (): Promise<TApiListResponse<TWaitlistEntry>> => {
+      queryKey: [...WAITLIST_QUERY_KEYS.list, params],
+      queryFn: async (): Promise<TPaginationResponse<TWaitlistEntry>> => {
         return await api.get("/waitlist", { params });
       },
     });
   },
 };
 
-const waitlistKeys = {
+export const WAITLIST_QUERY_KEYS = {
   list: ["waitlist-entries"] as const,
 };

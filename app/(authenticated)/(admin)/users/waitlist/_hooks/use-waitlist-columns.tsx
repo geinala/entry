@@ -8,11 +8,100 @@ import { toast } from "sonner";
 import { Send, XCircle } from "lucide-react";
 import { Button } from "@/app/_components/ui/button";
 import { useSendInvitationMutation } from "./use-mutations";
+import { Checkbox } from "@/app/_components/ui/checkbox";
+import { useCallback, useMemo, useState } from "react";
 
-export const useWaitlistColumns = (): ColumnDef<TWaitlistEntry>[] => {
+interface IUseWaitlistColumnsReturn {
+  columns: ColumnDef<TWaitlistEntry>[];
+  selectedIds: number[];
+  isSendingInvitations: boolean;
+  sendBulkInvitations: () => Promise<void>;
+  clearSelection: () => void;
+}
+
+export const useWaitlistColumns = (): IUseWaitlistColumnsReturn => {
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const { mutateAsync, isPending: isSendMutationPending } = useSendInvitationMutation();
 
-  return [
+  /**
+   * Memoized callback to handle row selection changes
+   * Prevents unnecessary table re-renders from function recreation
+   */
+  const handleSelectRow = useCallback((id: number, selected: boolean) => {
+    setSelectedIds((prev) => {
+      if (selected) {
+        return [...prev, id];
+      } else {
+        return prev.filter((selectedId) => selectedId !== id);
+      }
+    });
+  }, []);
+
+  /**
+   * Send bulk invitations to selected waitlist entries
+   * Preserves selection state on error for retry capability
+   */
+  const sendBulkInvitations = async () => {
+    if (selectedIds.length === 0) {
+      toast.error("No rows selected");
+      return;
+    }
+
+    try {
+      await mutateAsync({ waitlistIds: selectedIds });
+      setSelectedIds([]); // Clear selection only on success
+    } catch (error) {
+      // Preserve selectedIds so user can retry without re-selecting
+      const errorMessage = error instanceof Error ? error.message : "Failed to send invitations";
+      console.error("[SendBulkInvitations] Error:", errorMessage);
+      toast.error(`Failed to send invitations. Please try again. ${errorMessage}`);
+    }
+  };
+
+  /**
+   * Clear all selected rows
+   */
+  const clearSelection = useCallback(() => {
+    setSelectedIds([]);
+  }, []);
+
+  /**
+   * Memoized column definitions to prevent table re-renders
+   * Recreate only when mutation state or handlers change
+   */
+  const columns: ColumnDef<TWaitlistEntry>[] = useMemo(
+    () => [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getRowModel().rows.length > 0 &&
+            selectedIds.length === table.getRowModel().rows.length
+          }
+          onCheckedChange={(value) => {
+            table.toggleAllPageRowsSelected(!!value);
+            if (value) {
+              const allIds = table.getRowModel().rows.map((row) => row.original.id);
+              setSelectedIds(allIds);
+            } else {
+              setSelectedIds([]);
+            }
+          }}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={selectedIds.includes(row.original.id)}
+          onCheckedChange={(value) => {
+            row.toggleSelected(!!value);
+            handleSelectRow(row.original.id, !!value);
+          }}
+          aria-label="Select row"
+        />
+      ),
+    },
     {
       accessorKey: "fullName",
       header: "Name",
@@ -46,6 +135,10 @@ export const useWaitlistColumns = (): ColumnDef<TWaitlistEntry>[] => {
       accessorKey: "actions",
       header: "",
       cell: ({ row }) => {
+        if (row.original.status !== "pending") {
+          return null;
+        }
+
         return (
           <div className="flex items-center justify-center space-x-2">
             <Button
@@ -71,5 +164,15 @@ export const useWaitlistColumns = (): ColumnDef<TWaitlistEntry>[] => {
         );
       },
     },
-  ];
+    ],
+    [handleSelectRow, isSendMutationPending, mutateAsync, selectedIds]
+  );
+
+  return {
+    columns,
+    selectedIds,
+    isSendingInvitations: isSendMutationPending,
+    sendBulkInvitations,
+    clearSelection,
+  };
 };

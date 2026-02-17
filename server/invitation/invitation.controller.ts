@@ -27,7 +27,8 @@ export const sendInvitationController = async (request: NextRequest) => {
       });
     }
 
-    return responseFormatter.success({
+    return responseFormatter.successWithData({
+      data: response.data.data,
       message: "Invitation sent successfully",
     });
   } catch (error) {

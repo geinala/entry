@@ -4,7 +4,7 @@ import { debounce } from "@/lib/debounce";
 import { updateQueryParam } from "@/lib/query-param";
 import { parseQueryParams } from "@/lib/validation";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import z, { ZodSchema } from "zod";
 import { TSortCriterion } from "../_components/data-table/sort";
 import { TFilterValue } from "../_components/data-table";
@@ -57,7 +57,6 @@ export const useFilters = (schema: ZodSchema) => {
   const handleSortingChange = useCallback(
     (sorts: TSortCriterion[]) => {
       const sortValue = sorts.map((s) => `${s.key}:${s.direction}`).join(",");
-
       updateUrl({
         sort: sortValue || null,
         page: 1,
@@ -109,6 +108,24 @@ export const useFilters = (schema: ZodSchema) => {
     }),
     [handlePaginationChange, handleSearch, handleSortingChange, handleFilterChange],
   );
+
+  useEffect(() => {
+    let needsUpdate = false;
+
+    Object.keys(validFilters).forEach((key) => {
+      const value = validFilters[key];
+
+      if (value === null || value === undefined) return;
+
+      if (!searchParams.has(key)) {
+        needsUpdate = true;
+      }
+    });
+
+    if (needsUpdate) {
+      updateUrl(validFilters);
+    }
+  }, [validFilters, searchParams, updateUrl]);
 
   return {
     search: typeof validFilters.search === "string" ? validFilters.search : "",
