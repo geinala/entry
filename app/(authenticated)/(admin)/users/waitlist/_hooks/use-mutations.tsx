@@ -1,9 +1,16 @@
+"use client";
+
 import useAuthenticatedClient from "@/app/_hooks/use-authenticated-client";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { waitlistMutations } from "../_api/mutations";
 
+/**
+ * Hook for sending invitations to waitlist entries
+ * Handles mutation state, cache invalidation, and error logging
+ */
 export const useSendInvitationMutation = () => {
   const api = useAuthenticatedClient();
+  const queryClient = useQueryClient();
 
-  return useMutation(waitlistMutations.send(api));
+  return useMutation(waitlistMutations.send(api, queryClient));
 };

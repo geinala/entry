@@ -16,6 +16,7 @@ export type TSelectFilterProps = Omit<
   allowClear?: boolean;
   onChange?: (value: string) => void;
   value?: string;
+  defaultValue?: string;
 };
 
 export const SelectFilter = ({
@@ -24,6 +25,7 @@ export const SelectFilter = ({
   options,
   onChange,
   value = "",
+  defaultValue,
   ...selectProps
 }: TSelectFilterProps) => {
   const handleClear = () => {
@@ -46,7 +48,7 @@ export const SelectFilter = ({
       <SelectContent position="popper">
         {options.map((option) => (
           <SelectItem key={option.value} value={option.value}>
-            {option.label}
+            {option.value === defaultValue ? `${option.label} (default)` : option.label}
           </SelectItem>
         ))}
       </SelectContent>

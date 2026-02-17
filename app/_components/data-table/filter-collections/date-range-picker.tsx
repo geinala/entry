@@ -14,6 +14,7 @@ export type TDateRangePickerProps = {
   onChange?: (dateRange: DateRange | undefined) => void;
   defaultValue?: DateRange;
   format?: string;
+  value?: DateRange;
 };
 
 export const DateRangePicker = ({

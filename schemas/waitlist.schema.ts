@@ -13,7 +13,7 @@ export type TWaitlistForm = z.infer<typeof WaitlistFormSchema>;
 
 export const GetWaitlistQueryParams = IndexQueryParams.extend({
   sort: createSortSchema(["firstName", "lastName", "email"]),
-  status: z.enum(waitlistStatusEnum.enumValues).optional(),
+  status: z.enum(waitlistStatusEnum.enumValues).optional().default("pending"),
 });
 
 export type TGetWaitlistQueryParams = z.infer<typeof GetWaitlistQueryParams>;
