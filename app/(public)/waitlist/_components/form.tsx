@@ -6,11 +6,11 @@ import Logo from "@/app/_components/logo";
 import { Paragraph, Title } from "@/app/_components/typography";
 import { Button } from "@/app/_components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader } from "@/app/_components/ui/card";
-import { Field, FieldError, FieldGroup } from "@/app/_components/ui/field";
+import { Field, FieldError, FieldGroup, FieldLabel } from "@/app/_components/ui/field";
 import { Input } from "@/app/_components/ui/input";
 import Link from "next/link";
 import { useForm } from "@tanstack/react-form";
-import { WaitlistFormSchema } from "@/server/waitlist/waitlist.schema";
+import { WaitlistFormSchema } from "@/schemas/waitlist.schema";
 import { useCreateWaitlistEntryMutation } from "../_hooks/use-mutations";
 
 export const WaitlistForm = () => {
@@ -18,7 +18,8 @@ export const WaitlistForm = () => {
 
   const form = useForm({
     defaultValues: {
-      name: "",
+      firstName: "",
+      lastName: "",
       email: "",
     },
     validators: { onSubmit: WaitlistFormSchema },
@@ -28,7 +29,7 @@ export const WaitlistForm = () => {
   });
 
   return (
-    <Card className="min-w-96 justify-center">
+    <Card className="w-md justify-center">
       <CardHeader className="justify-center items-center flex flex-col text-center">
         <Logo width={50} height={50} />
         <Title level={4}>Get Early Access</Title>
@@ -36,17 +37,17 @@ export const WaitlistForm = () => {
           Join our exclusive waitlist and be among the first to experience our platform.
         </Paragraph>
       </CardHeader>
-      <CardContent className="justify-center items-center flex flex-col">
+      <CardContent className="justify-center items-center flex flex-col w-full">
         <form
-          className="max-w-xs flex flex-col w-full gap-2"
+          className="flex flex-col w-full gap-3"
           onSubmit={(e) => {
             e.preventDefault();
             form.handleSubmit();
           }}
         >
-          <FieldGroup>
+          <FieldGroup className="grid grid-cols-2 gap-3">
             <form.Field
-              name="name"
+              name="firstName"
               children={(field) => {
                 const { isTouched, isValid, errors } = field.state.meta;
 
@@ -54,6 +55,7 @@ export const WaitlistForm = () => {
 
                 return (
                   <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>First Name</FieldLabel>
                     <Input
                       id={field.name}
                       name={field.name}
@@ -61,7 +63,32 @@ export const WaitlistForm = () => {
                       onBlur={field.handleBlur}
                       onChange={(e) => field.handleChange(e.target.value)}
                       aria-invalid={isInvalid}
-                      placeholder="Enter your full name"
+                      placeholder="Enter your first name"
+                      autoComplete="off"
+                    />
+                    {isInvalid && <FieldError errors={errors} />}
+                  </Field>
+                );
+              }}
+            />
+            <form.Field
+              name="lastName"
+              children={(field) => {
+                const { isTouched, isValid, errors } = field.state.meta;
+
+                const isInvalid = isTouched && !isValid;
+
+                return (
+                  <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Last Name</FieldLabel>
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      value={field.state.value ?? ""}
+                      onBlur={field.handleBlur}
+                      onChange={(e) => field.handleChange(e.target.value)}
+                      aria-invalid={isInvalid}
+                      placeholder="Enter your last name"
                       autoComplete="off"
                     />
                     {isInvalid && <FieldError errors={errors} />}
@@ -80,6 +107,7 @@ export const WaitlistForm = () => {
 
                 return (
                   <Field data-invalid={isInvalid}>
+                    <FieldLabel htmlFor={field.name}>Email Address</FieldLabel>
                     <Input
                       id={field.name}
                       name={field.name}

@@ -1,20 +1,15 @@
 "use client";
 
-import { client } from "@/lib/axios";
+import { client, setupAuthInterceptor } from "@/lib/axios";
 import { useAuth } from "@clerk/nextjs";
+import { useEffect } from "react";
 
 export default function useAuthenticatedClient() {
   const { getToken } = useAuth();
 
-  client.interceptors.request.use(async (config) => {
-    const token = await getToken();
-
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
-    }
-
-    return config;
-  });
+  useEffect(() => {
+    setupAuthInterceptor(getToken);
+  }, [getToken]);
 
   return client;
 }

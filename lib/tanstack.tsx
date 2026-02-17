@@ -104,5 +104,9 @@ const handleGlobalError = (error: AxiosError) => {
     case 404:
       toast.error(message || "The requested resource was not found.");
       break;
+
+    case 422:
+      toast.error(message || "Validation error occurred. Please check your input.");
+      break;
   }
 };

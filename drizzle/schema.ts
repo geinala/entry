@@ -71,6 +71,7 @@ export const rolePermissionTable = pgTable(
 
 export const waitlistStatusEnum = pgEnum("waitlist_status_enum", [
   "pending",
+  "sending",
   "confirmed",
   "rejected",
   "invited",
@@ -82,7 +83,8 @@ export const waitlistTable = pgTable(
   {
     id: serial().primaryKey(),
     email: varchar("email").notNull().unique(),
-    fullName: varchar("full_name").notNull(),
+    firstName: varchar("first_name").notNull(),
+    lastName: varchar("last_name").notNull(),
     status: waitlistStatusEnum("status").notNull().default("pending"),
     ticketId: varchar("ticket_id").unique(),
     invitedAt: timestamp("invited_at", { withTimezone: true }),

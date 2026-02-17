@@ -10,17 +10,18 @@ import { format } from "date-fns";
 import { Input } from "../../ui/input";
 import { cn } from "@/lib/utils";
 
-export type DateRangePickerProps = {
+export type TDateRangePickerProps = {
   onChange?: (dateRange: DateRange | undefined) => void;
   defaultValue?: DateRange;
   format?: string;
+  value?: DateRange;
 };
 
 export const DateRangePicker = ({
   onChange,
   defaultValue,
   format: dateFormat = "MM/dd/yyyy",
-}: DateRangePickerProps) => {
+}: TDateRangePickerProps) => {
   const [dateRange, setDateRange] = useState<DateRange | undefined>(defaultValue);
   const [isHovered, setIsHovered] = useState(false);
   const startInputRef = useRef<HTMLInputElement | null>(null);

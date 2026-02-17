@@ -1,5 +1,3 @@
-"use client";
-
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { format as dateFnsFormat } from "date-fns";

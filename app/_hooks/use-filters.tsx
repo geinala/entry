@@ -4,10 +4,10 @@ import { debounce } from "@/lib/debounce";
 import { updateQueryParam } from "@/lib/query-param";
 import { parseQueryParams } from "@/lib/validation";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import z, { ZodSchema } from "zod";
-import { SortCriterion } from "../_components/data-table/sort";
-import { FilterValue } from "../_components/data-table";
+import { TSortCriterion } from "../_components/data-table/sort";
+import { TFilterValue } from "../_components/data-table";
 
 export const useFilters = (schema: ZodSchema) => {
   const searchParams = useSearchParams();
@@ -55,9 +55,8 @@ export const useFilters = (schema: ZodSchema) => {
   );
 
   const handleSortingChange = useCallback(
-    (sorts: SortCriterion[]) => {
+    (sorts: TSortCriterion[]) => {
       const sortValue = sorts.map((s) => `${s.key}:${s.direction}`).join(",");
-
       updateUrl({
         sort: sortValue || null,
         page: 1,
@@ -67,8 +66,14 @@ export const useFilters = (schema: ZodSchema) => {
   );
 
   const handleFilterChange = useCallback(
-    (filters: Record<string, FilterValue>) => {
+    (filters: Record<string, TFilterValue>) => {
       const updatedFilters: Record<string, z.infer<typeof schema>> = { page: 1 };
+
+      Object.keys(validFilters).forEach((key) => {
+        if (key !== "page" && key !== "pageSize" && key !== "search" && key !== "sort") {
+          updatedFilters[key] = null;
+        }
+      });
 
       Object.entries(filters).forEach(([key, value]) => {
         if (value === undefined || value === null || value === "") {
@@ -80,7 +85,7 @@ export const useFilters = (schema: ZodSchema) => {
 
       updateUrl(updatedFilters);
     },
-    [updateUrl],
+    [updateUrl, validFilters],
   );
 
   const pagination = useMemo(
@@ -103,6 +108,24 @@ export const useFilters = (schema: ZodSchema) => {
     }),
     [handlePaginationChange, handleSearch, handleSortingChange, handleFilterChange],
   );
+
+  useEffect(() => {
+    let needsUpdate = false;
+
+    Object.keys(validFilters).forEach((key) => {
+      const value = validFilters[key];
+
+      if (value === null || value === undefined) return;
+
+      if (!searchParams.has(key)) {
+        needsUpdate = true;
+      }
+    });
+
+    if (needsUpdate) {
+      updateUrl(validFilters);
+    }
+  }, [validFilters, searchParams, updateUrl]);
 
   return {
     search: typeof validFilters.search === "string" ? validFilters.search : "",
