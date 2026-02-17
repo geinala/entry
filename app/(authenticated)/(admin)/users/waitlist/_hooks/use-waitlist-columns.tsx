@@ -71,101 +71,101 @@ export const useWaitlistColumns = (): IUseWaitlistColumnsReturn => {
    */
   const columns: ColumnDef<TWaitlistEntry>[] = useMemo(
     () => [
-    {
-      id: "select",
-      header: ({ table }) => (
-        <Checkbox
-          checked={
-            table.getRowModel().rows.length > 0 &&
-            selectedIds.length === table.getRowModel().rows.length
-          }
-          onCheckedChange={(value) => {
-            table.toggleAllPageRowsSelected(!!value);
-            if (value) {
-              const allIds = table.getRowModel().rows.map((row) => row.original.id);
-              setSelectedIds(allIds);
-            } else {
-              setSelectedIds([]);
+      {
+        id: "select",
+        header: ({ table }) => (
+          <Checkbox
+            checked={
+              table.getRowModel().rows.length > 0 &&
+              selectedIds.length === table.getRowModel().rows.length
             }
-          }}
-          aria-label="Select all"
-        />
-      ),
-      cell: ({ row }) => (
-        <Checkbox
-          checked={selectedIds.includes(row.original.id)}
-          onCheckedChange={(value) => {
-            row.toggleSelected(!!value);
-            handleSelectRow(row.original.id, !!value);
-          }}
-          aria-label="Select row"
-        />
-      ),
-    },
-    {
-      accessorKey: "fullName",
-      header: "Name",
-      cell: ({ row }) => {
-        const entry = row.original;
-        return `${entry.firstName} ${entry.lastName}`;
+            onCheckedChange={(value) => {
+              table.toggleAllPageRowsSelected(!!value);
+              if (value) {
+                const allIds = table.getRowModel().rows.map((row) => row.original.id);
+                setSelectedIds(allIds);
+              } else {
+                setSelectedIds([]);
+              }
+            }}
+            aria-label="Select all"
+          />
+        ),
+        cell: ({ row }) => (
+          <Checkbox
+            checked={selectedIds.includes(row.original.id)}
+            onCheckedChange={(value) => {
+              row.toggleSelected(!!value);
+              handleSelectRow(row.original.id, !!value);
+            }}
+            aria-label="Select row"
+          />
+        ),
       },
-    },
-    {
-      accessorKey: "email",
-      header: "Email",
-    },
-    {
-      accessorKey: "createdAt",
-      header: "Registered At",
-      cell: ({ row }) => {
-        const entry = row.original;
-        return convertUtcToLocalTime({ utcDateStr: entry.createdAt.toString(), format: "PPpp" });
+      {
+        accessorKey: "fullName",
+        header: "Name",
+        cell: ({ row }) => {
+          const entry = row.original;
+          return `${entry.firstName} ${entry.lastName}`;
+        },
       },
-    },
-    {
-      accessorKey: "status",
-      header: "Status",
-      cell: ({ row }) => {
-        const entry = row.original;
-        return <WaitlistStatusBadge status={entry.status} />;
+      {
+        accessorKey: "email",
+        header: "Email",
       },
-    },
-    {
-      id: "actions",
-      accessorKey: "actions",
-      header: "",
-      cell: ({ row }) => {
-        if (row.original.status !== "pending") {
-          return null;
-        }
+      {
+        accessorKey: "createdAt",
+        header: "Registered At",
+        cell: ({ row }) => {
+          const entry = row.original;
+          return convertUtcToLocalTime({ utcDateStr: entry.createdAt.toString(), format: "PPpp" });
+        },
+      },
+      {
+        accessorKey: "status",
+        header: "Status",
+        cell: ({ row }) => {
+          const entry = row.original;
+          return <WaitlistStatusBadge status={entry.status} />;
+        },
+      },
+      {
+        id: "actions",
+        accessorKey: "actions",
+        header: "",
+        cell: ({ row }) => {
+          if (row.original.status !== "pending") {
+            return null;
+          }
 
-        return (
-          <div className="flex items-center justify-center space-x-2">
-            <Button
-              variant={"ghost"}
-              size={"sm"}
-              className="text-green-600 hover:text-green-700"
-              onClick={() => mutateAsync({ waitlistIds: [row.original.id] })}
-              disabled={isSendMutationPending}
-              isLoading={isSendMutationPending}
-            >
-              <Send /> Send Invitation
-            </Button>
-            <Button
-              variant={"ghost"}
-              size={"sm"}
-              onClick={() => toast.warning("Coming Soon")}
-              className="ml-2 text-red-600 hover:text-red-700"
-              disabled={isSendMutationPending}
-            >
-              <XCircle /> Reject
-            </Button>
-          </div>
-        );
+          return (
+            <div className="flex items-center justify-center space-x-2">
+              <Button
+                variant={"ghost"}
+                size={"sm"}
+                className="text-green-600 hover:text-green-700"
+                onClick={() => mutateAsync({ waitlistIds: [row.original.id] })}
+                disabled={isSendMutationPending}
+                isLoading={isSendMutationPending}
+              >
+                <Send /> Send Invitation
+              </Button>
+              <Button
+                variant={"ghost"}
+                size={"sm"}
+                onClick={() => toast.warning("Coming Soon")}
+                className="ml-2 text-red-600 hover:text-red-700"
+                disabled={isSendMutationPending}
+              >
+                <XCircle /> Reject
+              </Button>
+            </div>
+          );
+        },
       },
-    },
     ],
-    [handleSelectRow, isSendMutationPending, mutateAsync, selectedIds]
+    [handleSelectRow, isSendMutationPending, mutateAsync, selectedIds],
   );
 
   return {
