@@ -40,11 +40,15 @@ export default function WaitlistPage() {
     isLoading: isBulkOperationLoading,
     sendBulkInvitations,
     bulkUpdateWaitlistStatus,
-    isRejectable,
+    isDeniable,
   } = useWaitlistColumns(data?.data);
   const sortOptions = getWaitlistSortingOptions();
   const isSelectable =
-    filters.status === "pending" || filters.status === "denied" || filters.status === "expired";
+    filters.status === "pending" ||
+    filters.status === "denied" ||
+    filters.status === "expired" ||
+    filters.status === "invited" ||
+    filters.status === "revoked";
 
   useEffect(() => {
     setBreadcrumbs([
@@ -71,11 +75,11 @@ export default function WaitlistPage() {
           </Button>
           <Button
             variant={"destructive"}
-            disabled={selectedIds.length === 0 || isBulkOperationLoading || !isRejectable}
+            disabled={selectedIds.length === 0 || isBulkOperationLoading || !isDeniable}
             onClick={bulkUpdateWaitlistStatus}
             isLoading={isBulkOperationLoading}
           >
-            Reject Selected {selectedIds.length > 0 && `(${selectedIds.length})`}
+            Deny Selected {selectedIds.length > 0 && `(${selectedIds.length})`}
           </Button>
           <Button
             size={"sm"}
