@@ -6,7 +6,11 @@ out
 .gitignore
 Dockerfile
 docker-compose*
-.env
-.env.*
+.env.example
 npm-debug.log*
 pnpm-debug.log*
+.agents
+.husky
+.github
+.vscode
+.tests

@@ -17,3 +17,11 @@ export const GetWaitlistQueryParams = IndexQueryParams.extend({
 });
 
 export type TGetWaitlistQueryParams = z.infer<typeof GetWaitlistQueryParams>;
+
+// For updating waitlist data
+export const UpdateWaitlistSchema = z.object({
+  waitlistIds: z.array(z.number()).min(1, "At least one waitlist ID is required"),
+  status: z.enum(waitlistStatusEnum.enumValues),
+});
+
+export type TUpdateWaitlist = z.infer<typeof UpdateWaitlistSchema>;

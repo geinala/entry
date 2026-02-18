@@ -5,7 +5,8 @@ import { updateWaitlistEntriesStatusRepository } from "../waitlist/waitlist.repo
 
 export const sendInvitationsService = async (waitlistIds: number[]) => {
   try {
-    await updateWaitlistEntriesStatusRepository(waitlistIds, "sending");
+    await updateWaitlistEntriesStatusRepository({ waitlistIds, status: "sending" });
+
     return await server.post("/invitations", { waitlist_ids: waitlistIds });
   } catch (error) {
     throw error;

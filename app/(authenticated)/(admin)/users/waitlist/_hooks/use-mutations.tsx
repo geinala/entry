@@ -14,3 +14,10 @@ export const useSendInvitationMutation = () => {
 
   return useMutation(waitlistMutations.send(api, queryClient));
 };
+
+export const useUpdateWaitlistStatusMutation = () => {
+  const api = useAuthenticatedClient();
+  const queryClient = useQueryClient();
+
+  return useMutation(waitlistMutations.updateStatus(api, queryClient));
+};
