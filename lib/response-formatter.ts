@@ -69,17 +69,20 @@ export const responseFormatter = {
     meta,
     message,
     status = HTTP_STATUS.OK,
+    ...rest
   }: {
     data: T[];
     meta: TPaginationMeta;
     message?: string;
     status?: number;
+    [key: string]: unknown;
   }): NextResponse => {
     const body: TApiSuccessResponseWithPagination<T> = {
       success: true,
       message: message || "Request successful",
       data,
       meta,
+      ...rest,
     };
 
     return NextResponse.json(body, { status });

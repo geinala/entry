@@ -29,6 +29,20 @@
       "when": 1771328469552,
       "tag": "0003_certain_hedge_knight",
       "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1771396073633,
+      "tag": "0004_omniscient_nicolaos",
+      "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1771397250908,
+      "tag": "0005_tiresome_marten_broadcloak",
+      "breakpoints": true
     }
   ]
 }

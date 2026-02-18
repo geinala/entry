@@ -8,10 +8,13 @@ import { useGetWaitlistEntriesQuery } from "./_hooks/use-queries";
 import { useFilters } from "@/app/_hooks/use-filters";
 import { GetWaitlistQueryParams, TGetWaitlistQueryParams } from "@/schemas/waitlist.schema";
 import { useWaitlistColumns } from "./_hooks/use-waitlist-columns";
-import { getWaitlistFilteringOptions, getWaitlistSortingOptions } from "./waitlist-table.config";
+import { getWaitlistSortingOptions } from "./waitlist-table.config";
 import { Button } from "@/app/_components/ui/button";
 import { Plus } from "lucide-react";
 import { toast } from "sonner";
+import { Tabs, TabsList, TabsTrigger } from "@/app/_components/ui/tabs";
+import { waitlistStatusEnum } from "@/drizzle/schema";
+import { toTitleCase } from "@/lib/utils";
 
 export default function WaitlistPage() {
   const { setBreadcrumbs } = useBreadcrumb();
@@ -31,9 +34,17 @@ export default function WaitlistPage() {
     ...params,
   });
 
-  const { columns, selectedIds, isSendingInvitations, sendBulkInvitations } = useWaitlistColumns();
+  const {
+    columns,
+    selectedIds,
+    isLoading: isBulkOperationLoading,
+    sendBulkInvitations,
+    bulkUpdateWaitlistStatus,
+    isRejectable,
+  } = useWaitlistColumns(data?.data);
   const sortOptions = getWaitlistSortingOptions();
-  const filterOptions = getWaitlistFilteringOptions(filters);
+  const isSelectable =
+    filters.status === "pending" || filters.status === "denied" || filters.status === "expired";
 
   useEffect(() => {
     setBreadcrumbs([
@@ -52,23 +63,56 @@ export default function WaitlistPage() {
         <div className="flex gap-2">
           <Button
             variant={"secondary"}
-            disabled={selectedIds.length === 0}
+            disabled={selectedIds.length === 0 || isBulkOperationLoading}
             onClick={sendBulkInvitations}
-            isLoading={isSendingInvitations}
+            isLoading={isBulkOperationLoading}
           >
             Send Invitations {selectedIds.length > 0 && `(${selectedIds.length})`}
           </Button>
-          <Button size={"sm"} onClick={() => toast.warning("This feature is coming soon!")}>
+          <Button
+            variant={"destructive"}
+            disabled={selectedIds.length === 0 || isBulkOperationLoading || !isRejectable}
+            onClick={bulkUpdateWaitlistStatus}
+            isLoading={isBulkOperationLoading}
+          >
+            Reject Selected {selectedIds.length > 0 && `(${selectedIds.length})`}
+          </Button>
+          <Button
+            size={"sm"}
+            onClick={() => toast.warning("This feature is coming soon!")}
+            className="shadow-orange-700"
+          >
             <Plus className="mr-2" />
             Invite Users
           </Button>
         </div>
       }
     >
+      <Tabs
+        onValueChange={(value) => handleChange.onFilterChange({ status: value })}
+        defaultValue={filters.status}
+      >
+        <TabsList>
+          {waitlistStatusEnum.enumValues.map((status) => {
+            if (status === "sending") return null;
+
+            return (
+              <TabsTrigger key={status} value={status}>
+                {toTitleCase(status) + (data?.summary ? ` (${data.summary[status] || 0})` : " (0)")}
+              </TabsTrigger>
+            );
+          })}
+        </TabsList>
+      </Tabs>
       <DataTable
         columns={columns}
         source={data}
-        handleChange={handleChange}
+        handleChange={{
+          onPaginationChange: handleChange.onPaginationChange,
+          onSearch: handleChange.onSearch,
+          onSortingChange: handleChange.onSortingChange,
+          onFilterChange: () => {},
+        }}
         search={search}
         isLoading={isLoading}
         pagination={pagination}
@@ -76,12 +120,7 @@ export default function WaitlistPage() {
         sortOptions={sortOptions}
         sortDefaultValue={filters.sort}
         placeholderSearch="Search with name or email ..."
-        filterComponents={filterOptions}
-        /**
-         * Enable row selection only when viewing pending entries
-         * This prevents accidental bulk operations on confirmed/rejected entries
-         */
-        selectable={filters.status === "pending"}
+        selectable={isSelectable}
       />
     </Page>
   );

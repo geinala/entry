@@ -73,8 +73,10 @@ export const waitlistStatusEnum = pgEnum("waitlist_status_enum", [
   "pending",
   "sending",
   "confirmed",
-  "rejected",
+  "denied",
   "invited",
+  "revoked",
+  "failed",
   "expired",
 ]);
 

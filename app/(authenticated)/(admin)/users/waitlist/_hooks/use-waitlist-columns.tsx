@@ -7,21 +7,25 @@ import { WaitlistStatusBadge } from "../_components/waitlist-status.badge";
 import { toast } from "sonner";
 import { Send, XCircle } from "lucide-react";
 import { Button } from "@/app/_components/ui/button";
-import { useSendInvitationMutation } from "./use-mutations";
+import { useSendInvitationMutation, useUpdateWaitlistStatusMutation } from "./use-mutations";
 import { Checkbox } from "@/app/_components/ui/checkbox";
 import { useCallback, useMemo, useState } from "react";
 
 interface IUseWaitlistColumnsReturn {
   columns: ColumnDef<TWaitlistEntry>[];
   selectedIds: number[];
-  isSendingInvitations: boolean;
+  isLoading: boolean;
   sendBulkInvitations: () => Promise<void>;
+  bulkUpdateWaitlistStatus: () => Promise<void>;
   clearSelection: () => void;
+  isRejectable: boolean;
 }
 
-export const useWaitlistColumns = (): IUseWaitlistColumnsReturn => {
+export const useWaitlistColumns = (data?: TWaitlistEntry[]): IUseWaitlistColumnsReturn => {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const { mutateAsync, isPending: isSendMutationPending } = useSendInvitationMutation();
+  const { mutateAsync: bulkRejectWaitlist, isPending: isBulkRejectWaitlistPending } =
+    useUpdateWaitlistStatusMutation();
 
   /**
    * Memoized callback to handle row selection changes
@@ -58,12 +62,35 @@ export const useWaitlistColumns = (): IUseWaitlistColumnsReturn => {
     }
   };
 
+  const updateWaitlistStatus = async () => {
+    try {
+      await bulkRejectWaitlist({ waitlistIds: selectedIds, status: "denied" });
+      setSelectedIds([]); // Clear selection only on success
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Failed to update status";
+      console.error("[UpdateWaitlistStatus] Error:", errorMessage);
+      toast.error(`Failed to update status. Please try again. ${errorMessage}`);
+    }
+  };
+
   /**
    * Clear all selected rows
    */
   const clearSelection = useCallback(() => {
     setSelectedIds([]);
   }, []);
+
+  /**
+   * Check if any selected row can be rejected
+   * Rejectable status: "pending" or "expired"
+   */
+  const isRejectable = useMemo(() => {
+    if (selectedIds.length === 0 || !data) return false;
+    return selectedIds.some((id) => {
+      const entry = data.find((item) => item.id === id);
+      return entry && (entry.status === "pending" || entry.status === "expired");
+    });
+  }, [selectedIds, data]);
 
   /**
    * Memoized column definitions to prevent table re-renders
@@ -123,6 +150,36 @@ export const useWaitlistColumns = (): IUseWaitlistColumnsReturn => {
         },
       },
       {
+        accessorKey: "invitedAt",
+        header: "Invited At",
+        cell: ({ row }) => {
+          const entry = row.original;
+          return entry.invitedAt
+            ? convertUtcToLocalTime({ utcDateStr: entry.invitedAt.toString(), format: "PPpp" })
+            : "-";
+        },
+      },
+      {
+        accessorKey: "expiredAt",
+        header: "Expired At",
+        cell: ({ row }) => {
+          const entry = row.original;
+          return entry.expiredAt
+            ? convertUtcToLocalTime({ utcDateStr: entry.expiredAt.toString(), format: "PPpp" })
+            : "-";
+        },
+      },
+      {
+        accessorKey: "confirmedAt",
+        header: "Confirmed At",
+        cell: ({ row }) => {
+          const entry = row.original;
+          return entry.confirmedAt
+            ? convertUtcToLocalTime({ utcDateStr: entry.confirmedAt.toString(), format: "PPpp" })
+            : "-";
+        },
+      },
+      {
         accessorKey: "status",
         header: "Status",
         cell: ({ row }) => {
@@ -135,7 +192,14 @@ export const useWaitlistColumns = (): IUseWaitlistColumnsReturn => {
         accessorKey: "actions",
         header: "",
         cell: ({ row }) => {
-          if (row.original.status !== "pending") {
+          const hasActions =
+            row.original.status === "pending" ||
+            row.original.status === "expired" ||
+            row.original.status === "denied";
+          const isRejectable =
+            row.original.status === "pending" || row.original.status === "expired";
+
+          if (!hasActions) {
             return null;
           }
 
@@ -146,17 +210,19 @@ export const useWaitlistColumns = (): IUseWaitlistColumnsReturn => {
                 size={"sm"}
                 className="text-green-600 hover:text-green-700"
                 onClick={() => mutateAsync({ waitlistIds: [row.original.id] })}
-                disabled={isSendMutationPending}
-                isLoading={isSendMutationPending}
+                disabled={isSendMutationPending || isBulkRejectWaitlistPending}
+                isLoading={isSendMutationPending || isBulkRejectWaitlistPending}
               >
                 <Send /> Send Invitation
               </Button>
               <Button
                 variant={"ghost"}
                 size={"sm"}
-                onClick={() => toast.warning("Coming Soon")}
+                onClick={() =>
+                  bulkRejectWaitlist({ waitlistIds: [row.original.id], status: "denied" })
+                }
                 className="ml-2 text-red-600 hover:text-red-700"
-                disabled={isSendMutationPending}
+                disabled={isSendMutationPending || isBulkRejectWaitlistPending || !isRejectable}
               >
                 <XCircle /> Reject
               </Button>
@@ -165,14 +231,23 @@ export const useWaitlistColumns = (): IUseWaitlistColumnsReturn => {
         },
       },
     ],
-    [handleSelectRow, isSendMutationPending, mutateAsync, selectedIds],
+    [
+      handleSelectRow,
+      isSendMutationPending,
+      mutateAsync,
+      selectedIds,
+      isBulkRejectWaitlistPending,
+      bulkRejectWaitlist,
+    ],
   );
 
   return {
     columns,
     selectedIds,
-    isSendingInvitations: isSendMutationPending,
+    isLoading: isSendMutationPending || isBulkRejectWaitlistPending,
+    bulkUpdateWaitlistStatus: updateWaitlistStatus,
     sendBulkInvitations,
     clearSelection,
+    isRejectable,
   };
 };

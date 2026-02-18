@@ -214,6 +214,7 @@ const TablePagination = <TData,>(props: IPaginationProps<TData>) => {
   const isMobile = useIsMobile();
   const pageRange = isMobile ? 1 : 2;
   const start = pageIndex * pageSize - pageSize + 1;
+  const hasData = (totalItems ?? 0) > 0;
 
   const generatePageNumbers = (): (number | string)[] => {
     const maxVisiblePages = !isMobile ? 3 : 6;
@@ -253,6 +254,7 @@ const TablePagination = <TData,>(props: IPaginationProps<TData>) => {
           variant={pageIndex === page ? "default" : "outline"}
           className="h-8 w-8"
           onClick={() => onPageChange?.(page, pageSize)}
+          disabled={!hasData}
         >
           {page}
         </Button>
@@ -260,7 +262,12 @@ const TablePagination = <TData,>(props: IPaginationProps<TData>) => {
     }
 
     return (
-      <Button variant="outline" className="h-8 w-8" onClick={() => handleEllipsisClick(index)}>
+      <Button
+        variant="outline"
+        className="h-8 w-8"
+        onClick={() => handleEllipsisClick(index)}
+        disabled={!hasData}
+      >
         {page}
       </Button>
     );
@@ -302,7 +309,7 @@ const TablePagination = <TData,>(props: IPaginationProps<TData>) => {
                 variant="outline"
                 className="h-8 w-8"
                 onClick={() => onPageChange(1, pageSize)}
-                disabled={pageIndex === 1}
+                disabled={pageIndex === 1 || !hasData}
               >
                 <ChevronsLeft className="h-4 w-4" />
               </Button>
@@ -312,7 +319,7 @@ const TablePagination = <TData,>(props: IPaginationProps<TData>) => {
                 variant="outline"
                 className="h-8 w-8"
                 onClick={() => onPageChange(pageIndex - 1, pageSize)}
-                disabled={pageIndex === 1}
+                disabled={pageIndex === 1 || !hasData}
               >
                 <ChevronLeft className="h-4 w-4" />
               </Button>
@@ -327,7 +334,7 @@ const TablePagination = <TData,>(props: IPaginationProps<TData>) => {
                 variant="outline"
                 className="h-8 w-8"
                 onClick={() => onPageChange(pageIndex + 1, pageSize)}
-                disabled={pageIndex === pageCount}
+                disabled={pageIndex === pageCount || !hasData}
               >
                 <ChevronRight className="h-4 w-4" />
               </Button>
@@ -337,7 +344,7 @@ const TablePagination = <TData,>(props: IPaginationProps<TData>) => {
                 variant="outline"
                 className="h-8 w-8"
                 onClick={() => onPageChange(pageCount, pageSize)}
-                disabled={pageIndex === pageCount}
+                disabled={pageIndex === pageCount || !hasData}
               >
                 <ChevronsRight className="h-4 w-4" />
               </Button>
