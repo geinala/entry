@@ -31,9 +31,7 @@ export const sendInvitationController = async (request: NextRequest) => {
       data: response.data.data,
       message: "Invitation sent successfully",
     });
-  } catch (error) {
-    console.error("Error in sendInvitationController:", error);
-
+  } catch {
     return responseFormatter.error({
       message: "Failed to send invitation",
     });

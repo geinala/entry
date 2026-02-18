@@ -18,5 +18,9 @@
     "lib": "@/lib",
     "hooks": "@/app/_hooks"
   },
-  "registries": {}
+  "registries": {
+    "@bundui": {
+      "url": "https://bundui.io/api/registry/{name}.json"
+    }
+  }
 }
