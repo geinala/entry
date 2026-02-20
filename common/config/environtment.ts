@@ -11,6 +11,7 @@ type Env = {
   DATABASE_URL: string;
   TOMTOM_API_KEY: string;
   BACKEND_API_URL: string;
+  API_KEY: string;
 };
 
 const env: Env = {
@@ -26,6 +27,7 @@ const env: Env = {
   DATABASE_URL: process.env.DATABASE_URL!,
   TOMTOM_API_KEY: process.env.TOMTOM_API_KEY!,
   BACKEND_API_URL: process.env.BACKEND_API_URL!,
+  API_KEY: process.env.API_KEY!,
 };
 
 export const validateEnv = (): void => {
@@ -42,6 +44,7 @@ export const validateEnv = (): void => {
     "DATABASE_URL",
     "TOMTOM_API_KEY",
     "BACKEND_API_URL",
+    "API_KEY",
   ];
 
   const missingVars = requiredVars.filter((key) => !env[key]);
