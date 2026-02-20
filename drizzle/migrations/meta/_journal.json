@@ -43,6 +43,13 @@
       "when": 1771397250908,
       "tag": "0005_tiresome_marten_broadcloak",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1771575607000,
+      "tag": "0006_violet_mach_iv",
+      "breakpoints": true
     }
   ]
 }

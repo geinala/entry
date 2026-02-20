@@ -17,10 +17,6 @@ export const userTable = pgTable(
     clerkUserId: varchar("clerk_user_id").notNull(),
     email: varchar("email").notNull().unique(),
     fullName: varchar("full_name").notNull(),
-    imageUrl: varchar("image_url"),
-    hasImage: integer("has_image").notNull().default(0),
-    lastSignInAt: timestamp("last_sign_in_at", { withTimezone: true }),
-    lastActiveAt: timestamp("last_active_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
