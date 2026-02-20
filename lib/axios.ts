@@ -29,5 +29,6 @@ export const server = axios.create({
   baseURL: env.BACKEND_API_URL,
   headers: {
     "Content-Type": "application/json",
+    "X-API-KEY": env.API_KEY,
   },
 });
