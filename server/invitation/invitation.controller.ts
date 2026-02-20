@@ -3,7 +3,7 @@ import "server-only";
 import { responseFormatter } from "@/lib/response-formatter";
 import { validateSchema } from "@/lib/validation";
 import { NextRequest } from "next/server";
-import { sendInvitationsService } from "./invitation.service";
+import { acceptInvitationService, sendInvitationsService } from "./invitation.service";
 import { SendInvitationSchema } from "@/schemas/invitation.schema";
 
 export const sendInvitationController = async (request: NextRequest) => {
@@ -34,6 +34,16 @@ export const sendInvitationController = async (request: NextRequest) => {
   } catch {
     return responseFormatter.error({
       message: "Failed to send invitation",
+    });
+  }
+};
+
+export const acceptInvitationController = async (token: string) => {
+  try {
+    return await acceptInvitationService(token);
+  } catch {
+    return responseFormatter.error({
+      message: "Failed to accept invitation",
     });
   }
 };

@@ -28,4 +28,27 @@ export const authService = {
 
     return toAuth();
   },
+
+  createClerkUser: async ({
+    email,
+    firstName,
+    lastName,
+  }: {
+    email: string;
+    firstName?: string;
+    lastName?: string;
+  }) => {
+    const client = await clerkClient();
+
+    const user = await client.users.createUser({
+      emailAddress: [email],
+      firstName,
+      lastName,
+      publicMetadata: {
+        isOnboarded: true,
+      },
+    });
+
+    return user;
+  },
 };

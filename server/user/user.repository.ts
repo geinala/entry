@@ -97,3 +97,17 @@ export const getUsersCountRepository = async (queryParams: TGetUsersQueryParams)
 
   return result[0].count;
 };
+
+export const createUserRepository = async (
+  clerkUserId: string,
+  email: string,
+  fullName: string,
+  roleId: number,
+) => {
+  return await db.insert(userTable).values({
+    clerkUserId,
+    email,
+    fullName,
+    roleId,
+  });
+};

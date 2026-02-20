@@ -2,11 +2,17 @@ import { clerkMiddleware, createRouteMatcher } from "@clerk/nextjs/server";
 import { NextResponse } from "next/server";
 
 const isOnboardingRoute = createRouteMatcher(["/onboarding"]);
-const isPublicRoute = createRouteMatcher(["/", "/sign-in(.*)", "/sign-up(.*)", "/waitlist(.*)"]);
+const isPublicRoute = createRouteMatcher([
+  "/",
+  "/sign-in(.*)",
+  "/sign-up(.*)",
+  "/waitlist(.*)",
+  "/ticket(.*)",
+]);
 
 export default clerkMiddleware(async (auth, req) => {
   const { sessionClaims, redirectToSignIn, isAuthenticated } = await auth();
-  const isOnboarded = sessionClaims?.metadata?.onboardingCompleted;
+  const isOnboarded = sessionClaims?.metadata?.isOnboarded;
 
   // user yang belum login tidak boleh mengakses halaman private
   if (!isAuthenticated) {

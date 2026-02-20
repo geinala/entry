@@ -4,20 +4,34 @@ import { db } from "@/lib/db";
 import { waitlistTable } from "@/drizzle/schema";
 import { TNewWaitlistEntry } from "@/types/database";
 import { buildCountQuery, buildPaginatedQuery, TColumnsDefinition } from "@/lib/query-builder";
-import { inArray, sql } from "drizzle-orm";
+import { eq, inArray, sql } from "drizzle-orm";
 import { toTitleCase } from "@/lib/utils";
 import { TGetWaitlistQueryParams, TUpdateWaitlist, TWaitlistForm } from "@/schemas/waitlist.schema";
 import { TWaitlistEntrySummary } from "./waitlist.type";
+import { generateSHA256Hash } from "@/lib/crypto";
 
 export const createWaitlistEntryRepository = async (data: TWaitlistForm) => {
+  const ticket = generateSHA256Hash(data.email);
+
   const waitlistEntry: TNewWaitlistEntry = {
     email: data.email,
     firstName: toTitleCase(data.firstName),
     lastName: toTitleCase(data.lastName),
+    ticketId: ticket.slice(0, 16),
     expiredAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
   };
 
   return db.insert(waitlistTable).values(waitlistEntry);
+};
+
+export const getWaitlistEntryByTokenRepository = async (token: string) => {
+  const result = await db
+    .select()
+    .from(waitlistTable)
+    .where(eq(waitlistTable.ticketId, token))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : null;
 };
 
 const WAITLIST_COLUMNS: TColumnsDefinition<typeof waitlistTable> = {
@@ -105,4 +119,11 @@ export const getWaitlistEntriesSummaryRepository = async (): Promise<TWaitlistEn
   }
 
   return summary;
+};
+
+export const updateWaitlistEntryRepository = async (
+  id: number,
+  data: Partial<TNewWaitlistEntry>,
+) => {
+  return await db.update(waitlistTable).set(data).where(eq(waitlistTable.id, id));
 };
