@@ -3,18 +3,17 @@ import "server-only";
 import { server } from "@/lib/axios";
 import {
   getWaitlistEntryByTokenRepository,
-  updateWaitlistEntriesStatusRepository,
   updateWaitlistEntryRepository,
 } from "../waitlist/waitlist.repository";
 import { createUserRepository } from "../user/user.repository";
 import { responseFormatter } from "@/lib/response-formatter";
 import { ROLE_ENUM } from "@/common/enum/role";
 import { getRoleByNameRepository } from "../role/role.repository";
-import { authService } from "../auth/auth.service";
+import { clerkService } from "../clerk/clerk.service";
 
 export const sendInvitationsService = async (waitlistIds: number[]) => {
   try {
-    await updateWaitlistEntriesStatusRepository({ waitlistIds, status: "sending" });
+    await updateWaitlistEntryRepository(waitlistIds, { status: "sending" });
 
     return await server.post("/invitations", { waitlist_ids: waitlistIds });
   } catch (error) {
@@ -65,7 +64,7 @@ export const acceptInvitationService = async (token: string) => {
       });
     }
 
-    const clerkUser = await authService.createClerkUser({
+    const clerkUser = await clerkService.createClerkUser({
       email: entry.email,
       lastName: entry.lastName,
       firstName: entry.firstName,
@@ -78,11 +77,19 @@ export const acceptInvitationService = async (token: string) => {
       role[0].id,
     );
 
-    await updateWaitlistEntryRepository(entry.id, { status: "confirmed", confirmedAt: new Date() });
+    await updateWaitlistEntryRepository(entry.id, { status: "confirmed" });
 
     return responseFormatter.success({
       message: "Invitation accepted successfully",
     });
+  } catch (error) {
+    throw error;
+  }
+};
+
+export const revokeInvitationService = async (waitlistIds: number[]) => {
+  try {
+    return await server.post("/invitations/revoke/bulk", { waitlist_ids: waitlistIds });
   } catch (error) {
     throw error;
   }
