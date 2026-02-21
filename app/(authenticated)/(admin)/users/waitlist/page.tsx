@@ -11,10 +11,16 @@ import { useWaitlistColumns } from "./_hooks/use-waitlist-columns";
 import { getWaitlistSortingOptions } from "./waitlist-table.config";
 import { Button } from "@/app/_components/ui/button";
 import { Plus } from "lucide-react";
-import { toast } from "sonner";
 import { Tabs, TabsList, TabsTrigger } from "@/app/_components/ui/tabs";
 import { waitlistStatusEnum } from "@/drizzle/schema";
 import { toTitleCase } from "@/lib/utils";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/app/_components/ui/dialog";
 
 export default function WaitlistPage() {
   const { setBreadcrumbs } = useBreadcrumb();
@@ -54,57 +60,64 @@ export default function WaitlistPage() {
   }, [setBreadcrumbs]);
 
   return (
-    <Page
-      title="Waitlist Management"
-      description="Manage registered users, review their status, and send invitations directly from this page."
-      headerAction={
-        <Button
-          size={"sm"}
-          onClick={() => toast.warning("This feature is coming soon!")}
-          className="shadow-orange-700"
-        >
-          <Plus className="mr-2" />
-          Invite User
-        </Button>
-      }
-    >
-      <Tabs
-        onValueChange={async (value) => {
-          handleChange.onFilterChange({ status: value });
-          clearSelection();
-        }}
-        defaultValue={filters.status}
+    <Dialog>
+      <Page
+        title="Waitlist Management"
+        description="Manage registered users, review their status, and send invitations directly from this page."
+        headerAction={
+          <DialogTrigger asChild>
+            <Button size={"sm"} className="shadow-orange-700">
+              <Plus className="mr-2" />
+              Invite User
+            </Button>
+          </DialogTrigger>
+        }
       >
-        <TabsList>
-          {waitlistStatusEnum.enumValues.map((status) => {
-            if (status === "sending") return null;
+        <Tabs
+          onValueChange={async (value) => {
+            handleChange.onFilterChange({ status: value });
+            clearSelection();
+          }}
+          defaultValue={filters.status}
+        >
+          <TabsList>
+            {waitlistStatusEnum.enumValues.map((status) => {
+              if (status === "sending") return null;
 
-            return (
-              <TabsTrigger key={status} value={status}>
-                {toTitleCase(status) + (data?.summary ? ` (${data.summary[status] || 0})` : " (0)")}
-              </TabsTrigger>
-            );
-          })}
-        </TabsList>
-      </Tabs>
-      <DataTable
-        columns={columns}
-        source={data}
-        handleChange={{
-          onPaginationChange: handleChange.onPaginationChange,
-          onSearch: handleChange.onSearch,
-          onSortingChange: handleChange.onSortingChange,
-          onFilterChange: () => {},
-        }}
-        search={search}
-        isLoading={isLoading}
-        pagination={pagination}
-        isSearchable
-        sortOptions={sortOptions}
-        sortDefaultValue={filters.sort}
-        placeholderSearch="Search with name or email ..."
-        selectable={isSelectable}
-      />
-    </Page>
+              return (
+                <TabsTrigger key={status} value={status}>
+                  {toTitleCase(status) +
+                    (data?.summary ? ` (${data.summary[status] || 0})` : " (0)")}
+                </TabsTrigger>
+              );
+            })}
+          </TabsList>
+        </Tabs>
+        <DataTable
+          columns={columns}
+          source={data}
+          handleChange={{
+            onPaginationChange: handleChange.onPaginationChange,
+            onSearch: handleChange.onSearch,
+            onSortingChange: handleChange.onSortingChange,
+            onFilterChange: () => {},
+          }}
+          search={search}
+          isLoading={isLoading}
+          pagination={pagination}
+          isSearchable
+          sortOptions={sortOptions}
+          sortDefaultValue={filters.sort}
+          placeholderSearch="Search with name or email ..."
+          selectable={isSelectable}
+        />
+
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Invite User</DialogTitle>
+          </DialogHeader>
+        </DialogContent>
+      </Page>
+    </Dialog>
   );
 }
