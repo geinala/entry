@@ -7,31 +7,34 @@ import { WaitlistStatusBadge } from "../_components/waitlist-status.badge";
 import { toast } from "sonner";
 import { Send, XCircle, RotateCcw, Trash2 } from "lucide-react";
 import { Button } from "@/app/_components/ui/button";
-import { useSendInvitationMutation, useUpdateWaitlistStatusMutation } from "./use-mutations";
+import {
+  useRevokeInvitationMutation,
+  useSendInvitationMutation,
+  useUpdateWaitlistStatusMutation,
+} from "./use-mutations";
 import { Checkbox } from "@/app/_components/ui/checkbox";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useEffect } from "react";
+import { WaitlistActionToast } from "../_components/waitlist-action.toast";
 
 interface IUseWaitlistColumnsReturn {
   columns: ColumnDef<TWaitlistEntry>[];
-  selectedIds: number[];
-  isLoading: boolean;
-  sendBulkInvitations: () => Promise<void>;
-  bulkUpdateWaitlistStatus: () => Promise<void>;
   clearSelection: () => void;
-  isDeniable: boolean;
 }
 
-export const useWaitlistColumns = (data?: TWaitlistEntry[]): IUseWaitlistColumnsReturn => {
+export const useWaitlistColumns = (_data?: TWaitlistEntry[]): IUseWaitlistColumnsReturn => {
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
-  const { mutateAsync, isPending: isSendMutationPending } = useSendInvitationMutation();
-  const { mutateAsync: bulkDeniedWaitlist, isPending: isBulkDeniedWaitlistPending } =
+  const { mutateAsync: sendInvitation, isPending: isSendMutationPending } =
+    useSendInvitationMutation();
+  const { mutateAsync: updateStatusMutation, isPending: isUpdateStatusMutationPending } =
     useUpdateWaitlistStatusMutation();
+  const { mutateAsync: revokeInvitation, isPending: isRevokeInvitationPending } =
+    useRevokeInvitationMutation();
 
-  const isAnyPending = isSendMutationPending || isBulkDeniedWaitlistPending;
+  const isAnyPending =
+    isSendMutationPending || isUpdateStatusMutationPending || isRevokeInvitationPending;
 
   /**
    * Memoized callback to handle row selection changes
-   * Prevents unnecessary table re-renders from function recreation
    */
   const handleSelectRow = useCallback((id: number, selected: boolean) => {
     setSelectedIds((prev) => {
@@ -47,31 +50,41 @@ export const useWaitlistColumns = (data?: TWaitlistEntry[]): IUseWaitlistColumns
    * Send bulk invitations to selected waitlist entries
    * Preserves selection state on error for retry capability
    */
-  const sendBulkInvitations = async () => {
+  const sendBulkInvitations = useCallback(async () => {
     if (selectedIds.length === 0) {
       toast.error("No rows selected");
       return;
     }
 
-    try {
-      await mutateAsync({ waitlistIds: selectedIds });
-      setSelectedIds([]); // Clear selection only on success
-    } catch (error) {
-      // Preserve selectedIds so user can retry without re-selecting
-      const errorMessage = error instanceof Error ? error.message : "Failed to send invitations";
-      toast.error(`Failed to send invitations. Please try again. ${errorMessage}`);
-    }
-  };
+    await sendInvitation({ waitlistIds: selectedIds });
+    setSelectedIds([]); // Clear selection only on success
+  }, [selectedIds, sendInvitation]);
 
-  const updateWaitlistStatus = async () => {
-    try {
-      await bulkDeniedWaitlist({ waitlistIds: selectedIds, status: "denied" });
-      setSelectedIds([]); // Clear selection only on success
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : "Failed to update status";
-      toast.error(`Failed to update status. Please try again. ${errorMessage}`);
+  /**
+   * Bulk deny selected waitlist entries
+   */
+  const denyBulkEntries = useCallback(async () => {
+    if (selectedIds.length === 0) {
+      toast.error("No rows selected");
+      return;
     }
-  };
+
+    await updateStatusMutation({ waitlistIds: selectedIds, status: "denied" });
+    setSelectedIds([]); // Clear selection only on success
+  }, [selectedIds, updateStatusMutation]);
+
+  /**
+   * Bulk revoke selected waitlist entries
+   */
+  const revokeBulkEntries = useCallback(async () => {
+    if (selectedIds.length === 0) {
+      toast.error("No rows selected");
+      return;
+    }
+
+    await revokeInvitation({ waitlistIds: selectedIds });
+    setSelectedIds([]); // Clear selection only on success
+  }, [selectedIds, revokeInvitation]);
 
   /**
    * Clear all selected rows
@@ -79,21 +92,6 @@ export const useWaitlistColumns = (data?: TWaitlistEntry[]): IUseWaitlistColumns
   const clearSelection = useCallback(() => {
     setSelectedIds([]);
   }, []);
-
-  /**
-   * Check if any selected row can be denied
-   * Deniable status: "pending", "expired", or "revoked"
-   */
-  const isDeniable = useMemo(() => {
-    if (selectedIds.length === 0 || !data) return false;
-    return selectedIds.some((id) => {
-      const entry = data.find((item) => item.id === id);
-      return (
-        entry &&
-        (entry.status === "pending" || entry.status === "expired" || entry.status === "revoked")
-      );
-    });
-  }, [selectedIds, data]);
 
   /**
    * Helper function to get available actions for a status
@@ -116,7 +114,7 @@ export const useWaitlistColumns = (data?: TWaitlistEntry[]): IUseWaitlistColumns
             id: "send",
             label: "Invite",
             icon: <Send className="w-4 h-4" />,
-            action: () => mutateAsync({ waitlistIds: [entry.id] }),
+            action: () => sendInvitation({ waitlistIds: [entry.id] }),
             variant: "ghost",
             className: "text-green-600 hover:text-green-700",
           });
@@ -124,7 +122,7 @@ export const useWaitlistColumns = (data?: TWaitlistEntry[]): IUseWaitlistColumns
             id: "deny",
             label: "Deny",
             icon: <XCircle className="w-4 h-4" />,
-            action: () => bulkDeniedWaitlist({ waitlistIds: [entry.id], status: "denied" }),
+            action: () => updateStatusMutation({ waitlistIds: [entry.id], status: "denied" }),
             variant: "ghost",
             className: "text-red-600 hover:text-red-700",
           });
@@ -135,19 +133,18 @@ export const useWaitlistColumns = (data?: TWaitlistEntry[]): IUseWaitlistColumns
             id: "reinvite",
             label: "Reinvite",
             icon: <RotateCcw className="w-4 h-4" />,
-            action: () => toast.warning("This feature is coming soon!"),
+            action: () => sendInvitation({ waitlistIds: [entry.id] }),
             variant: "ghost",
-            className: "text-blue-600 hover:text-blue-700",
+            className: "text-emerald-600 hover:text-emerald-700",
           });
           break;
 
         case "invited":
-          // Invited: revoke dan reinvite
           actions.push({
             id: "revoke",
             label: "Revoke",
             icon: <Trash2 className="w-4 h-4" />,
-            action: () => toast.warning("This feature is coming soon!"),
+            action: () => revokeInvitation({ waitlistIds: [entry.id] }),
             variant: "ghost",
             className: "text-red-600 hover:text-red-700",
           });
@@ -155,49 +152,31 @@ export const useWaitlistColumns = (data?: TWaitlistEntry[]): IUseWaitlistColumns
             id: "reinvite",
             label: "Reinvite",
             icon: <RotateCcw className="w-4 h-4" />,
-            action: () => toast.warning("This feature is coming soon!"),
+            action: () => sendInvitation({ waitlistIds: [entry.id] }),
             variant: "ghost",
-            className: "text-blue-600 hover:text-blue-700",
+            className: "text-emerald-600 hover:text-emerald-700",
           });
           break;
 
         case "revoked":
-          // Revoked: reinvite dan tolak
           actions.push({
             id: "reinvite",
             label: "Reinvite",
             icon: <RotateCcw className="w-4 h-4" />,
-            action: () => toast.warning("This feature is coming soon!"),
+            action: () => sendInvitation({ waitlistIds: [entry.id] }),
             variant: "ghost",
-            className: "text-blue-600 hover:text-blue-700",
-          });
-          actions.push({
-            id: "deny",
-            label: "Deny",
-            icon: <XCircle className="w-4 h-4" />,
-            action: () => bulkDeniedWaitlist({ waitlistIds: [entry.id], status: "denied" }),
-            variant: "ghost",
-            className: "text-red-600 hover:text-red-700",
+            className: "text-emerald-600 hover:text-emerald-700",
           });
           break;
 
         case "expired":
-          // Expired: reinvite dan tolak
           actions.push({
             id: "reinvite",
             label: "Reinvite",
             icon: <RotateCcw className="w-4 h-4" />,
-            action: () => toast.warning("This feature is coming soon!"),
+            action: () => sendInvitation({ waitlistIds: [entry.id] }),
             variant: "ghost",
-            className: "text-blue-600 hover:text-blue-700",
-          });
-          actions.push({
-            id: "deny",
-            label: "Deny",
-            icon: <XCircle className="w-4 h-4" />,
-            action: () => bulkDeniedWaitlist({ waitlistIds: [entry.id], status: "denied" }),
-            variant: "ghost",
-            className: "text-red-600 hover:text-red-700",
+            className: "text-emerald-600 hover:text-emerald-700",
           });
           break;
 
@@ -206,25 +185,88 @@ export const useWaitlistColumns = (data?: TWaitlistEntry[]): IUseWaitlistColumns
             id: "reinvite",
             label: "Reinvite",
             icon: <RotateCcw className="w-4 h-4" />,
-            action: () => toast.warning("This feature is coming soon!"),
+            action: () => sendInvitation({ waitlistIds: [entry.id] }),
             variant: "ghost",
-            className: "text-blue-600 hover:text-blue-700",
-          });
-          actions.push({
-            id: "deny",
-            label: "Deny",
-            icon: <XCircle className="w-4 h-4" />,
-            action: () => bulkDeniedWaitlist({ waitlistIds: [entry.id], status: "denied" }),
-            variant: "ghost",
-            className: "text-red-600 hover:text-red-700",
+            className: "text-emerald-600 hover:text-emerald-700",
           });
           break;
       }
 
       return actions;
     },
-    [mutateAsync, bulkDeniedWaitlist],
+    [sendInvitation, updateStatusMutation, revokeInvitation],
   );
+
+  /**
+   * Show bulk action toast when selection changes
+   */
+  useEffect(() => {
+    if (selectedIds.length > 0) {
+      // Determine available actions for selected entries
+      const getAvailableActions = () => {
+        if (!_data) return new Set<string>();
+
+        const selectedEntries = _data.filter((entry) => selectedIds.includes(entry.id));
+        if (selectedEntries.length === 0) return new Set<string>();
+
+        // Get actions for each selected entry using getActionsForStatus
+        const actionsPerEntry = selectedEntries.map((entry) => {
+          const actions = getActionsForStatus(entry);
+          return new Set(actions.map((a) => a.id));
+        });
+
+        // Find common actions across all selected entries
+        if (actionsPerEntry.length === 1) {
+          return actionsPerEntry[0];
+        }
+
+        const commonActions = new Set<string>();
+        actionsPerEntry[0].forEach((action) => {
+          if (actionsPerEntry.every((actions) => actions.has(action))) {
+            commonActions.add(action);
+          }
+        });
+
+        return commonActions;
+      };
+
+      const availableActions = getAvailableActions();
+
+      toast(
+        <div className="flex flex-row justify-center items-center gap-2">
+          {`Selected ${selectedIds.length} entr${selectedIds.length > 1 ? "ies" : "y"}`}
+          <WaitlistActionToast
+            onClearSelection={clearSelection}
+            onDeny={denyBulkEntries}
+            onInvite={sendBulkInvitations}
+            onRevoke={revokeBulkEntries}
+            availableActions={availableActions}
+          />
+        </div>,
+        {
+          id: "bulk-actions",
+          closeButton: false,
+          duration: Infinity,
+          richColors: false,
+          icon: false,
+          className:
+            "w-max! p-2! bg-radial-[at_52%_-52%]! from-neutral-900/70! to-neutral-900/95! text-white! inset-shadow-2xs! inset-shadow-white/25! border! border-neutral-800! shadow-xl! text-sm! ring-0!",
+          position: "bottom-center",
+        },
+      );
+    } else {
+      // Dismiss toast when all selections are cleared
+      toast.dismiss("bulk-actions");
+    }
+  }, [
+    selectedIds,
+    sendBulkInvitations,
+    denyBulkEntries,
+    revokeBulkEntries,
+    clearSelection,
+    _data,
+    getActionsForStatus,
+  ]);
 
   /**
    * Memoized column definitions to prevent table re-renders
@@ -358,11 +400,6 @@ export const useWaitlistColumns = (data?: TWaitlistEntry[]): IUseWaitlistColumns
 
   return {
     columns,
-    selectedIds,
-    isLoading: isAnyPending,
-    bulkUpdateWaitlistStatus: updateWaitlistStatus,
-    sendBulkInvitations,
     clearSelection,
-    isDeniable,
   };
 };

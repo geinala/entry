@@ -1,6 +1,6 @@
 import { TMiddlewareResponse } from "@/lib/request";
 import { NextRequest, NextResponse } from "next/server";
-import { authService } from "@/server/auth/auth.service";
+import { clerkService } from "@/server/clerk/clerk.service";
 
 export type TAuthMiddlewareData = {
   clerkUserId: string;
@@ -11,7 +11,7 @@ export const authMiddleware = async (
   req: NextRequest,
 ): Promise<TMiddlewareResponse<TAuthMiddlewareData>> => {
   try {
-    const authData = await authService.authenticateRequest(req);
+    const authData = await clerkService.authenticateRequest(req);
 
     if (!authData) {
       return {

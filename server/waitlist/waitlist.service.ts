@@ -4,7 +4,7 @@ import {
   createWaitlistEntryRepository,
   getWaitlistEntriesCountRepository,
   getWaitlistEntriesWithPaginationRepository,
-  updateWaitlistEntriesStatusRepository,
+  updateWaitlistEntryRepository,
 } from "./waitlist.repository";
 import { TWaitlistEntry } from "@/types/database";
 import { paginationResponseMapper } from "@/lib/pagination";
@@ -36,7 +36,9 @@ export const getWaitlistEntriesWithPaginationService = async (
 
 export const updateWaitlistEntriesStatusService = async (payload: TUpdateWaitlist) => {
   try {
-    await updateWaitlistEntriesStatusRepository(payload);
+    await updateWaitlistEntryRepository(payload.waitlistIds, {
+      status: payload.status,
+    });
   } catch (error) {
     throw error;
   }

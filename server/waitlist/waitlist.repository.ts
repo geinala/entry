@@ -6,7 +6,7 @@ import { TNewWaitlistEntry } from "@/types/database";
 import { buildCountQuery, buildPaginatedQuery, TColumnsDefinition } from "@/lib/query-builder";
 import { eq, inArray, sql } from "drizzle-orm";
 import { toTitleCase } from "@/lib/utils";
-import { TGetWaitlistQueryParams, TUpdateWaitlist, TWaitlistForm } from "@/schemas/waitlist.schema";
+import { TGetWaitlistQueryParams, TWaitlistForm } from "@/schemas/waitlist.schema";
 import { TWaitlistEntrySummary } from "./waitlist.type";
 import { generateSHA256Hash } from "@/lib/crypto";
 
@@ -14,11 +14,10 @@ export const createWaitlistEntryRepository = async (data: TWaitlistForm) => {
   const ticket = generateSHA256Hash(data.email);
 
   const waitlistEntry: TNewWaitlistEntry = {
-    email: data.email,
+    email: data.email.toLowerCase(),
     firstName: toTitleCase(data.firstName),
     lastName: toTitleCase(data.lastName),
     ticketId: ticket.slice(0, 16),
-    expiredAt: new Date(Date.now() + 1000 * 60 * 60 * 24 * 30),
   };
 
   return db.insert(waitlistTable).values(waitlistEntry);
@@ -59,17 +58,6 @@ export const getWaitlistEntriesCountRepository = async (queryParams: TGetWaitlis
     table: waitlistTable,
     columns: WAITLIST_COLUMNS,
     queryParams,
-  });
-};
-
-export const updateWaitlistEntriesStatusRepository = async (payload: TUpdateWaitlist) => {
-  const { waitlistIds, status } = payload;
-
-  return await db.transaction(async (tx) => {
-    return await tx
-      .update(waitlistTable)
-      .set({ status })
-      .where(inArray(waitlistTable.id, waitlistIds));
   });
 };
 
@@ -122,8 +110,26 @@ export const getWaitlistEntriesSummaryRepository = async (): Promise<TWaitlistEn
 };
 
 export const updateWaitlistEntryRepository = async (
-  id: number,
+  id: number | number[],
   data: Partial<TNewWaitlistEntry>,
 ) => {
-  return await db.update(waitlistTable).set(data).where(eq(waitlistTable.id, id));
+  const payload: Partial<TNewWaitlistEntry> = {
+    ...(data.status === "revoked" && { expiredAt: new Date() }),
+    ...(data.status === "invited" && { invitedAt: new Date() }),
+    ...(data.status === "pending" && { invitedAt: null, expiredAt: null }),
+    ...(data.status === "confirmed" && { confirmedAt: new Date() }),
+    ...(data.status === "denied" && { invitedAt: null, expiredAt: null, confirmedAt: null }),
+  };
+
+  if (Array.isArray(id)) {
+    return await db
+      .update(waitlistTable)
+      .set({ ...data, ...payload })
+      .where(inArray(waitlistTable.id, id));
+  }
+
+  return await db
+    .update(waitlistTable)
+    .set({ ...data, ...payload })
+    .where(eq(waitlistTable.id, id));
 };

@@ -50,6 +50,13 @@
       "when": 1771575607000,
       "tag": "0006_violet_mach_iv",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1771635513693,
+      "tag": "0007_nice_bullseye",
+      "breakpoints": true
     }
   ]
 }
