@@ -3,7 +3,7 @@
 import DataTable from "@/app/_components/data-table";
 import Page from "@/app/_components/page";
 import { useBreadcrumb } from "@/app/_contexts/breadcrumb.context";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useGetWaitlistEntriesQuery } from "./_hooks/use-queries";
 import { useFilters } from "@/app/_hooks/use-filters";
 import { GetWaitlistQueryParams, TGetWaitlistQueryParams } from "@/schemas/waitlist.schema";
@@ -21,10 +21,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/app/_components/ui/dialog";
+import { CreateWaitlistEntryForm } from "./_components/form";
 
 export default function WaitlistPage() {
   const { setBreadcrumbs } = useBreadcrumb();
   const { handleChange, pagination, filters, search } = useFilters(GetWaitlistQueryParams);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   const params: TGetWaitlistQueryParams = {
     ...pagination,
@@ -60,7 +62,7 @@ export default function WaitlistPage() {
   }, [setBreadcrumbs]);
 
   return (
-    <Dialog>
+    <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <Page
         title="Waitlist Management"
         description="Manage registered users, review their status, and send invitations directly from this page."
@@ -116,6 +118,7 @@ export default function WaitlistPage() {
           <DialogHeader>
             <DialogTitle>Invite User</DialogTitle>
           </DialogHeader>
+          <CreateWaitlistEntryForm onSuccess={() => setDialogOpen(false)} />
         </DialogContent>
       </Page>
     </Dialog>

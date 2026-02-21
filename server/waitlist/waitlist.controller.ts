@@ -5,6 +5,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   createWaitlistEntryService,
   getWaitlistEntriesWithPaginationService,
+  getWaitlistEntryByEmailService,
   updateWaitlistEntriesStatusService,
 } from "./waitlist.service";
 import { parseSortParams } from "@/lib/query-param";
@@ -30,9 +31,16 @@ export const createWaitlistEntryController = async (req: NextRequest): Promise<N
       });
     }
 
-    await createWaitlistEntryService(result.data);
+    const existingEntry = await getWaitlistEntryByEmailService(result.data.email);
+
+    if (existingEntry) {
+      return responseFormatter.conflict("An entry with this email already exists in the waitlist");
+    }
+
+    const waitlistEntry = await createWaitlistEntryService(result.data);
 
     return responseFormatter.created({
+      data: waitlistEntry[0],
       message: "Successfully joined the waitlist",
     });
   } catch {

@@ -4,9 +4,9 @@ import z from "zod";
 import { waitlistStatusEnum } from "@/drizzle/schema";
 
 export const WaitlistFormSchema = z.object({
-  email: z.string().email("Invalid email address"),
-  firstName: z.string().min(1, "First name is required"),
-  lastName: z.string().min(1, "Last name is required"),
+  email: z.string().trim().email("Invalid email address"),
+  firstName: z.string().trim().min(1, "First name is required"),
+  lastName: z.string().trim().min(1, "Last name is required"),
 });
 
 export type TWaitlistForm = z.infer<typeof WaitlistFormSchema>;

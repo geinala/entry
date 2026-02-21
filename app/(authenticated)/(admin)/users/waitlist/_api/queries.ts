@@ -16,6 +16,7 @@ export const waitlistQueries = {
       > => {
         return await api.get("/waitlist", { params });
       },
+      staleTime: 0,
     });
   },
 };

@@ -3,7 +3,7 @@ import { mutationOptions, QueryClient } from "@tanstack/react-query";
 import { AxiosInstance } from "axios";
 import { toast } from "sonner";
 import { WAITLIST_QUERY_KEYS } from "./queries";
-import { TUpdateWaitlist } from "@/schemas/waitlist.schema";
+import { TUpdateWaitlist, TWaitlistForm } from "@/schemas/waitlist.schema";
 
 export const waitlistMutations = {
   send: (api: AxiosInstance, queryClient: QueryClient) => {
@@ -41,6 +41,22 @@ export const waitlistMutations = {
         toast.success(`Waitlist entry status updated`);
 
         queryClient.invalidateQueries({ queryKey: WAITLIST_QUERY_KEYS.list });
+      },
+    });
+  },
+  create: (
+    api: AxiosInstance,
+    queryClient: QueryClient,
+    onSuccessCallback?: (waitlistId: number) => void,
+  ) => {
+    return mutationOptions({
+      mutationFn: async (payload: TWaitlistForm) => {
+        return await api.post("/waitlist", payload);
+      },
+      onSuccess: (data) => {
+        if (onSuccessCallback) {
+          onSuccessCallback(data.data.data.id);
+        }
       },
     });
   },
