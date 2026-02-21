@@ -4,7 +4,7 @@ import env from "@/common/config/environtment";
 import { clerkClient } from "@clerk/nextjs/server";
 import { NextRequest } from "next/server";
 
-export const authService = {
+export const clerkService = {
   revokeSession: async (sessionId: string) => {
     const client = await clerkClient();
 

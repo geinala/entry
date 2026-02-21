@@ -80,6 +80,7 @@ export const waitlistTable = pgTable(
   "waitlist",
   {
     id: serial().primaryKey(),
+    clerkInvitationId: varchar("clerk_invitation_id").unique(),
     email: varchar("email").notNull().unique(),
     firstName: varchar("first_name").notNull(),
     lastName: varchar("last_name").notNull(),

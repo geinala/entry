@@ -21,3 +21,10 @@ export const useUpdateWaitlistStatusMutation = () => {
 
   return useMutation(waitlistMutations.updateStatus(api, queryClient));
 };
+
+export const useRevokeInvitationMutation = () => {
+  const api = useAuthenticatedClient();
+  const queryClient = useQueryClient();
+
+  return useMutation(waitlistMutations.revoke(api, queryClient));
+};

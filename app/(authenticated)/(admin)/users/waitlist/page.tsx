@@ -34,17 +34,15 @@ export default function WaitlistPage() {
     ...params,
   });
 
-  const {
-    columns,
-    selectedIds,
-    isLoading: isBulkOperationLoading,
-    sendBulkInvitations,
-    bulkUpdateWaitlistStatus,
-    isRejectable,
-  } = useWaitlistColumns(data?.data);
+  const { columns, clearSelection } = useWaitlistColumns(data?.data);
   const sortOptions = getWaitlistSortingOptions();
   const isSelectable =
-    filters.status === "pending" || filters.status === "denied" || filters.status === "expired";
+    filters.status === "pending" ||
+    filters.status === "denied" ||
+    filters.status === "expired" ||
+    filters.status === "invited" ||
+    filters.status === "revoked" ||
+    filters.status === "failed";
 
   useEffect(() => {
     setBreadcrumbs([
@@ -60,36 +58,21 @@ export default function WaitlistPage() {
       title="Waitlist Management"
       description="Manage registered users, review their status, and send invitations directly from this page."
       headerAction={
-        <div className="flex gap-2">
-          <Button
-            variant={"secondary"}
-            disabled={selectedIds.length === 0 || isBulkOperationLoading}
-            onClick={sendBulkInvitations}
-            isLoading={isBulkOperationLoading}
-          >
-            Send Invitations {selectedIds.length > 0 && `(${selectedIds.length})`}
-          </Button>
-          <Button
-            variant={"destructive"}
-            disabled={selectedIds.length === 0 || isBulkOperationLoading || !isRejectable}
-            onClick={bulkUpdateWaitlistStatus}
-            isLoading={isBulkOperationLoading}
-          >
-            Reject Selected {selectedIds.length > 0 && `(${selectedIds.length})`}
-          </Button>
-          <Button
-            size={"sm"}
-            onClick={() => toast.warning("This feature is coming soon!")}
-            className="shadow-orange-700"
-          >
-            <Plus className="mr-2" />
-            Invite Users
-          </Button>
-        </div>
+        <Button
+          size={"sm"}
+          onClick={() => toast.warning("This feature is coming soon!")}
+          className="shadow-orange-700"
+        >
+          <Plus className="mr-2" />
+          Invite User
+        </Button>
       }
     >
       <Tabs
-        onValueChange={(value) => handleChange.onFilterChange({ status: value })}
+        onValueChange={async (value) => {
+          handleChange.onFilterChange({ status: value });
+          clearSelection();
+        }}
         defaultValue={filters.status}
       >
         <TabsList>
