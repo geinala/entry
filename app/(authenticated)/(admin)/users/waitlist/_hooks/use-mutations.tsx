@@ -28,3 +28,15 @@ export const useRevokeInvitationMutation = () => {
 
   return useMutation(waitlistMutations.revoke(api, queryClient));
 };
+
+export const useCreateWaitlistEntryMutation = () => {
+  const api = useAuthenticatedClient();
+  const queryClient = useQueryClient();
+  const { mutateAsync } = useSendInvitationMutation();
+
+  return useMutation(
+    waitlistMutations.create(api, queryClient, async (waitlistId: number) => {
+      await mutateAsync({ waitlistIds: [waitlistId] });
+    }),
+  );
+};

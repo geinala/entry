@@ -4,12 +4,19 @@ import {
   createWaitlistEntryRepository,
   getWaitlistEntriesCountRepository,
   getWaitlistEntriesWithPaginationRepository,
+  getWaitlistEntryByEmailRepository,
   updateWaitlistEntryRepository,
 } from "./waitlist.repository";
 import { TWaitlistEntry } from "@/types/database";
 import { paginationResponseMapper } from "@/lib/pagination";
 import { TPaginationResponse } from "@/types/meta";
 import { TGetWaitlistQueryParams, TUpdateWaitlist, TWaitlistForm } from "@/schemas/waitlist.schema";
+
+export const getWaitlistEntryByEmailService = async (
+  email: string,
+): Promise<TWaitlistEntry | null> => {
+  return await getWaitlistEntryByEmailRepository(email);
+};
 
 export const createWaitlistEntryService = async (data: TWaitlistForm) => {
   return await createWaitlistEntryRepository(data);

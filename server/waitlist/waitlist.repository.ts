@@ -20,7 +20,7 @@ export const createWaitlistEntryRepository = async (data: TWaitlistForm) => {
     ticketId: ticket.slice(0, 16),
   };
 
-  return db.insert(waitlistTable).values(waitlistEntry);
+  return db.insert(waitlistTable).values(waitlistEntry).returning();
 };
 
 export const getWaitlistEntryByTokenRepository = async (token: string) => {
@@ -132,4 +132,14 @@ export const updateWaitlistEntryRepository = async (
     .update(waitlistTable)
     .set({ ...data, ...payload })
     .where(eq(waitlistTable.id, id));
+};
+
+export const getWaitlistEntryByEmailRepository = async (email: string) => {
+  const result = await db
+    .select()
+    .from(waitlistTable)
+    .where(eq(waitlistTable.email, email.toLowerCase()))
+    .limit(1);
+
+  return result.length > 0 ? result[0] : null;
 };
