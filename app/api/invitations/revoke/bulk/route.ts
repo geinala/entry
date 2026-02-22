@@ -6,6 +6,8 @@ import { revokeInvitationController } from "@/server/invitation/invitation.contr
 export const POST = async (request: NextRequest) => {
   return handleAuthenticatedRequest({
     request,
-    callback: revokeInvitationController,
+    callback: async (req, context) => {
+      return await revokeInvitationController(context.clerkUserId, req);
+    },
   });
 };

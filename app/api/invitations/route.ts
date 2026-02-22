@@ -6,6 +6,6 @@ import { NextRequest } from "next/server";
 export const POST = async (request: NextRequest) => {
   return handleAuthenticatedRequest({
     request,
-    callback: sendInvitationController,
+    callback: (req, context) => sendInvitationController(context.clerkUserId, req),
   });
 };

@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import useAuthenticatedClient from "./use-authenticated-client";
-import { TUserWithRoleAndPermissions } from "@/types/database";
+import { TUserWithRoleAndPermissionNames } from "@/types/database";
 import { isAxiosError } from "axios";
 import { useClerk } from "@clerk/nextjs";
 import { toast } from "sonner";
@@ -13,7 +13,7 @@ export default function useGetUser() {
 
   return useQuery({
     queryKey: ["current-user"],
-    queryFn: async (): Promise<TUserWithRoleAndPermissions | null> => {
+    queryFn: async (): Promise<TUserWithRoleAndPermissionNames | null> => {
       try {
         return await api.get("/users/me");
       } catch (error) {
