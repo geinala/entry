@@ -9,6 +9,7 @@ import {
   CardFooter,
   CardTitle,
 } from "@/app/_components/ui/card";
+import { DialogTrigger } from "@/app/_components/ui/dialog";
 import { Input } from "@/app/_components/ui/input";
 import {
   Sidebar,
@@ -17,7 +18,6 @@ import {
   SidebarHeader,
 } from "@/app/_components/ui/sidebar";
 import { Calendar, ListFilter, Plus } from "lucide-react";
-import { toast } from "sonner";
 
 export const SimulationHistorySidebar = () => {
   return (
@@ -45,13 +45,11 @@ export const SimulationHistorySidebar = () => {
         </Card>
       </SidebarContent>
       <SidebarFooter>
-        <Button
-          onClick={() => {
-            toast.info("Coming Soon");
-          }}
-        >
-          <Plus /> Create New Simulation
-        </Button>
+        <DialogTrigger asChild>
+          <Button>
+            <Plus /> Create New Simulation
+          </Button>
+        </DialogTrigger>
       </SidebarFooter>
     </Sidebar>
   );

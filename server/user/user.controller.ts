@@ -4,7 +4,7 @@ import { NextRequest, NextResponse } from "next/server";
 import {
   findUserWithRoleAndPermissionsService,
   getUsersWithPaginationService,
-  validateUserService,
+  findCurrentUserByClerkUserIdService,
 } from "./user.service";
 import { clerkService } from "@/server/clerk/clerk.service";
 import { parseQueryParams } from "@/lib/validation";
@@ -13,7 +13,7 @@ import { GetUsersQueryParams } from "@/schemas/user.schema";
 
 export const onBoardingUserController = async (clerkUserId: string): Promise<NextResponse> => {
   try {
-    const user = await validateUserService(clerkUserId);
+    const user = await findCurrentUserByClerkUserIdService(clerkUserId);
 
     if (user) {
       return NextResponse.json({ registered: true, redirectTo: "/dashboard" }, { status: 200 });

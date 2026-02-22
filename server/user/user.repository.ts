@@ -8,7 +8,7 @@ import { PgColumn } from "drizzle-orm/pg-core";
 import { calculateOffset } from "@/lib/pagination";
 import { TGetUsersQueryParams } from "@/schemas/user.schema";
 
-export const findUserByClerkIdRepository = async (clerkUserId: string) => {
+export const findCurrentUserByClerkUserIdRepository = async (clerkUserId: string) => {
   return await db.select().from(userTable).where(eq(userTable.clerkUserId, clerkUserId)).limit(1);
 };
 
