@@ -1,29 +1,26 @@
 import "server-only";
 
 import {
-  findUserByClerkIdRepository,
+  findCurrentUserByClerkUserIdRepository,
   findUserWithRoleAndPermissionsRepository,
   getUsersCountRepository,
   getUsersWithPaginationRepository,
 } from "./user.repository";
-import { UserType } from "./user.types";
 import { paginationResponseMapper } from "@/lib/pagination";
 import { TUser, TUserWithRoleAndPermissionNames } from "@/types/database";
 import { TPaginationResponse } from "@/types/meta";
 import { TGetUsersQueryParams } from "@/schemas/user.schema";
 
-export const validateUserService = async (clerkUserId: string) => {
+export const findCurrentUserByClerkUserIdService = async (clerkUserId: string) => {
   try {
-    const user = await findUserByClerkIdRepository(clerkUserId);
+    const user = await findCurrentUserByClerkUserIdRepository(clerkUserId);
 
     if (!user || user.length === 0) {
       return null;
     }
 
     if (user) {
-      return {
-        type: UserType.EXISTING_USER,
-      };
+      return user[0];
     }
 
     return null;

@@ -64,6 +64,20 @@
       "when": 1771698383323,
       "tag": "0008_slippery_viper",
       "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1771799596071,
+      "tag": "0009_naive_ikaris",
+      "breakpoints": true
+    },
+    {
+      "idx": 10,
+      "version": "7",
+      "when": 1771800593846,
+      "tag": "0010_glamorous_vermin",
+      "breakpoints": true
     }
   ]
 }
