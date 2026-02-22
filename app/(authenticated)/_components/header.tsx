@@ -1,8 +1,8 @@
 "use client";
 
 import { UserButton } from "@clerk/nextjs";
-import NotificationDropdown from "../(user)/_components/notification.dropdown";
-import DownloadTemplateButton from "../(user)/_components/download-template.button";
+import NotificationDropdown from "./notification.dropdown";
+import DownloadTemplateButton from "./download-template.button";
 import { SidebarTrigger } from "@/app/_components/ui/sidebar";
 import Logo from "@/app/_components/logo";
 import Breadcrumb from "./breadcrumb";

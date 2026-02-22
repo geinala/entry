@@ -6,6 +6,7 @@ import {
   pgTable,
   serial,
   timestamp,
+  uuid,
   varchar,
 } from "drizzle-orm/pg-core";
 
@@ -95,5 +96,34 @@ export const waitlistTable = pgTable(
     index("idx_waitlist_status").on(table.status),
     index("idx_waitlist_email").on(table.email),
     index("idx_waitlist_ticket_id").on(table.ticketId),
+  ],
+);
+
+export const simulationStatusEnum = pgEnum("simulation_status_enum", [
+  "pending",
+  "running",
+  "completed",
+  "failed",
+]);
+
+export const simulationTable = pgTable(
+  "simulations",
+  {
+    id: uuid().primaryKey().defaultRandom(),
+    userId: integer("user_id").references(() => userTable.id),
+    title: varchar("title", { length: 300 }).notNull(),
+    status: simulationStatusEnum("status").notNull().default("pending"),
+    startedAt: timestamp("started_at", { withTimezone: true }),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [userTable.id],
+      name: "simulations_user_id_users_id_fk",
+    }),
+    index("simulations_user_id_idx").on(table.userId),
+    index("simulations_status_idx").on(table.status),
   ],
 );

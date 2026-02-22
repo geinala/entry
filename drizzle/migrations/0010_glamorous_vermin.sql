@@ -1,0 +1,1 @@
+ALTER TABLE "simulations" ALTER COLUMN "id" SET DEFAULT gen_random_uuid();
