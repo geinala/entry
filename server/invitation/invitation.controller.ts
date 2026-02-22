@@ -9,9 +9,13 @@ import {
   sendInvitationsService,
 } from "./invitation.service";
 import { SendAndRevokeInvitationSchema } from "@/schemas/invitation.schema";
+import { checkUserPermissionsService } from "../permission/permission.service";
+import { PERMISSIONS } from "@/common/constants/permissions/permissions";
 
-export const sendInvitationController = async (request: NextRequest) => {
+export const sendInvitationController = async (clerkUserId: string, request: NextRequest) => {
   try {
+    await checkUserPermissionsService(clerkUserId, [PERMISSIONS.WAITLIST_INVITE]);
+
     const body = await request.json();
 
     const result = validateSchema(SendAndRevokeInvitationSchema, body);
@@ -52,8 +56,10 @@ export const acceptInvitationController = async (token: string) => {
   }
 };
 
-export const revokeInvitationController = async (request: NextRequest) => {
+export const revokeInvitationController = async (clerkUserId: string, request: NextRequest) => {
   try {
+    await checkUserPermissionsService(clerkUserId, [PERMISSIONS.WAITLIST_REVOKE]);
+
     const body = await request.json();
 
     const result = validateSchema(SendAndRevokeInvitationSchema, body);

@@ -57,6 +57,13 @@
       "when": 1771635513693,
       "tag": "0007_nice_bullseye",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1771698383323,
+      "tag": "0008_slippery_viper",
+      "breakpoints": true
     }
   ]
 }

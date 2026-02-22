@@ -17,6 +17,8 @@ import {
   WaitlistFormSchema,
 } from "@/schemas/waitlist.schema";
 import { getWaitlistEntriesSummaryRepository } from "./waitlist.repository";
+import { checkUserPermissionsService } from "../permission/permission.service";
+import { PERMISSIONS } from "@/common/constants/permissions/permissions";
 
 export const createWaitlistEntryController = async (req: NextRequest): Promise<NextResponse> => {
   try {
@@ -51,9 +53,12 @@ export const createWaitlistEntryController = async (req: NextRequest): Promise<N
 };
 
 export const getWaitlistEntriesWithPaginationController = async (
+  clerkUserId: string,
   req: NextRequest,
 ): Promise<NextResponse> => {
   try {
+    await checkUserPermissionsService(clerkUserId, [PERMISSIONS.WAITLIST_VIEW]);
+
     const { searchParams } = new URL(req.url);
 
     const rawQueryParams = {
@@ -91,8 +96,10 @@ export const getWaitlistEntriesWithPaginationController = async (
   }
 };
 
-export const updateWaitlistEntriesStatusController = async (req: NextRequest) => {
+export const denyWaitlistEntriesController = async (clerkUserId: string, req: NextRequest) => {
   try {
+    await checkUserPermissionsService(clerkUserId, [PERMISSIONS.WAITLIST_DENY]);
+
     const body = await req.json();
 
     const result = validateSchema(UpdateWaitlistSchema, body);

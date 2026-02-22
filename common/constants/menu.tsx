@@ -7,7 +7,7 @@ export type TMenuItem = {
   label: string;
   path: RouteNext;
   icon: React.ReactNode;
-  roles?: string[];
+  permissions?: string[];
 };
 
 export interface IGroupedMenuItem {
@@ -22,13 +22,11 @@ export const MENU_ITEMS: (TMenuItem | IGroupedMenuItem)[] = [
       {
         label: "Dashboard",
         path: "/dashboard",
-        roles: ["user", "admin"],
         icon: <LayoutDashboard />,
       },
       {
         label: "Simulations",
         path: "/simulations",
-        roles: ["user"],
         icon: <Route />,
       },
     ],
@@ -40,13 +38,11 @@ export const MENU_ITEMS: (TMenuItem | IGroupedMenuItem)[] = [
         path: "/users",
         icon: <Users />,
         label: "User Management",
-        roles: ["admin"],
       },
       {
         path: "/users/waitlist",
         icon: <UserCog />,
         label: "Waitlist",
-        roles: ["admin"],
       },
     ],
   },

@@ -33,13 +33,13 @@ export const userTable = pgTable(
 export const roleTable = pgTable("roles", {
   id: serial().primaryKey(),
   name: varchar("name").notNull().unique(),
-  description: varchar("description").notNull(),
+  description: varchar("description"),
 });
 
 export const permissionTable = pgTable("permissions", {
   id: serial().primaryKey(),
   name: varchar("name").notNull().unique(),
-  description: varchar("description").notNull(),
+  description: varchar("description"),
 });
 
 export const rolePermissionTable = pgTable(

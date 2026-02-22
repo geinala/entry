@@ -26,8 +26,7 @@ const checkIsMenuActive = (menuPath: string, currentPath: string) => {
 };
 
 export default function AuthenticatedSidebar() {
-  const { userDetails } = useUserContext();
-  const role = userDetails?.role?.name;
+  const { role } = useUserContext();
   const pathname = usePathname();
 
   const isMenuActive = useMemo(() => {
@@ -39,13 +38,13 @@ export default function AuthenticatedSidebar() {
       (acc, item) => {
         if ("groupLabel" in item) {
           const filteredSubItems = item.items.filter(
-            (sub) => !sub.roles || sub.roles.includes(role || ""),
+            (sub) => !sub.permissions || sub.permissions.includes(role || ""),
           );
           if (filteredSubItems.length > 0) {
             acc.push({ ...item, items: filteredSubItems });
           }
         } else {
-          if (!item.roles || item.roles.includes(role || "")) {
+          if (!item.permissions || item.permissions.includes(role || "")) {
             acc.push(item);
           }
         }
