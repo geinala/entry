@@ -15,6 +15,7 @@ import {
 } from "@/app/_components/ui/sidebar";
 import { useUserContext } from "@/app/_contexts/user.context";
 import { IGroupedMenuItem, MENU_ITEMS, TMenuItem } from "@/common/constants/menu";
+import { clientCheckPermissions } from "@/lib/permission";
 import { X } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -26,7 +27,7 @@ const checkIsMenuActive = (menuPath: string, currentPath: string) => {
 };
 
 export default function AuthenticatedSidebar() {
-  const { role } = useUserContext();
+  const { permissions } = useUserContext();
   const pathname = usePathname();
 
   const isMenuActive = useMemo(() => {
@@ -34,17 +35,20 @@ export default function AuthenticatedSidebar() {
   }, [pathname]);
 
   const allowedSidebarMenus = useMemo(() => {
-    return MENU_ITEMS.reduce(
+    if (!permissions) return [];
+
+    const filtered = MENU_ITEMS.reduce(
       (acc, item) => {
         if ("groupLabel" in item) {
-          const filteredSubItems = item.items.filter(
-            (sub) => !sub.permissions || sub.permissions.includes(role || ""),
+          const filteredSubItems = item.items.filter((sub) =>
+            clientCheckPermissions(permissions, sub.permissions ?? []),
           );
+          // Only add group if it has items after filtering
           if (filteredSubItems.length > 0) {
             acc.push({ ...item, items: filteredSubItems });
           }
         } else {
-          if (!item.permissions || item.permissions.includes(role || "")) {
+          if (!item.permissions || clientCheckPermissions(permissions, item.permissions)) {
             acc.push(item);
           }
         }
@@ -52,7 +56,14 @@ export default function AuthenticatedSidebar() {
       },
       [] as (TMenuItem | IGroupedMenuItem)[],
     );
-  }, [role]);
+
+    // Sort by level (ascending), treating undefined as 0
+    return filtered.sort((a, b) => {
+      const levelA = a.level ?? 0;
+      const levelB = b.level ?? 0;
+      return levelA - levelB;
+    });
+  }, [permissions]);
 
   return (
     <Sidebar containerClassName="z-999">
