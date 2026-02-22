@@ -15,6 +15,9 @@ import {
 import { Checkbox } from "@/app/_components/ui/checkbox";
 import { useCallback, useMemo, useState, useEffect } from "react";
 import { WaitlistActionToast } from "../_components/waitlist-action.toast";
+import { useUserContext } from "@/app/_contexts/user.context";
+import { clientCheckPermissions } from "@/lib/permission";
+import { PERMISSIONS } from "@/common/constants/permissions/permissions";
 
 interface IUseWaitlistColumnsReturn {
   columns: ColumnDef<TWaitlistEntry>[];
@@ -22,6 +25,7 @@ interface IUseWaitlistColumnsReturn {
 }
 
 export const useWaitlistColumns = (_data?: TWaitlistEntry[]): IUseWaitlistColumnsReturn => {
+  const { permissions } = useUserContext();
   const [selectedIds, setSelectedIds] = useState<number[]>([]);
   const { mutateAsync: sendInvitation, isPending: isSendMutationPending } =
     useSendInvitationMutation();
@@ -51,40 +55,55 @@ export const useWaitlistColumns = (_data?: TWaitlistEntry[]): IUseWaitlistColumn
    * Preserves selection state on error for retry capability
    */
   const sendBulkInvitations = useCallback(async () => {
+    if (!permissions || !clientCheckPermissions(permissions, [PERMISSIONS.WAITLIST_INVITE])) {
+      toast.error("You don't have permission to send invitations");
+      return;
+    }
+
     if (selectedIds.length === 0) {
       toast.error("No rows selected");
       return;
     }
 
     await sendInvitation({ waitlistIds: selectedIds });
-    setSelectedIds([]); // Clear selection only on success
-  }, [selectedIds, sendInvitation]);
+    setSelectedIds([]);
+  }, [selectedIds, sendInvitation, permissions]);
 
   /**
    * Bulk deny selected waitlist entries
    */
   const denyBulkEntries = useCallback(async () => {
+    if (!permissions || !clientCheckPermissions(permissions, [PERMISSIONS.WAITLIST_DENY])) {
+      toast.error("You don't have permission to deny entries");
+      return;
+    }
+
     if (selectedIds.length === 0) {
       toast.error("No rows selected");
       return;
     }
 
     await updateStatusMutation({ waitlistIds: selectedIds, status: "denied" });
-    setSelectedIds([]); // Clear selection only on success
-  }, [selectedIds, updateStatusMutation]);
+    setSelectedIds([]);
+  }, [selectedIds, updateStatusMutation, permissions]);
 
   /**
    * Bulk revoke selected waitlist entries
    */
   const revokeBulkEntries = useCallback(async () => {
+    if (!permissions || !clientCheckPermissions(permissions, [PERMISSIONS.WAITLIST_REVOKE])) {
+      toast.error("You don't have permission to revoke invitations");
+      return;
+    }
+
     if (selectedIds.length === 0) {
       toast.error("No rows selected");
       return;
     }
 
     await revokeInvitation({ waitlistIds: selectedIds });
-    setSelectedIds([]); // Clear selection only on success
-  }, [selectedIds, revokeInvitation]);
+    setSelectedIds([]);
+  }, [selectedIds, revokeInvitation, permissions]);
 
   /**
    * Clear all selected rows
@@ -110,91 +129,107 @@ export const useWaitlistColumns = (_data?: TWaitlistEntry[]): IUseWaitlistColumn
 
       switch (entry.status) {
         case "pending":
-          actions.push({
-            id: "send",
-            label: "Invite",
-            icon: <Send className="w-4 h-4" />,
-            action: () => sendInvitation({ waitlistIds: [entry.id] }),
-            variant: "ghost",
-            className: "text-green-600 hover:text-green-700",
-          });
-          actions.push({
-            id: "deny",
-            label: "Deny",
-            icon: <XCircle className="w-4 h-4" />,
-            action: () => updateStatusMutation({ waitlistIds: [entry.id], status: "denied" }),
-            variant: "ghost",
-            className: "text-red-600 hover:text-red-700",
-          });
+          if (permissions && clientCheckPermissions(permissions, [PERMISSIONS.WAITLIST_INVITE])) {
+            actions.push({
+              id: "send",
+              label: "Invite",
+              icon: <Send className="w-4 h-4" />,
+              action: () => sendInvitation({ waitlistIds: [entry.id] }),
+              variant: "ghost",
+              className: "text-green-600 hover:text-green-700",
+            });
+          }
+          if (permissions && clientCheckPermissions(permissions, [PERMISSIONS.WAITLIST_DENY])) {
+            actions.push({
+              id: "deny",
+              label: "Deny",
+              icon: <XCircle className="w-4 h-4" />,
+              action: () => updateStatusMutation({ waitlistIds: [entry.id], status: "denied" }),
+              variant: "ghost",
+              className: "text-red-600 hover:text-red-700",
+            });
+          }
           break;
 
         case "denied":
-          actions.push({
-            id: "reinvite",
-            label: "Reinvite",
-            icon: <RotateCcw className="w-4 h-4" />,
-            action: () => sendInvitation({ waitlistIds: [entry.id] }),
-            variant: "ghost",
-            className: "text-emerald-600 hover:text-emerald-700",
-          });
+          if (permissions && clientCheckPermissions(permissions, [PERMISSIONS.WAITLIST_INVITE])) {
+            actions.push({
+              id: "reinvite",
+              label: "Reinvite",
+              icon: <RotateCcw className="w-4 h-4" />,
+              action: () => sendInvitation({ waitlistIds: [entry.id] }),
+              variant: "ghost",
+              className: "text-emerald-600 hover:text-emerald-700",
+            });
+          }
           break;
 
         case "invited":
-          actions.push({
-            id: "revoke",
-            label: "Revoke",
-            icon: <Trash2 className="w-4 h-4" />,
-            action: () => revokeInvitation({ waitlistIds: [entry.id] }),
-            variant: "ghost",
-            className: "text-red-600 hover:text-red-700",
-          });
-          actions.push({
-            id: "reinvite",
-            label: "Reinvite",
-            icon: <RotateCcw className="w-4 h-4" />,
-            action: () => sendInvitation({ waitlistIds: [entry.id] }),
-            variant: "ghost",
-            className: "text-emerald-600 hover:text-emerald-700",
-          });
+          if (permissions && clientCheckPermissions(permissions, [PERMISSIONS.WAITLIST_REVOKE])) {
+            actions.push({
+              id: "revoke",
+              label: "Revoke",
+              icon: <Trash2 className="w-4 h-4" />,
+              action: () => revokeInvitation({ waitlistIds: [entry.id] }),
+              variant: "ghost",
+              className: "text-red-600 hover:text-red-700",
+            });
+          }
+          if (permissions && clientCheckPermissions(permissions, [PERMISSIONS.WAITLIST_INVITE])) {
+            actions.push({
+              id: "reinvite",
+              label: "Reinvite",
+              icon: <RotateCcw className="w-4 h-4" />,
+              action: () => sendInvitation({ waitlistIds: [entry.id] }),
+              variant: "ghost",
+              className: "text-emerald-600 hover:text-emerald-700",
+            });
+          }
           break;
 
         case "revoked":
-          actions.push({
-            id: "reinvite",
-            label: "Reinvite",
-            icon: <RotateCcw className="w-4 h-4" />,
-            action: () => sendInvitation({ waitlistIds: [entry.id] }),
-            variant: "ghost",
-            className: "text-emerald-600 hover:text-emerald-700",
-          });
+          if (permissions && clientCheckPermissions(permissions, [PERMISSIONS.WAITLIST_INVITE])) {
+            actions.push({
+              id: "reinvite",
+              label: "Reinvite",
+              icon: <RotateCcw className="w-4 h-4" />,
+              action: () => sendInvitation({ waitlistIds: [entry.id] }),
+              variant: "ghost",
+              className: "text-emerald-600 hover:text-emerald-700",
+            });
+          }
           break;
 
         case "expired":
-          actions.push({
-            id: "reinvite",
-            label: "Reinvite",
-            icon: <RotateCcw className="w-4 h-4" />,
-            action: () => sendInvitation({ waitlistIds: [entry.id] }),
-            variant: "ghost",
-            className: "text-emerald-600 hover:text-emerald-700",
-          });
+          if (permissions && clientCheckPermissions(permissions, [PERMISSIONS.WAITLIST_INVITE])) {
+            actions.push({
+              id: "reinvite",
+              label: "Reinvite",
+              icon: <RotateCcw className="w-4 h-4" />,
+              action: () => sendInvitation({ waitlistIds: [entry.id] }),
+              variant: "ghost",
+              className: "text-emerald-600 hover:text-emerald-700",
+            });
+          }
           break;
 
         case "failed":
-          actions.push({
-            id: "reinvite",
-            label: "Reinvite",
-            icon: <RotateCcw className="w-4 h-4" />,
-            action: () => sendInvitation({ waitlistIds: [entry.id] }),
-            variant: "ghost",
-            className: "text-emerald-600 hover:text-emerald-700",
-          });
+          if (permissions && clientCheckPermissions(permissions, [PERMISSIONS.WAITLIST_INVITE])) {
+            actions.push({
+              id: "reinvite",
+              label: "Reinvite",
+              icon: <RotateCcw className="w-4 h-4" />,
+              action: () => sendInvitation({ waitlistIds: [entry.id] }),
+              variant: "ghost",
+              className: "text-emerald-600 hover:text-emerald-700",
+            });
+          }
           break;
       }
 
       return actions;
     },
-    [sendInvitation, updateStatusMutation, revokeInvitation],
+    [sendInvitation, updateStatusMutation, revokeInvitation, permissions],
   );
 
   /**

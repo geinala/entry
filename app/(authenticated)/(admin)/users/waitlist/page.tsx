@@ -22,6 +22,8 @@ import {
   DialogTrigger,
 } from "@/app/_components/ui/dialog";
 import { CreateWaitlistEntryForm } from "./_components/form";
+import { GuardComponent } from "@/app/_components/guard";
+import { PERMISSIONS } from "@/common/constants/permissions/permissions";
 
 export default function WaitlistPage() {
   const { setBreadcrumbs } = useBreadcrumb();
@@ -67,12 +69,14 @@ export default function WaitlistPage() {
         title="Waitlist Management"
         description="Manage registered users, review their status, and send invitations directly from this page."
         headerAction={
-          <DialogTrigger asChild>
-            <Button size={"sm"} className="shadow-orange-700">
-              <Plus className="mr-2" />
-              Invite User
-            </Button>
-          </DialogTrigger>
+          <GuardComponent requirePermission={PERMISSIONS.WAITLIST_INVITE}>
+            <DialogTrigger asChild>
+              <Button size={"sm"} className="shadow-orange-700">
+                <Plus className="mr-2" />
+                Invite User
+              </Button>
+            </DialogTrigger>
+          </GuardComponent>
         }
       >
         <Tabs
@@ -95,6 +99,7 @@ export default function WaitlistPage() {
             })}
           </TabsList>
         </Tabs>
+
         <DataTable
           columns={columns}
           source={data}
@@ -114,12 +119,14 @@ export default function WaitlistPage() {
           selectable={isSelectable}
         />
 
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Invite User</DialogTitle>
-          </DialogHeader>
-          <CreateWaitlistEntryForm onSuccess={() => setDialogOpen(false)} />
-        </DialogContent>
+        <GuardComponent requirePermission={PERMISSIONS.WAITLIST_INVITE}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Invite User</DialogTitle>
+            </DialogHeader>
+            <CreateWaitlistEntryForm onSuccess={() => setDialogOpen(false)} />
+          </DialogContent>
+        </GuardComponent>
       </Page>
     </Dialog>
   );
