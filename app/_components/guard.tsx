@@ -12,6 +12,21 @@ interface Props {
   requirePermission?: string;
 }
 
+export const GuardComponent = ({ children, requirePermission }: Props) => {
+  const { permissions } = useUserContext();
+
+  const hasPermission = useMemo(() => {
+    if (!permissions) return false;
+    return clientCheckPermissions(permissions, requirePermission ? [requirePermission] : []);
+  }, [permissions, requirePermission]);
+
+  if (!hasPermission) {
+    return null;
+  }
+
+  return <>{children}</>;
+};
+
 export const GuardPage = ({ children, requirePermission }: Props) => {
   const { permissions } = useUserContext();
   const pathname = usePathname();
