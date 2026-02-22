@@ -1,9 +1,13 @@
 import { InferSelectModel, InferInsertModel } from "drizzle-orm";
-import { userTable, waitlistTable, waitlistStatusEnum } from "@/drizzle/schema";
+import { userTable, waitlistTable, waitlistStatusEnum, roleTable } from "@/drizzle/schema";
 
 // User Types
 export type TUser = InferSelectModel<typeof userTable>;
 
+// Role Types
+export type TRole = InferSelectModel<typeof roleTable>;
+
+// User with Role and Permissions
 export type TUserWithRoleAndPermissionNames = TUser & {
   role: string;
   permissions: string[];

@@ -14,7 +14,7 @@ import { PERMISSIONS } from "@/common/constants/permissions/permissions";
 
 export const sendInvitationController = async (clerkUserId: string, request: NextRequest) => {
   try {
-    await checkUserPermissionsService(clerkUserId, [PERMISSIONS.WAITLIST_INVITE]);
+    await checkUserPermissionsService(clerkUserId, [PERMISSIONS.INVITE_WAITLIST]);
 
     const body = await request.json();
 
@@ -58,7 +58,7 @@ export const acceptInvitationController = async (token: string) => {
 
 export const revokeInvitationController = async (clerkUserId: string, request: NextRequest) => {
   try {
-    await checkUserPermissionsService(clerkUserId, [PERMISSIONS.WAITLIST_REVOKE]);
+    await checkUserPermissionsService(clerkUserId, [PERMISSIONS.REVOKE_WAITLIST]);
 
     const body = await request.json();
 

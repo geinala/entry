@@ -57,7 +57,7 @@ export const getWaitlistEntriesWithPaginationController = async (
   req: NextRequest,
 ): Promise<NextResponse> => {
   try {
-    await checkUserPermissionsService(clerkUserId, [PERMISSIONS.WAITLIST_VIEW]);
+    await checkUserPermissionsService(clerkUserId, [PERMISSIONS.VIEW_WAITLIST]);
 
     const { searchParams } = new URL(req.url);
 
@@ -98,7 +98,7 @@ export const getWaitlistEntriesWithPaginationController = async (
 
 export const denyWaitlistEntriesController = async (clerkUserId: string, req: NextRequest) => {
   try {
-    await checkUserPermissionsService(clerkUserId, [PERMISSIONS.WAITLIST_DENY]);
+    await checkUserPermissionsService(clerkUserId, [PERMISSIONS.DENY_WAITLIST]);
 
     const body = await req.json();
 

@@ -11,10 +11,10 @@ type TPageAccessPermissions = {
 export const PAGE_ACCESS_PERMISSIONS: TPageAccessPermissions[] = [
   {
     route: "/users/waitlist",
-    permissions: [PERMISSIONS.WAITLIST_VIEW],
+    permissions: [PERMISSIONS.VIEW_WAITLIST],
   },
   {
-    route: "/dashboard",
-    permissions: [PERMISSIONS.DASHBOARD_VIEW],
+    route: "/roles",
+    permissions: [PERMISSIONS.VIEW_ROLE],
   },
 ];
