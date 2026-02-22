@@ -1,14 +1,14 @@
 "use client";
 
-import { TUserWithRoleAndPermissions } from "@/types/database";
+import { TUserWithRoleAndPermissionNames } from "@/types/database";
 import { createContext, useContext, useMemo } from "react";
 import useGetUser from "../_hooks/use-get-user";
 import Loading from "../_components/loading";
-import { ROLE_ENUM } from "@/common/enum/role";
 
 const UserContext = createContext<{
-  userDetails: TUserWithRoleAndPermissions | null;
-  isAdmin: boolean;
+  userDetails: TUserWithRoleAndPermissionNames | null;
+  permissions?: string[];
+  role?: string;
 } | null>(null);
 
 export function UserProvider({ children }: { children: React.ReactNode }) {
@@ -17,7 +17,8 @@ export function UserProvider({ children }: { children: React.ReactNode }) {
   const contextValue = useMemo(
     () => ({
       userDetails: data || null,
-      isAdmin: data?.role?.name === ROLE_ENUM.ADMIN,
+      permissions: data?.permissions || [],
+      role: data?.role,
     }),
     [data],
   );
