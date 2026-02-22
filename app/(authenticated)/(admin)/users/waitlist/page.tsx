@@ -69,7 +69,7 @@ export default function WaitlistPage() {
         title="Waitlist Users Management"
         description="Manage registered users, review their status, and send invitations directly from this page."
         headerAction={
-          <GuardComponent requirePermission={PERMISSIONS.WAITLIST_INVITE}>
+          <GuardComponent requirePermission={PERMISSIONS.INVITE_WAITLIST}>
             <DialogTrigger asChild>
               <Button size={"sm"} className="shadow-orange-700">
                 <Plus className="mr-2" />
@@ -119,7 +119,7 @@ export default function WaitlistPage() {
           selectable={isSelectable}
         />
 
-        <GuardComponent requirePermission={PERMISSIONS.WAITLIST_INVITE}>
+        <GuardComponent requirePermission={PERMISSIONS.INVITE_WAITLIST}>
           <DialogContent>
             <DialogHeader>
               <DialogTitle>Invite User</DialogTitle>

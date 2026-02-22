@@ -55,7 +55,7 @@ export const useWaitlistColumns = (_data?: TWaitlistEntry[]): IUseWaitlistColumn
    * Preserves selection state on error for retry capability
    */
   const sendBulkInvitations = useCallback(async () => {
-    if (!permissions || !clientCheckPermissions(permissions, [PERMISSIONS.WAITLIST_INVITE])) {
+    if (!permissions || !clientCheckPermissions(permissions, [PERMISSIONS.INVITE_WAITLIST])) {
       toast.error("You don't have permission to send invitations");
       return;
     }
@@ -73,7 +73,7 @@ export const useWaitlistColumns = (_data?: TWaitlistEntry[]): IUseWaitlistColumn
    * Bulk deny selected waitlist entries
    */
   const denyBulkEntries = useCallback(async () => {
-    if (!permissions || !clientCheckPermissions(permissions, [PERMISSIONS.WAITLIST_DENY])) {
+    if (!permissions || !clientCheckPermissions(permissions, [PERMISSIONS.DENY_WAITLIST])) {
       toast.error("You don't have permission to deny entries");
       return;
     }
@@ -91,7 +91,7 @@ export const useWaitlistColumns = (_data?: TWaitlistEntry[]): IUseWaitlistColumn
    * Bulk revoke selected waitlist entries
    */
   const revokeBulkEntries = useCallback(async () => {
-    if (!permissions || !clientCheckPermissions(permissions, [PERMISSIONS.WAITLIST_REVOKE])) {
+    if (!permissions || !clientCheckPermissions(permissions, [PERMISSIONS.REVOKE_WAITLIST])) {
       toast.error("You don't have permission to revoke invitations");
       return;
     }
@@ -129,7 +129,7 @@ export const useWaitlistColumns = (_data?: TWaitlistEntry[]): IUseWaitlistColumn
 
       switch (entry.status) {
         case "pending":
-          if (permissions && clientCheckPermissions(permissions, [PERMISSIONS.WAITLIST_INVITE])) {
+          if (permissions && clientCheckPermissions(permissions, [PERMISSIONS.INVITE_WAITLIST])) {
             actions.push({
               id: "send",
               label: "Invite",
@@ -139,7 +139,7 @@ export const useWaitlistColumns = (_data?: TWaitlistEntry[]): IUseWaitlistColumn
               className: "text-green-600 hover:text-green-700",
             });
           }
-          if (permissions && clientCheckPermissions(permissions, [PERMISSIONS.WAITLIST_DENY])) {
+          if (permissions && clientCheckPermissions(permissions, [PERMISSIONS.DENY_WAITLIST])) {
             actions.push({
               id: "deny",
               label: "Deny",
@@ -152,7 +152,7 @@ export const useWaitlistColumns = (_data?: TWaitlistEntry[]): IUseWaitlistColumn
           break;
 
         case "denied":
-          if (permissions && clientCheckPermissions(permissions, [PERMISSIONS.WAITLIST_INVITE])) {
+          if (permissions && clientCheckPermissions(permissions, [PERMISSIONS.INVITE_WAITLIST])) {
             actions.push({
               id: "reinvite",
               label: "Reinvite",
@@ -165,7 +165,7 @@ export const useWaitlistColumns = (_data?: TWaitlistEntry[]): IUseWaitlistColumn
           break;
 
         case "invited":
-          if (permissions && clientCheckPermissions(permissions, [PERMISSIONS.WAITLIST_REVOKE])) {
+          if (permissions && clientCheckPermissions(permissions, [PERMISSIONS.REVOKE_WAITLIST])) {
             actions.push({
               id: "revoke",
               label: "Revoke",
@@ -175,7 +175,7 @@ export const useWaitlistColumns = (_data?: TWaitlistEntry[]): IUseWaitlistColumn
               className: "text-red-600 hover:text-red-700",
             });
           }
-          if (permissions && clientCheckPermissions(permissions, [PERMISSIONS.WAITLIST_INVITE])) {
+          if (permissions && clientCheckPermissions(permissions, [PERMISSIONS.INVITE_WAITLIST])) {
             actions.push({
               id: "reinvite",
               label: "Reinvite",
@@ -188,7 +188,7 @@ export const useWaitlistColumns = (_data?: TWaitlistEntry[]): IUseWaitlistColumn
           break;
 
         case "revoked":
-          if (permissions && clientCheckPermissions(permissions, [PERMISSIONS.WAITLIST_INVITE])) {
+          if (permissions && clientCheckPermissions(permissions, [PERMISSIONS.INVITE_WAITLIST])) {
             actions.push({
               id: "reinvite",
               label: "Reinvite",
@@ -201,7 +201,7 @@ export const useWaitlistColumns = (_data?: TWaitlistEntry[]): IUseWaitlistColumn
           break;
 
         case "expired":
-          if (permissions && clientCheckPermissions(permissions, [PERMISSIONS.WAITLIST_INVITE])) {
+          if (permissions && clientCheckPermissions(permissions, [PERMISSIONS.INVITE_WAITLIST])) {
             actions.push({
               id: "reinvite",
               label: "Reinvite",
@@ -214,7 +214,7 @@ export const useWaitlistColumns = (_data?: TWaitlistEntry[]): IUseWaitlistColumn
           break;
 
         case "failed":
-          if (permissions && clientCheckPermissions(permissions, [PERMISSIONS.WAITLIST_INVITE])) {
+          if (permissions && clientCheckPermissions(permissions, [PERMISSIONS.INVITE_WAITLIST])) {
             actions.push({
               id: "reinvite",
               label: "Reinvite",
