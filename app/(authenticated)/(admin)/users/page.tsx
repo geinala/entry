@@ -84,7 +84,10 @@ export default function UsersPage() {
   );
 
   return (
-    <Page title="Users" description="This page for managing users.">
+    <Page
+      title="Users Management"
+      description="View and manage all registered users in the system. Use the search and sorting features to quickly find specific users."
+    >
       <DataTable
         columns={columns}
         isLoading={isLoading}

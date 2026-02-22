@@ -57,7 +57,7 @@ export default function WaitlistPage() {
   useEffect(() => {
     setBreadcrumbs([
       {
-        label: "Waitlist",
+        label: "Waitlist Users",
         href: "/users/waitlist",
       },
     ]);
@@ -66,7 +66,7 @@ export default function WaitlistPage() {
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
       <Page
-        title="Waitlist Management"
+        title="Waitlist Users Management"
         description="Manage registered users, review their status, and send invitations directly from this page."
         headerAction={
           <GuardComponent requirePermission={PERMISSIONS.WAITLIST_INVITE}>

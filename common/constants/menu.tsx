@@ -44,13 +44,13 @@ export const MENU_ITEMS: (TMenuItem | IGroupedMenuItem)[] = [
       {
         path: "/users",
         icon: <Users />,
-        label: "User Management",
+        label: "Users",
         permissions: ["user:view"], // TODO: Replace with actual permission constants
       },
       {
         path: "/users/waitlist",
         icon: <UserCog />,
-        label: "Waitlist",
+        label: "Waitlist Users",
         permissions: [PERMISSIONS.WAITLIST_VIEW],
       },
     ],
