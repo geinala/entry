@@ -103,9 +103,9 @@ export const SimulationHistorySidebar = () => {
 
 const SimulationCard = (data: TSimulation) => {
   return (
-    <Card className="gap-3 shadow-none relative">
+    <Card className="gap-3 shadow-none relative overflow-hidden">
       <div className="h-fit w-full flex justify-center items-center absolute top-0 left-0">
-        <div className="bg-red-500 w-[90%] h-[2px] rounded-full" />
+        <div className="bg-primary w-full h-[2.8px] rounded-full" />
       </div>
       <CardContent>
         <div className="w-full flex justify-between items-center">
