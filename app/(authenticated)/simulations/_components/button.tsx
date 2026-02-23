@@ -2,7 +2,6 @@
 
 import { Button } from "@/app/_components/ui/button";
 import { Map, Trash } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 
 const DeleteSimulationButton = () => {
@@ -21,17 +20,8 @@ const DeleteSimulationButton = () => {
 };
 
 const OpenSimulationButton = () => {
-  const router = useRouter();
-
   return (
-    <Button
-      onClick={() => {
-        // TODO: Replace with actual simulation ID
-        router.push("/simulations/1");
-      }}
-      size="sm"
-      variant={"outline"}
-    >
+    <Button size="sm" variant={"outline"}>
       <Map className="text-primary" /> Open Simulation
     </Button>
   );

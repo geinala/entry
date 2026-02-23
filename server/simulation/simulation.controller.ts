@@ -5,7 +5,11 @@ import { responseFormatter } from "@/lib/response-formatter";
 import { parseQueryParams, validateSchema } from "@/lib/validation";
 import { CreateSimulationSchema, IndexSimulationQueryParams } from "@/schemas/simulation.schema";
 import { NextRequest } from "next/server";
-import { createSimulationService, getSimulationsWithPaginationService } from "./simulation.service";
+import {
+  createSimulationService,
+  getSimulationByIdService,
+  getSimulationsWithPaginationService,
+} from "./simulation.service";
 import { checkUserPermissionsService } from "../permission/permission.service";
 import { PERMISSIONS } from "@/common/constants/permissions/permissions";
 import { parseSortParams } from "@/lib/query-param";
@@ -72,5 +76,24 @@ export const getSimulationsController = async (clerkUserId: string, req: NextReq
     });
   } catch {
     return responseFormatter.error({ message: "Failed to fetch simulations" });
+  }
+};
+
+export const getSimulationByIdController = async (clerkUserId: string, simulationId: string) => {
+  try {
+    await checkUserPermissionsService(clerkUserId, [PERMISSIONS.VIEW_SIMULATION]);
+
+    const simulation = await getSimulationByIdService(simulationId);
+
+    return responseFormatter.successWithData({
+      data: simulation,
+      message: "Simulation retrieved successfully",
+    });
+  } catch (error) {
+    if (error instanceof BaseException) {
+      return responseFormatter.error({ message: error.message, status: error.statusCode });
+    }
+
+    return responseFormatter.error({ message: "Failed to fetch simulation" });
   }
 };
