@@ -14,6 +14,11 @@ export const PERMISSIONS = {
   UPDATE_ROLE: "role:update",
   SHOW_ROLE: "role:show",
   VIEW_ROLE: "role:view",
+
+  // Simulations
+  CREATE_SIMULATION: "simulation:create",
+  VIEW_SIMULATION: "simulation:view",
+  DELETE_SIMULATION: "simulation:delete",
 };
 
 export type TPermission = (typeof PERMISSIONS)[keyof typeof PERMISSIONS];

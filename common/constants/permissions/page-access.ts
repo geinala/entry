@@ -17,4 +17,8 @@ export const PAGE_ACCESS_PERMISSIONS: TPageAccessPermissions[] = [
     route: "/roles",
     permissions: [PERMISSIONS.VIEW_ROLE],
   },
+  {
+    route: "/simulations",
+    permissions: [PERMISSIONS.VIEW_SIMULATION],
+  },
 ];
