@@ -1,3 +1,6 @@
+import { simulationStatusEnum } from "@/drizzle/schema";
+import { createSortSchema } from "@/lib/validation";
+import { IndexQueryParams } from "@/types/query-params";
 import z from "zod";
 
 export const CreateSimulationSchema = z.object({
@@ -9,3 +12,10 @@ export const CreateSimulationSchema = z.object({
 });
 
 export type TCreateSimulationSchema = z.infer<typeof CreateSimulationSchema>;
+
+export const IndexSimulationQueryParams = IndexQueryParams.extend({
+  sort: createSortSchema(["createdAt", "title"]),
+  status: z.enum(simulationStatusEnum.enumValues).optional(),
+});
+
+export type TIndexSimulationQueryParams = z.infer<typeof IndexSimulationQueryParams>;

@@ -1,5 +1,11 @@
 import { InferSelectModel, InferInsertModel } from "drizzle-orm";
-import { userTable, waitlistTable, waitlistStatusEnum, roleTable } from "@/drizzle/schema";
+import {
+  userTable,
+  waitlistTable,
+  waitlistStatusEnum,
+  roleTable,
+  simulationTable,
+} from "@/drizzle/schema";
 
 // User Types
 export type TUser = InferSelectModel<typeof userTable>;
@@ -17,3 +23,6 @@ export type TUserWithRoleAndPermissionNames = TUser & {
 export type TWaitlistEntry = InferSelectModel<typeof waitlistTable>;
 export type TNewWaitlistEntry = InferInsertModel<typeof waitlistTable>;
 export type TWaitlistStatus = (typeof waitlistStatusEnum.enumValues)[number];
+
+// Simulation Types
+export type TSimulation = InferSelectModel<typeof simulationTable>;
