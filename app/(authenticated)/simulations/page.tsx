@@ -16,6 +16,8 @@ import SimulationsLayoutShell from "./_components/layout-shell";
 import { SimulationHistorySidebar } from "./_components/sidebar";
 import { Dialog } from "@/app/_components/ui/dialog";
 import { CreateSimulationFormDialog } from "./_components/forms/create-simulation.form";
+import { GuardComponent } from "@/app/_components/guard";
+import { PERMISSIONS } from "@/common/constants/permissions/permissions";
 
 export default function HistoryPage() {
   const { setBreadcrumbs } = useBreadcrumb();
@@ -58,7 +60,9 @@ export default function HistoryPage() {
         </Page>
       </SimulationsLayoutShell>
 
-      <CreateSimulationFormDialog onSuccess={() => setIsDialogOpen(false)} />
+      <GuardComponent requirePermission={PERMISSIONS.CREATE_SIMULATION}>
+        <CreateSimulationFormDialog onSuccess={() => setIsDialogOpen(false)} />
+      </GuardComponent>
     </Dialog>
   );
 }

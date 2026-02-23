@@ -1,6 +1,5 @@
 "use client";
 
-import { debounce } from "@/lib/debounce";
 import { updateQueryParam } from "@/lib/query-param";
 import { parseQueryParams } from "@/lib/validation";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -8,6 +7,7 @@ import { useCallback, useEffect, useMemo } from "react";
 import z, { ZodSchema } from "zod";
 import { TSortCriterion } from "../_components/data-table/sort";
 import { TFilterValue } from "../_components/data-table";
+import { useDebounce } from "./use-debounce";
 
 export const useFilters = (schema: ZodSchema) => {
   const searchParams = useSearchParams();
@@ -26,16 +26,12 @@ export const useFilters = (schema: ZodSchema) => {
     [searchParams, pathname, router],
   );
 
-  const debouncedUpdateSearch = useMemo(
-    () =>
-      debounce((value: string) => {
-        updateUrl({
-          search: value || null,
-          page: 1,
-        });
-      }, 500),
-    [updateUrl],
-  );
+  const debouncedUpdateSearch = useDebounce((value: string) => {
+    updateUrl({
+      search: value || null,
+      page: 1,
+    });
+  }, 500);
 
   const handleSearch = useCallback(
     (searchTerm: string) => {

@@ -22,7 +22,7 @@ export default function AuthenticatedLayout({ children }: { children: React.Reac
         <BreadcrumbProvider>
           <div className="w-full h-screen flex flex-col">
             <Header />
-            <main className="h-full w-full flex">
+            <main className="w-full flex h-full overflow-hidden">
               <AuthenticatedSidebar />
               {children}
             </main>
