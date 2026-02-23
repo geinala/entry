@@ -3,6 +3,7 @@ import { findCurrentUserByClerkUserIdRepository } from "../user/user.repository"
 import { NotFoundException } from "@/common/exception/not-found.exception";
 import {
   createSimulationRepository,
+  getSimulationByIdRepository,
   getSimulationsCountRepository,
   getSimulationsWithPaginationRepository,
 } from "./simulation.repository";
@@ -49,4 +50,18 @@ export const getSimulationsWithPaginationService = async (
     pageSize: queryParams.pageSize,
     totalItems: total,
   });
+};
+
+export const getSimulationByIdService = async (simulationId: string) => {
+  try {
+    const simulation = await getSimulationByIdRepository(simulationId);
+
+    if (!simulation || simulation.length === 0) {
+      throw new NotFoundException("Simulation not found");
+    }
+
+    return simulation[0];
+  } catch (error) {
+    throw error;
+  }
 };
