@@ -1,10 +1,11 @@
 import { getNextPage } from "@/lib/infinite-scroll";
 import { TIndexSimulationQueryParams } from "@/schemas/simulation.schema";
-import { infiniteQueryOptions } from "@tanstack/react-query";
+import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import { AxiosInstance } from "axios";
 
 const SIMULATIONS_QUERY_KEYS = {
   all: ["simulations"] as const,
+  findById: (id: string) => ["simulations", id] as const,
 };
 
 export const simulationQueries = {
@@ -23,6 +24,15 @@ export const simulationQueries = {
       initialPageParam: { page: queryParams.page, pageSize: queryParams.pageSize },
       getNextPageParam: (lastPage) => getNextPage(lastPage),
       select: (data) => data.pages.flatMap((page) => page.data.data),
+    });
+  },
+  findById: (api: AxiosInstance, id?: string) => {
+    return queryOptions({
+      queryKey: SIMULATIONS_QUERY_KEYS.findById(id || ""),
+      queryFn: async () => {
+        return await api.get(`/simulations/${id}`);
+      },
+      enabled: !!id,
     });
   },
 };
