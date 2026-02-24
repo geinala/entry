@@ -13,42 +13,36 @@ import { responseFormatter } from "@/lib/response-formatter";
 import { TWaitlistEntry } from "@/types/database";
 import {
   GetWaitlistQueryParams,
+  TUpdateWaitlist,
+  TWaitlistForm,
   UpdateWaitlistSchema,
   WaitlistFormSchema,
 } from "@/schemas/waitlist.schema";
 import { getWaitlistEntriesSummaryRepository } from "./waitlist.repository";
 import { checkUserPermissionsService } from "../permission/permission.service";
 import { PERMISSIONS } from "@/common/constants/permissions/permissions";
+import { handleException } from "@/common/exception/helper";
 
 export const createWaitlistEntryController = async (req: NextRequest): Promise<NextResponse> => {
   try {
     const body = await req.json();
 
-    const result = validateSchema(WaitlistFormSchema, body);
+    const { data } = validateSchema<TWaitlistForm>(WaitlistFormSchema, body);
 
-    if (!result.success && result.error) {
-      return responseFormatter.validationError({
-        error: result.error,
-        message: "Invalid request data",
-      });
-    }
-
-    const existingEntry = await getWaitlistEntryByEmailService(result.data.email);
+    const existingEntry = await getWaitlistEntryByEmailService(data.email);
 
     if (existingEntry) {
       return responseFormatter.conflict("An entry with this email already exists in the waitlist");
     }
 
-    const waitlistEntry = await createWaitlistEntryService(result.data);
+    const waitlistEntry = await createWaitlistEntryService(data);
 
     return responseFormatter.created({
       data: waitlistEntry[0],
       message: "Successfully joined the waitlist",
     });
-  } catch {
-    return responseFormatter.error({
-      message: "Something went wrong",
-    });
+  } catch (error) {
+    return handleException(error);
   }
 };
 
@@ -89,10 +83,8 @@ export const getWaitlistEntriesWithPaginationController = async (
       message: "Waitlist entries retrieved successfully",
       summary,
     });
-  } catch {
-    return responseFormatter.error({
-      message: "Something went wrong",
-    });
+  } catch (error) {
+    return handleException(error);
   }
 };
 
@@ -102,23 +94,14 @@ export const denyWaitlistEntriesController = async (clerkUserId: string, req: Ne
 
     const body = await req.json();
 
-    const result = validateSchema(UpdateWaitlistSchema, body);
+    const { data } = validateSchema<TUpdateWaitlist>(UpdateWaitlistSchema, body);
 
-    if (!result.success && result.error) {
-      return responseFormatter.validationError({
-        error: result.error,
-        message: "Invalid request data",
-      });
-    }
-
-    await updateWaitlistEntriesStatusService(result.data);
+    await updateWaitlistEntriesStatusService(data);
 
     return responseFormatter.success({
       message: "Waitlist entries updated successfully",
     });
-  } catch {
-    return responseFormatter.error({
-      message: "Something went wrong",
-    });
+  } catch (error) {
+    return handleException(error);
   }
 };

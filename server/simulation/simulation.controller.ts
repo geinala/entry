@@ -1,9 +1,12 @@
 import "server-only";
 
-import { BaseException } from "@/common/exception/base.exception";
 import { responseFormatter } from "@/lib/response-formatter";
 import { parseQueryParams, validateSchema } from "@/lib/validation";
-import { CreateSimulationSchema, IndexSimulationQueryParams } from "@/schemas/simulation.schema";
+import {
+  CreateSimulationSchema,
+  IndexSimulationQueryParams,
+  TCreateSimulationSchema,
+} from "@/schemas/simulation.schema";
 import { NextRequest } from "next/server";
 import {
   createSimulationService,
@@ -13,32 +16,22 @@ import {
 import { checkUserPermissionsService } from "../permission/permission.service";
 import { PERMISSIONS } from "@/common/constants/permissions/permissions";
 import { parseSortParams } from "@/lib/query-param";
+import { handleException } from "@/common/exception/helper";
 
 export const createSimulationController = async (clerkUserId: string, request: NextRequest) => {
   try {
     const body = await request.json();
 
-    const result = validateSchema(CreateSimulationSchema, body);
+    const { data } = validateSchema<TCreateSimulationSchema>(CreateSimulationSchema, body);
 
-    if (!result.success && result.error) {
-      return responseFormatter.validationError({
-        message: "Invalid request body",
-        error: result.error,
-      });
-    }
-
-    const createdSimulation = await createSimulationService(clerkUserId, result.data);
+    const createdSimulation = await createSimulationService(clerkUserId, data);
 
     return responseFormatter.created({
       data: createdSimulation,
       message: "Simulation created successfully",
     });
   } catch (error) {
-    if (error instanceof BaseException) {
-      return responseFormatter.error({ message: error.message, status: error.statusCode });
-    }
-
-    return responseFormatter.error({ message: "Failed to create simulation" });
+    return handleException(error);
   }
 };
 
@@ -74,8 +67,8 @@ export const getSimulationsController = async (clerkUserId: string, req: NextReq
       meta,
       message: "Simulations retrieved successfully",
     });
-  } catch {
-    return responseFormatter.error({ message: "Failed to fetch simulations" });
+  } catch (error) {
+    return handleException(error);
   }
 };
 
@@ -90,10 +83,6 @@ export const getSimulationByIdController = async (clerkUserId: string, simulatio
       message: "Simulation retrieved successfully",
     });
   } catch (error) {
-    if (error instanceof BaseException) {
-      return responseFormatter.error({ message: error.message, status: error.statusCode });
-    }
-
-    return responseFormatter.error({ message: "Failed to fetch simulation" });
+    return handleException(error);
   }
 };

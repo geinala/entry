@@ -7,7 +7,6 @@ import {
   SidebarSeparator,
 } from "@/app/_components/ui/sidebar";
 import CSVInput from "./input";
-import StartButton from "./button";
 import { Separator } from "@/app/_components/ui/separator";
 import { ChartNoAxesCombined } from "lucide-react";
 import { Paragraph, Title } from "@/app/_components/typography";
@@ -19,7 +18,8 @@ export const SimulationDetailLeftSidebar = () => {
     <Sidebar containerClassName="relative h-full" className="h-full relative w-full" side="left">
       <SidebarContent className="p-4">
         <CSVInput />
-        <StartButton />
+        {/* TODO: Implement start simulation functionality */}
+        {/* <StartButton /> */}
         <Separator />
         <StatItem title="Status" value="All systems operational" />{" "}
         {/* TODO: Replace with dynamic status */}

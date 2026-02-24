@@ -8,6 +8,7 @@ import { useParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import Loading from "@/app/_components/loading";
 import { Route } from "next";
+import { Empty, EmptyContent, EmptyDescription } from "@/app/_components/ui/empty";
 
 const TomTomMap = dynamic(() => import("./_components/tomtom-map"), {
   loading: () => <Loading />,
@@ -36,7 +37,14 @@ export default function SimulationDetailPage() {
       leftSidebar={<SimulationDetailLeftSidebar />}
       rightSidebar={<SimulationDetailRightSidebar />}
     >
-      <TomTomMap />
+      {/* <TomTomMap /> */}
+      <Empty>
+        <EmptyContent>
+          <EmptyDescription>
+            Visualization for this simulation is not available yet. Please check back later.
+          </EmptyDescription>
+        </EmptyContent>
+      </Empty>
     </SimulationsLayoutShell>
   );
 }

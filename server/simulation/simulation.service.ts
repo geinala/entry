@@ -15,19 +15,15 @@ export const createSimulationService = async (
   clerkUserId: string,
   data: TCreateSimulationSchema,
 ) => {
-  try {
-    const user = await findCurrentUserByClerkUserIdRepository(clerkUserId);
+  const user = await findCurrentUserByClerkUserIdRepository(clerkUserId);
 
-    if (!user || user.length === 0) {
-      throw new NotFoundException("User not found");
-    }
-
-    const simulation = await createSimulationRepository(user[0].id, data);
-
-    return simulation;
-  } catch (error) {
-    throw error;
+  if (!user || user.length === 0) {
+    throw new NotFoundException("User not found");
   }
+
+  const simulation = await createSimulationRepository(user[0].id, data);
+
+  return simulation;
 };
 
 export const getSimulationsWithPaginationService = async (
@@ -53,15 +49,11 @@ export const getSimulationsWithPaginationService = async (
 };
 
 export const getSimulationByIdService = async (simulationId: string) => {
-  try {
-    const simulation = await getSimulationByIdRepository(simulationId);
+  const simulation = await getSimulationByIdRepository(simulationId);
 
-    if (!simulation || simulation.length === 0) {
-      throw new NotFoundException("Simulation not found");
-    }
-
-    return simulation[0];
-  } catch (error) {
-    throw error;
+  if (!simulation || simulation.length === 0) {
+    throw new NotFoundException("Simulation not found");
   }
+
+  return simulation[0];
 };
