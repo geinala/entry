@@ -8,9 +8,13 @@ import {
   revokeInvitationService,
   sendInvitationsService,
 } from "./invitation.service";
-import { SendAndRevokeInvitationSchema } from "@/schemas/invitation.schema";
+import {
+  SendAndRevokeInvitationSchema,
+  TSendAndRevokeInvitation,
+} from "@/schemas/invitation.schema";
 import { checkUserPermissionsService } from "../permission/permission.service";
 import { PERMISSIONS } from "@/common/constants/permissions/permissions";
+import { handleException } from "@/common/exception/helper";
 
 export const sendInvitationController = async (clerkUserId: string, request: NextRequest) => {
   try {
@@ -18,16 +22,10 @@ export const sendInvitationController = async (clerkUserId: string, request: Nex
 
     const body = await request.json();
 
-    const result = validateSchema(SendAndRevokeInvitationSchema, body);
+    const { data } = validateSchema<TSendAndRevokeInvitation>(SendAndRevokeInvitationSchema, body);
+    const { waitlistIds } = data;
 
-    if (!result.success && result.error) {
-      return responseFormatter.validationError({
-        error: result.error,
-        message: "Invalid request data",
-      });
-    }
-
-    const response = await sendInvitationsService(result.data?.waitlistIds);
+    const response = await sendInvitationsService(waitlistIds);
 
     if (!response.data.success) {
       return responseFormatter.error({
@@ -39,20 +37,16 @@ export const sendInvitationController = async (clerkUserId: string, request: Nex
       data: response.data.data,
       message: "Invitation sent successfully",
     });
-  } catch {
-    return responseFormatter.error({
-      message: "Failed to send invitation",
-    });
+  } catch (error) {
+    return handleException(error);
   }
 };
 
 export const acceptInvitationController = async (token: string) => {
   try {
     return await acceptInvitationService(token);
-  } catch {
-    return responseFormatter.error({
-      message: "Failed to accept invitation",
-    });
+  } catch (error) {
+    return handleException(error);
   }
 };
 
@@ -62,16 +56,10 @@ export const revokeInvitationController = async (clerkUserId: string, request: N
 
     const body = await request.json();
 
-    const result = validateSchema(SendAndRevokeInvitationSchema, body);
+    const { data } = validateSchema<TSendAndRevokeInvitation>(SendAndRevokeInvitationSchema, body);
+    const { waitlistIds } = data;
 
-    if (!result.success && result.error) {
-      return responseFormatter.validationError({
-        error: result.error,
-        message: "Invalid request data",
-      });
-    }
-
-    const response = await revokeInvitationService(result.data?.waitlistIds);
+    const response = await revokeInvitationService(waitlistIds);
 
     if (!response.data.success) {
       return responseFormatter.error({
@@ -83,9 +71,7 @@ export const revokeInvitationController = async (clerkUserId: string, request: N
       data: response.data.data,
       message: "Invitation revoked successfully",
     });
-  } catch {
-    return responseFormatter.error({
-      message: "Failed to revoke invitation",
-    });
+  } catch (error) {
+    return handleException(error);
   }
 };

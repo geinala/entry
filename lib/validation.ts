@@ -1,8 +1,9 @@
+import { ValidationException } from "@/common/exception/validation.exception";
 import { z, ZodSchema, ZodTypeAny } from "zod";
 
 interface IValidationResult<T> {
   success: boolean;
-  data?: T;
+  data: T;
   error?: z.ZodError;
 }
 
@@ -12,20 +13,21 @@ interface IValidationResult<T> {
  * @param data - Data yang akan divalidasi
  * @returns Hasil validasi dengan data atau error
  */
-export function validateSchema<T>(schema: ZodSchema, data: T): IValidationResult<T> {
-  const result = schema.safeParse(data);
+export function validateSchema<T>(schema: ZodSchema, data: unknown): IValidationResult<T> {
+  try {
+    const result = schema.safeParse(data);
 
-  if (result.success) {
+    if (result.error && !result.data) {
+      throw new ValidationException("Validation failed", result.error);
+    }
+
     return {
       success: true,
       data: result.data as T,
     };
+  } catch (error) {
+    throw error;
   }
-
-  return {
-    success: false,
-    error: result.error,
-  };
 }
 
 export function parseQueryParams<TSchema extends ZodTypeAny>(schema: TSchema, query: unknown) {

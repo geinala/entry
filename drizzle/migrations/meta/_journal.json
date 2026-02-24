@@ -78,6 +78,13 @@
       "when": 1771800593846,
       "tag": "0010_glamorous_vermin",
       "breakpoints": true
+    },
+    {
+      "idx": 11,
+      "version": "7",
+      "when": 1771899316149,
+      "tag": "0011_old_cobalt_man",
+      "breakpoints": true
     }
   ]
 }

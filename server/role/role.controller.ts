@@ -7,6 +7,7 @@ import { parseQueryParams } from "@/lib/validation";
 import { IndexRoleQueryParams } from "@/schemas/role.schema";
 import { getRolesWithPaginationService } from "./role.service";
 import { TRole } from "@/types/database";
+import { handleException } from "@/common/exception/helper";
 
 export const getRolesWithPaginationController = async (
   clerkUserId: string,
@@ -42,9 +43,7 @@ export const getRolesWithPaginationController = async (
       meta,
       message: "Roles retrieved successfully",
     });
-  } catch {
-    return responseFormatter.error({
-      message: "Failed to retrieve roles",
-    });
+  } catch (error) {
+    return handleException(error);
   }
 };

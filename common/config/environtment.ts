@@ -12,6 +12,12 @@ type Env = {
   NEXT_PUBLIC_TOMTOM_API_KEY: string;
   BACKEND_API_URL: string;
   API_KEY: string;
+  MINIO_ENDPOINT: string;
+  MINIO_PORT: string;
+  MINIO_USE_SSL: string;
+  MINIO_ACCESS_KEY: string;
+  MINIO_SECRET_KEY: string;
+  MINIO_BUCKET_NAME: string;
 };
 
 const env: Env = {
@@ -28,6 +34,12 @@ const env: Env = {
   NEXT_PUBLIC_TOMTOM_API_KEY: process.env.NEXT_PUBLIC_TOMTOM_API_KEY!,
   BACKEND_API_URL: process.env.BACKEND_API_URL!,
   API_KEY: process.env.API_KEY!,
+  MINIO_ENDPOINT: process.env.MINIO_ENDPOINT!,
+  MINIO_PORT: process.env.MINIO_PORT!,
+  MINIO_USE_SSL: process.env.MINIO_USE_SSL!,
+  MINIO_ACCESS_KEY: process.env.MINIO_ACCESS_KEY!,
+  MINIO_SECRET_KEY: process.env.MINIO_SECRET_KEY!,
+  MINIO_BUCKET_NAME: process.env.MINIO_BUCKET_NAME!,
 };
 
 export const validateEnv = (): void => {
@@ -45,6 +57,12 @@ export const validateEnv = (): void => {
     "NEXT_PUBLIC_TOMTOM_API_KEY",
     "BACKEND_API_URL",
     "API_KEY",
+    "MINIO_ENDPOINT",
+    "MINIO_PORT",
+    "MINIO_USE_SSL",
+    "MINIO_ACCESS_KEY",
+    "MINIO_SECRET_KEY",
+    "MINIO_BUCKET_NAME",
   ];
 
   const missingVars = requiredVars.filter((key) => !env[key]);

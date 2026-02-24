@@ -127,3 +127,33 @@ export const simulationTable = pgTable(
     index("simulations_status_idx").on(table.status),
   ],
 );
+
+export const simulationUploadStatusEnum = pgEnum("simulation_upload_status_enum", [
+  "uploaded",
+  "validating",
+  "failed",
+  "ready",
+  "processing",
+  "done",
+]);
+
+export const simulationUploadedFileTable = pgTable(
+  "simulation_uploaded_files",
+  {
+    id: serial().primaryKey(),
+    simulationId: uuid("simulation_id").references(() => simulationTable.id),
+    fileUrl: varchar("file_url").notNull(),
+    totalRows: integer("total_rows"),
+    invalidRows: integer("invalid_rows"),
+    status: simulationUploadStatusEnum("status").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.simulationId],
+      foreignColumns: [simulationTable.id],
+      name: "simulation_uploaded_files_simulation_id_simulations_id_fk",
+    }),
+    index("simulation_uploaded_files_simulation_id_idx").on(table.simulationId),
+  ],
+);
