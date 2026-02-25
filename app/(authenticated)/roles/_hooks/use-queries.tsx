@@ -1,3 +1,5 @@
+"use client";
+
 import useAuthenticatedClient from "@/app/_hooks/use-authenticated-client";
 import { TIndexRoleQueryParams } from "@/schemas/role.schema";
 import { useQuery } from "@tanstack/react-query";

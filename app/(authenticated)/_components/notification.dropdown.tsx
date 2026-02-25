@@ -15,7 +15,7 @@ const NotificationDropdown = () => {
       <DropdownMenuTrigger asChild>
         <Bell className="w-6 h-6 cursor-pointer text-gray-600 hover:text-gray-800" />
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-64">
+      <DropdownMenuContent className="w-64" align="end">
         <DropdownMenuLabel>Notifications</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {/* Notification items would go here */}

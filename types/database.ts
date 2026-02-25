@@ -5,6 +5,8 @@ import {
   waitlistStatusEnum,
   roleTable,
   simulationTable,
+  simulationUploadedFileTable,
+  simulationStatusEnum,
 } from "@/drizzle/schema";
 
 // User Types
@@ -26,3 +28,12 @@ export type TWaitlistStatus = (typeof waitlistStatusEnum.enumValues)[number];
 
 // Simulation Types
 export type TSimulation = InferSelectModel<typeof simulationTable>;
+export type TUpdateSimulation = Partial<Omit<TSimulation, "id" | "createdAt" | "updatedAt">>;
+export type TSimulationWithUploadedFile = TSimulation & {
+  uploadedFile: TSimulationUploadedFile | null;
+};
+
+// Simulation Uploaded File Types
+export type TSimulationUploadedFile = InferSelectModel<typeof simulationUploadedFileTable>;
+export type TNewSimulationUploadedFile = InferInsertModel<typeof simulationUploadedFileTable>;
+export type TSimulationStatus = (typeof simulationStatusEnum.enumValues)[number];

@@ -2,12 +2,15 @@
 
 import { Button } from "@/app/_components/ui/button";
 import { Play } from "lucide-react";
+import { toast } from "sonner";
 
 // TODO: Implement start simulation functionality
-export default function StartButton() {
+const StartButton = () => {
   return (
-    <Button disabled>
+    <Button onClick={() => toast.warning("This feature is not implemented yet")}>
       <Play /> Start Simulation
     </Button>
   );
-}
+};
+
+export { StartButton };

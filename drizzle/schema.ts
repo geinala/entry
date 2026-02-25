@@ -115,7 +115,9 @@ export const simulationTable = pgTable(
     status: simulationStatusEnum("status").notNull().default("pending"),
     startedAt: timestamp("started_at", { withTimezone: true }),
     completedAt: timestamp("completed_at", { withTimezone: true }),
+    uploadId: integer("upload_id").references(() => simulationUploadedFileTable.id),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
     foreignKey({
@@ -123,7 +125,48 @@ export const simulationTable = pgTable(
       foreignColumns: [userTable.id],
       name: "simulations_user_id_users_id_fk",
     }),
+    foreignKey({
+      columns: [table.uploadId],
+      foreignColumns: [simulationUploadedFileTable.id],
+      name: "simulations_upload_id_simulation_uploaded_files_id_fk",
+    }),
     index("simulations_user_id_idx").on(table.userId),
     index("simulations_status_idx").on(table.status),
+  ],
+);
+
+export const simulationUploadStatusEnum = pgEnum("simulation_upload_status_enum", [
+  "uploaded",
+  "validating",
+  "failed",
+  "ready",
+]);
+
+export const simulationUploadedFileTable = pgTable(
+  "simulation_uploaded_files",
+  {
+    id: serial().primaryKey(),
+    userId: integer("user_id")
+      .references(() => userTable.id)
+      .notNull(),
+    fileName: varchar("file_name").notNull(),
+    filePath: varchar("file_path").notNull(),
+    fileErrorPath: varchar("file_error_path"),
+    totalRows: integer("total_rows"),
+    invalidRows: integer("invalid_rows"),
+    processedRows: integer("processed_rows"),
+    progressPercentage: integer("progress_percentage").default(0),
+    status: simulationUploadStatusEnum("status").notNull().default("uploaded"),
+    validatedAt: timestamp("validated_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [userTable.id],
+      name: "simulation_uploaded_files_user_id_users_id_fk",
+    }),
+    index("simulation_uploaded_files_user_id_idx").on(table.userId),
   ],
 );

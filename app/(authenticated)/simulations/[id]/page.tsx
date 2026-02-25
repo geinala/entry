@@ -8,6 +8,8 @@ import { useParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import Loading from "@/app/_components/loading";
 import { Route } from "next";
+import { Empty, EmptyContent, EmptyDescription } from "@/app/_components/ui/empty";
+import { useGetSimulationByIdQuery } from "../_hooks/use-queries";
 
 const TomTomMap = dynamic(() => import("./_components/tomtom-map"), {
   loading: () => <Loading />,
@@ -15,8 +17,9 @@ const TomTomMap = dynamic(() => import("./_components/tomtom-map"), {
 });
 
 export default function SimulationDetailPage() {
-  const params = useParams();
+  const { id: simulationId } = useParams<{ id: string }>();
   const { setBreadcrumbs } = useBreadcrumb();
+  const { data, isLoading } = useGetSimulationByIdQuery(simulationId);
 
   useEffect(() => {
     setBreadcrumbs([
@@ -26,17 +29,25 @@ export default function SimulationDetailPage() {
       },
       {
         label: "Visualization",
-        href: `/simulations/${params.id}` as Route,
+        href: `/simulations/${simulationId}` as Route,
       },
     ]);
-  }, [setBreadcrumbs, params.id]);
+  }, [setBreadcrumbs, simulationId]);
 
   return (
     <SimulationsLayoutShell
-      leftSidebar={<SimulationDetailLeftSidebar />}
+      leftSidebar={<SimulationDetailLeftSidebar hasUploadedCSV={!!data?.data.uploadId} />}
       rightSidebar={<SimulationDetailRightSidebar />}
+      isLoading={isLoading}
     >
-      <TomTomMap />
+      {/* <TomTomMap /> */}
+      <Empty>
+        <EmptyContent>
+          <EmptyDescription>
+            Visualization for this simulation is not available yet. Please check back later.
+          </EmptyDescription>
+        </EmptyContent>
+      </Empty>
     </SimulationsLayoutShell>
   );
 }

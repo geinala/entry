@@ -25,28 +25,20 @@ export const createWaitlistEntryService = async (data: TWaitlistForm) => {
 export const getWaitlistEntriesWithPaginationService = async (
   queryParams: TGetWaitlistQueryParams,
 ): Promise<TPaginationResponse<TWaitlistEntry>> => {
-  try {
-    const [entries, total] = await Promise.all([
-      getWaitlistEntriesWithPaginationRepository(queryParams),
-      getWaitlistEntriesCountRepository(queryParams),
-    ]);
+  const [entries, total] = await Promise.all([
+    getWaitlistEntriesWithPaginationRepository(queryParams),
+    getWaitlistEntriesCountRepository(queryParams),
+  ]);
 
-    return paginationResponseMapper<TWaitlistEntry>(entries, {
-      currentPage: queryParams.page,
-      pageSize: queryParams.pageSize,
-      totalItems: total,
-    });
-  } catch (error) {
-    throw error;
-  }
+  return paginationResponseMapper<TWaitlistEntry>(entries, {
+    currentPage: queryParams.page,
+    pageSize: queryParams.pageSize,
+    totalItems: total,
+  });
 };
 
 export const updateWaitlistEntriesStatusService = async (payload: TUpdateWaitlist) => {
-  try {
-    await updateWaitlistEntryRepository(payload.waitlistIds, {
-      status: payload.status,
-    });
-  } catch (error) {
-    throw error;
-  }
+  return await updateWaitlistEntryRepository(payload.waitlistIds, {
+    status: payload.status,
+  });
 };

@@ -10,23 +10,16 @@ import { paginationResponseMapper } from "@/lib/pagination";
 import { TUser, TUserWithRoleAndPermissionNames } from "@/types/database";
 import { TPaginationResponse } from "@/types/meta";
 import { TGetUsersQueryParams } from "@/schemas/user.schema";
+import { NotFoundException } from "@/common/exception/not-found.exception";
 
 export const findCurrentUserByClerkUserIdService = async (clerkUserId: string) => {
-  try {
-    const user = await findCurrentUserByClerkUserIdRepository(clerkUserId);
+  const user = await findCurrentUserByClerkUserIdRepository(clerkUserId);
 
-    if (!user || user.length === 0) {
-      return null;
-    }
-
-    if (user) {
-      return user[0];
-    }
-
-    return null;
-  } catch (error) {
-    throw error;
+  if (!user || user.length === 0) {
+    throw new NotFoundException("User not found");
   }
+
+  return user[0];
 };
 
 export const findUserWithRoleAndPermissionsService = async (
@@ -35,12 +28,13 @@ export const findUserWithRoleAndPermissionsService = async (
   const userDetails = await findUserWithRoleAndPermissionsRepository(clerkUserId);
 
   if (!userDetails || userDetails.length === 0) {
-    return null;
+    throw new NotFoundException("User not found");
   }
 
   const firstRow = userDetails[0];
+
   if (!firstRow?.users || !firstRow?.roles) {
-    return null;
+    throw new NotFoundException("User or role information is incomplete");
   }
 
   const permissionNames = Array.from(
@@ -61,18 +55,14 @@ export const findUserWithRoleAndPermissionsService = async (
 export const getUsersWithPaginationService = async (
   queryParams: TGetUsersQueryParams,
 ): Promise<TPaginationResponse<TUser>> => {
-  try {
-    const [users, total] = await Promise.all([
-      getUsersWithPaginationRepository(queryParams),
-      getUsersCountRepository(queryParams),
-    ]);
+  const [users, total] = await Promise.all([
+    getUsersWithPaginationRepository(queryParams),
+    getUsersCountRepository(queryParams),
+  ]);
 
-    return paginationResponseMapper<TUser>(users, {
-      currentPage: queryParams.page,
-      pageSize: queryParams.pageSize,
-      totalItems: total,
-    });
-  } catch (error) {
-    throw error;
-  }
+  return paginationResponseMapper<TUser>(users, {
+    currentPage: queryParams.page,
+    pageSize: queryParams.pageSize,
+    totalItems: total,
+  });
 };

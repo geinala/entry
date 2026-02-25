@@ -1,3 +1,5 @@
+"use client";
+
 import useAuthenticatedClient from "@/app/_hooks/use-authenticated-client";
 import { TIndexSimulationQueryParams } from "@/schemas/simulation.schema";
 import { simulationQueries } from "../_api/queries";
