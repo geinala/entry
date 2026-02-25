@@ -1,3 +1,5 @@
+"use client";
+
 import { TIndexRoleQueryParams } from "@/schemas/role.schema";
 import { TRole } from "@/types/database";
 import { TPaginationResponse } from "@/types/meta";

@@ -1,3 +1,5 @@
+"use client";
+
 export const useDebounce = <T extends (...args: never[]) => void>(
   func: T,
   wait: number,

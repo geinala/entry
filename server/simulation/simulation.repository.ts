@@ -75,3 +75,26 @@ export const updateSimulationRepository = async (simulationId: string, data: TUp
 export const createSimulationUploadedFileRepository = async (data: TNewSimulationUploadedFile) => {
   return await db.insert(simulationUploadedFileTable).values(data).returning();
 };
+
+export const getSimulationUploadedFileBySimulationIdRepository = async (simulationId: string) => {
+  return await db
+    .select()
+    .from(simulationTable)
+    .innerJoin(
+      simulationUploadedFileTable,
+      eq(simulationTable.uploadId, simulationUploadedFileTable.id),
+    )
+    .where(eq(simulationTable.id, simulationId))
+    .limit(1);
+};
+
+export const updateSimulationUploadedFileRepository = async (
+  uploadedFileId: number,
+  data: Partial<TNewSimulationUploadedFile>,
+) => {
+  return await db
+    .update(simulationUploadedFileTable)
+    .set(data)
+    .where(eq(simulationUploadedFileTable.id, uploadedFileId))
+    .returning();
+};

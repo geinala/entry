@@ -7,14 +7,18 @@ import { CSVUploadedSchema } from "@/schemas/file.schema";
 import { useForm } from "@tanstack/react-form";
 import { CloudUpload, Trash } from "lucide-react";
 import { useUploadCSVMutation } from "../_hooks/use-mutations";
-import { useState } from "react";
+import React, { useState } from "react";
 import { Item, ItemContent } from "@/app/_components/ui/item";
-import { truncateText } from "@/lib/utils";
+import { cn, truncateText } from "@/lib/utils";
 import { Field, FieldError, FieldLabel } from "@/app/_components/ui/field";
 import { Input } from "@/app/_components/ui/input";
 import { useParams } from "next/navigation";
 
-export default function CSVInput() {
+interface CSVInputProps extends React.ComponentProps<typeof Item> {
+  onFileUpload?: () => void;
+}
+
+export default function CSVInput({ onFileUpload, ...props }: CSVInputProps) {
   const { id: simulationId } = useParams<{ id: string }>();
   const { mutateAsync, isPending } = useUploadCSVMutation();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
@@ -29,6 +33,9 @@ export default function CSVInput() {
     onSubmit: async (values) => {
       if (values.value.file) {
         await onSubmit(values.value.file);
+      }
+      if (onFileUpload) {
+        onFileUpload();
       }
     },
   });
@@ -59,8 +66,12 @@ export default function CSVInput() {
       }}
     >
       <Item
+        {...props}
         variant={"muted"}
-        className="border border-neutral-400 border-dashed flex items-center rounded-md flex-col justify-center text-center cursor-pointer hover:bg-gray-50 bg-muted"
+        className={cn(
+          "border border-neutral-400 border-dashed flex items-center rounded-md flex-col justify-center text-center cursor-pointer hover:bg-gray-50 bg-muted",
+          props.className,
+        )}
       >
         <ItemContent>
           {!selectedFile ? (
@@ -116,6 +127,7 @@ export default function CSVInput() {
             <>
               <Button
                 variant={"ghost"}
+                id="remove-file-button"
                 size={"icon"}
                 type="button"
                 className="absolute top-4 right-4 hover:bg-transparent"

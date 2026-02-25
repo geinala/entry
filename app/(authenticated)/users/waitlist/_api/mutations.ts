@@ -1,3 +1,5 @@
+"use client";
+
 import { TSendAndRevokeInvitation } from "@/schemas/invitation.schema";
 import { mutationOptions, QueryClient } from "@tanstack/react-query";
 import { AxiosInstance } from "axios";

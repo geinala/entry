@@ -1,3 +1,5 @@
+"use client";
+
 import { getNextPage } from "@/lib/infinite-scroll";
 import { TIndexSimulationQueryParams } from "@/schemas/simulation.schema";
 import { TSimulation } from "@/types/database";

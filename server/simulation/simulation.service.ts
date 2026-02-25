@@ -9,13 +9,16 @@ import {
   getSimulationByIdRepository,
   getSimulationsCountRepository,
   getSimulationsWithPaginationRepository,
+  getSimulationUploadedFileBySimulationIdRepository,
   updateSimulationRepository,
+  updateSimulationUploadedFileRepository,
 } from "./simulation.repository";
 import { TPaginationResponse } from "@/types/meta";
-import { TSimulation } from "@/types/database";
+import { TSimulation, TSimulationWithUploadedFile } from "@/types/database";
 import { paginationResponseMapper } from "@/lib/pagination";
 import { findCurrentUserByClerkUserIdService } from "../user/user.service";
 import { uploadFileService } from "../files/file.service";
+import { server } from "@/lib/axios";
 
 export const createSimulationService = async (
   clerkUserId: string,
@@ -85,7 +88,36 @@ export const uploadSimulationFileService = async (
     uploadId: uploadedFile[0].id,
   });
 
-  // TODO: Add background job to process the uploaded file and update the simulation status accordingly
+  try {
+    await server.post(`/simulations/${simulationId}/files/validate`);
+  } catch {
+    await updateSimulationUploadedFileRepository(uploadedFile[0].id, {
+      status: "failed",
+    });
+  }
 
   return updatedSimulation;
+};
+
+export const getSimulationUploadedFileBySimulationIdService = async (
+  simulationId: string,
+): Promise<TSimulationWithUploadedFile> => {
+  const simulation = await getSimulationByIdService(simulationId);
+
+  if (!simulation.uploadId) {
+    throw new NotFoundException("No file uploaded for this simulation");
+  }
+
+  const uploadedFile = await getSimulationUploadedFileBySimulationIdRepository(simulationId);
+
+  if (!uploadedFile || uploadedFile.length === 0) {
+    throw new NotFoundException("Uploaded file not found");
+  }
+
+  return {
+    ...uploadedFile[0].simulations,
+    uploadedFile: {
+      ...uploadedFile[0].simulation_uploaded_files,
+    },
+  };
 };

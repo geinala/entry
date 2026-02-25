@@ -36,12 +36,7 @@ export default function SimulationDetailPage() {
 
   return (
     <SimulationsLayoutShell
-      leftSidebar={
-        <SimulationDetailLeftSidebar
-          status={data?.data.status}
-          hasUploadedCSV={!!data?.data.uploadId}
-        />
-      }
+      leftSidebar={<SimulationDetailLeftSidebar hasUploadedCSV={!!data?.data.uploadId} />}
       rightSidebar={<SimulationDetailRightSidebar />}
       isLoading={isLoading}
     >

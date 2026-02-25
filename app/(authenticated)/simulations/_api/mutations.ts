@@ -1,3 +1,5 @@
+"use client";
+
 import { TCreateSimulationSchema } from "@/schemas/simulation.schema";
 import { mutationOptions } from "@tanstack/react-query";
 import { AxiosInstance } from "axios";

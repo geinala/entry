@@ -11,18 +11,21 @@ import { Separator } from "@/app/_components/ui/separator";
 import { ChartNoAxesCombined } from "lucide-react";
 import { Paragraph } from "@/app/_components/typography";
 import StatItem from "./item";
+import { SimulationFileUploadedItem } from "./file-status.item";
+import { useGetFileWithSimulationIdQuery } from "../_hooks/use-queries";
+import { useParams } from "next/navigation";
 import { StartButton } from "./button";
-import { TSimulationStatus } from "@/types/database";
 
 interface SimulationDetailSidebarLeftProps {
   hasUploadedCSV: boolean;
-  status?: TSimulationStatus;
 }
 
 export const SimulationDetailLeftSidebar = ({
   hasUploadedCSV,
-  status,
 }: SimulationDetailSidebarLeftProps) => {
+  const { id } = useParams<{ id: string }>();
+  const { data, isLoading } = useGetFileWithSimulationIdQuery(id, hasUploadedCSV);
+
   return (
     <Sidebar containerClassName="relative h-full" className="h-full relative w-full" side="left">
       <SidebarContent className="p-4">
@@ -32,9 +35,12 @@ export const SimulationDetailLeftSidebar = ({
             <Separator />
           </>
         ) : (
-          <StartButton />
+          <>
+            <SimulationFileUploadedItem data={data?.data} isLoading={isLoading} />
+            {data?.data.uploadedFile?.status === "ready" && <StartButton />}
+          </>
         )}
-        <StatItem status={status} /> {/* TODO: Replace with dynamic status */}
+        <StatItem status={data?.data?.status} /> {/* TODO: Replace with dynamic status */}
       </SidebarContent>
     </Sidebar>
   );

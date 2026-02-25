@@ -1,3 +1,5 @@
+"use client";
+
 import { client } from "@/lib/axios";
 import { mutationOptions } from "@tanstack/react-query";
 

@@ -31,4 +31,17 @@ export const minioService = {
   async deleteFile(bucketName: string, objectName: string): Promise<void> {
     await minioClient.removeObject(bucketName, objectName);
   },
+
+  async presignedUrl(
+    bucketName: string,
+    objectName: string,
+    expiresInSeconds: number,
+    download: boolean = false,
+  ): Promise<string> {
+    const headers: Record<string, string> = download
+      ? { "response-content-disposition": `attachment; filename="errors.csv"` }
+      : {};
+
+    return await minioClient.presignedGetObject(bucketName, objectName, expiresInSeconds, headers);
+  },
 };

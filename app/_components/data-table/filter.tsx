@@ -8,7 +8,11 @@ import { FilterInputFactory, TFilterItem } from "./filter-collections/factory";
 import { TFilterValue } from ".";
 import { useMemo, useState, ReactNode } from "react";
 import { Badge } from "../ui/badge";
-import { isValidFilterValue, EMPTY_VALUE } from "./filter-utils";
+
+const EMPTY_VALUE = "";
+
+const isValidFilterValue = (value: unknown): boolean =>
+  value !== undefined && value !== null && value !== EMPTY_VALUE;
 
 export interface IFilterTableProps {
   filterItems: TFilterItem[];
