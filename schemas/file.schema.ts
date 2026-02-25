@@ -13,3 +13,10 @@ export const CSVUploadedSchema = z.object({
 });
 
 export type TCSVUploaded = z.infer<typeof CSVUploadedSchema>;
+
+export const GetPresignedUrlParamsSchema = z.object({
+  objectName: z.string().nonempty("Object name is required"),
+  forceDownload: z.boolean().optional(),
+});
+
+export type TGetPresignedUrlParams = z.infer<typeof GetPresignedUrlParamsSchema>;

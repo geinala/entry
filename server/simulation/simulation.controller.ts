@@ -12,6 +12,7 @@ import {
   createSimulationService,
   getSimulationByIdService,
   getSimulationsWithPaginationService,
+  getSimulationUploadedFileBySimulationIdService,
   uploadSimulationFileService,
 } from "./simulation.service";
 import { checkUserPermissionsService } from "../permission/permission.service";
@@ -107,6 +108,24 @@ export const uploadSimulationFileController = async (
     return responseFormatter.successWithData({
       message: "File uploaded successfully",
       data: result,
+    });
+  } catch (error) {
+    return handleException(error);
+  }
+};
+
+export const getSimulationUploadedFileController = async (
+  clerkUserId: string,
+  simulationId: string,
+) => {
+  try {
+    await checkUserPermissionsService(clerkUserId, [PERMISSIONS.VIEW_SIMULATION]);
+
+    const file = await getSimulationUploadedFileBySimulationIdService(simulationId);
+
+    return responseFormatter.successWithData({
+      data: file,
+      message: "Uploaded file retrieved successfully",
     });
   } catch (error) {
     return handleException(error);

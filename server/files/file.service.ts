@@ -1,3 +1,4 @@
+import env from "@/common/config/environtment";
 import { minioService } from "../minio/minio.service";
 
 export const uploadFileService = async (file: File, path: string) => {
@@ -21,4 +22,17 @@ export const uploadFileService = async (file: File, path: string) => {
     etag: result.etag,
     versionId: result.versionId ?? null,
   };
+};
+
+export const getPresignedUrlService = async (
+  objectPath: string,
+  expiresInSeconds: number,
+  download: boolean = false,
+) => {
+  return await minioService.presignedUrl(
+    env.MINIO_BUCKET_NAME,
+    objectPath,
+    expiresInSeconds,
+    download,
+  );
 };

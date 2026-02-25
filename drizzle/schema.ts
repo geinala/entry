@@ -154,6 +154,8 @@ export const simulationUploadedFileTable = pgTable(
     fileErrorPath: varchar("file_error_path"),
     totalRows: integer("total_rows"),
     invalidRows: integer("invalid_rows"),
+    processedRows: integer("processed_rows"),
+    progressPercentage: integer("progress_percentage").default(0),
     status: simulationUploadStatusEnum("status").notNull().default("uploaded"),
     validatedAt: timestamp("validated_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),

@@ -1,9 +1,11 @@
-import { mutationOptions } from "@tanstack/react-query";
+"use client";
+
+import { mutationOptions, QueryClient } from "@tanstack/react-query";
 import { AxiosInstance } from "axios";
 import { toast } from "sonner";
 
 export const simulationDetailMutation = {
-  uploadCSV: (api: AxiosInstance) => {
+  uploadCSV: (api: AxiosInstance, queryClient: QueryClient) => {
     return mutationOptions({
       mutationFn: async ({
         formData,
@@ -12,7 +14,7 @@ export const simulationDetailMutation = {
         formData: FormData;
         simulationId: string;
       }) => {
-        return await api.post(`/simulations/${simulationId}/upload`, formData, {
+        return await api.post(`/simulations/${simulationId}/files`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },
@@ -20,9 +22,10 @@ export const simulationDetailMutation = {
       },
       onSuccess: () => {
         toast.success("CSV file uploaded successfully!");
+        queryClient.invalidateQueries({ queryKey: ["simulation-file"] });
+        queryClient.invalidateQueries({ queryKey: ["simulations"] });
       },
-      onError: (error) => {
-        console.error("Error uploading CSV file:", error);
+      onError: () => {
         toast.error("Failed to upload CSV file. Please try again.");
       },
     });

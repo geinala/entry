@@ -1,3 +1,5 @@
+"use client";
+
 import { TPaginationMeta } from "@/types/meta";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useDebounce } from "../_hooks/use-debounce";
