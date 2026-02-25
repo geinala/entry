@@ -1,5 +1,7 @@
 import { getNextPage } from "@/lib/infinite-scroll";
 import { TIndexSimulationQueryParams } from "@/schemas/simulation.schema";
+import { TSimulation } from "@/types/database";
+import { TApiSuccessResponseWithData } from "@/types/response";
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import { AxiosInstance } from "axios";
 
@@ -29,7 +31,7 @@ export const simulationQueries = {
   findById: (api: AxiosInstance, id?: string) => {
     return queryOptions({
       queryKey: SIMULATIONS_QUERY_KEYS.findById(id || ""),
-      queryFn: async () => {
+      queryFn: async (): Promise<TApiSuccessResponseWithData<TSimulation>> => {
         return await api.get(`/simulations/${id}`);
       },
       enabled: !!id,

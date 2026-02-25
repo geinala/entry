@@ -12,11 +12,13 @@ import {
   createSimulationService,
   getSimulationByIdService,
   getSimulationsWithPaginationService,
+  uploadSimulationFileService,
 } from "./simulation.service";
 import { checkUserPermissionsService } from "../permission/permission.service";
 import { PERMISSIONS } from "@/common/constants/permissions/permissions";
 import { parseSortParams } from "@/lib/query-param";
 import { handleException } from "@/common/exception/helper";
+import { CSVUploadedSchema, TCSVUploaded } from "@/schemas/file.schema";
 
 export const createSimulationController = async (clerkUserId: string, request: NextRequest) => {
   try {
@@ -81,6 +83,30 @@ export const getSimulationByIdController = async (clerkUserId: string, simulatio
     return responseFormatter.successWithData({
       data: simulation,
       message: "Simulation retrieved successfully",
+    });
+  } catch (error) {
+    return handleException(error);
+  }
+};
+
+export const uploadSimulationFileController = async (
+  clerkUserId: string,
+  simulationId: string,
+  request: NextRequest,
+) => {
+  try {
+    const formData = await request.formData();
+
+    const file = formData.get("file");
+
+    const { data } = validateSchema<TCSVUploaded>(CSVUploadedSchema, { file });
+    const { file: validatedFile } = data;
+
+    const result = await uploadSimulationFileService(clerkUserId, simulationId, validatedFile);
+
+    return responseFormatter.successWithData({
+      message: "File uploaded successfully",
+      data: result,
     });
   } catch (error) {
     return handleException(error);

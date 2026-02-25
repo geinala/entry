@@ -1,10 +1,11 @@
 import "server-only";
 
-import { simulationTable } from "@/drizzle/schema";
+import { simulationTable, simulationUploadedFileTable } from "@/drizzle/schema";
 import { db } from "@/lib/db";
 import { buildCountQuery, buildPaginatedQuery, TColumnsDefinition } from "@/lib/query-builder";
 import { TCreateSimulationSchema, TIndexSimulationQueryParams } from "@/schemas/simulation.schema";
 import { eq } from "drizzle-orm";
+import { TNewSimulationUploadedFile, TUpdateSimulation } from "@/types/database";
 
 export const createSimulationRepository = async (userId: number, data: TCreateSimulationSchema) => {
   return await db
@@ -61,4 +62,16 @@ export const getSimulationByIdRepository = async (simulationId: string) => {
     .from(simulationTable)
     .where(eq(simulationTable.id, simulationId))
     .limit(1);
+};
+
+export const updateSimulationRepository = async (simulationId: string, data: TUpdateSimulation) => {
+  return await db
+    .update(simulationTable)
+    .set(data)
+    .where(eq(simulationTable.id, simulationId))
+    .returning();
+};
+
+export const createSimulationUploadedFileRepository = async (data: TNewSimulationUploadedFile) => {
+  return await db.insert(simulationUploadedFileTable).values(data).returning();
 };

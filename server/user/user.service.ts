@@ -16,14 +16,10 @@ export const findCurrentUserByClerkUserIdService = async (clerkUserId: string) =
   const user = await findCurrentUserByClerkUserIdRepository(clerkUserId);
 
   if (!user || user.length === 0) {
-    return null;
+    throw new NotFoundException("User not found");
   }
 
-  if (user) {
-    return user[0];
-  }
-
-  return null;
+  return user[0];
 };
 
 export const findUserWithRoleAndPermissionsService = async (

@@ -9,20 +9,32 @@ import {
 import CSVInput from "./input";
 import { Separator } from "@/app/_components/ui/separator";
 import { ChartNoAxesCombined } from "lucide-react";
-import { Paragraph, Title } from "@/app/_components/typography";
+import { Paragraph } from "@/app/_components/typography";
 import StatItem from "./item";
-import { ItemContent } from "@/app/_components/ui/item";
+import { StartButton } from "./button";
+import { TSimulationStatus } from "@/types/database";
 
-export const SimulationDetailLeftSidebar = () => {
+interface SimulationDetailSidebarLeftProps {
+  hasUploadedCSV: boolean;
+  status?: TSimulationStatus;
+}
+
+export const SimulationDetailLeftSidebar = ({
+  hasUploadedCSV,
+  status,
+}: SimulationDetailSidebarLeftProps) => {
   return (
     <Sidebar containerClassName="relative h-full" className="h-full relative w-full" side="left">
       <SidebarContent className="p-4">
-        <CSVInput />
-        {/* TODO: Implement start simulation functionality */}
-        {/* <StartButton /> */}
-        <Separator />
-        <StatItem title="Status" value="All systems operational" />{" "}
-        {/* TODO: Replace with dynamic status */}
+        {!hasUploadedCSV ? (
+          <>
+            <CSVInput />
+            <Separator />
+          </>
+        ) : (
+          <StartButton />
+        )}
+        <StatItem status={status} /> {/* TODO: Replace with dynamic status */}
       </SidebarContent>
     </Sidebar>
   );
@@ -37,47 +49,7 @@ export const SimulationDetailRightSidebar = () => {
       </SidebarHeader>
       <SidebarSeparator className="m-0" />
       <SidebarContent>
-        <div className="grid grid-cols-2 gap-3 p-3">
-          <StatItem
-            title="Distance"
-            value={
-              // TODO: Replace with dynamic distance
-              <div className="flex flex-row items-baseline gap-0.5">
-                <Title level={4}>123</Title>
-                km
-              </div>
-            }
-            className="h-fit gap-1!"
-            showIndicator={false}
-          />
-          <StatItem
-            title="Time"
-            value={
-              // TODO: Replace with dynamic time
-              <div className="flex flex-row items-baseline gap-2">
-                <span className="flex flex-row items-baseline gap-0.5">
-                  <Title level={4}>2</Title>h
-                </span>
-                <span className="flex flex-row items-baseline gap-0.5">
-                  <Title level={4}>30</Title>m
-                </span>
-              </div>
-            }
-            className="h-fit gap-1!"
-            showIndicator={false}
-          />
-          <StatItem
-            title="Vehicles Used"
-            value={
-              // TODO: Replace with dynamic vehicle count
-              <ItemContent className="flex flex-row justify-between items-center">
-                <Title level={3}>5</Title>
-              </ItemContent>
-            }
-            className="h-fit col-span-2 flex flex-row justify-between items-center gap-1!"
-            showIndicator={false}
-          />
-        </div>
+        <div className="grid grid-cols-2 gap-3 p-3"></div>
       </SidebarContent>
     </Sidebar>
   );

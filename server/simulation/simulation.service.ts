@@ -1,15 +1,21 @@
+import "server-only";
+
 import { TCreateSimulationSchema, TIndexSimulationQueryParams } from "@/schemas/simulation.schema";
 import { findCurrentUserByClerkUserIdRepository } from "../user/user.repository";
 import { NotFoundException } from "@/common/exception/not-found.exception";
 import {
   createSimulationRepository,
+  createSimulationUploadedFileRepository,
   getSimulationByIdRepository,
   getSimulationsCountRepository,
   getSimulationsWithPaginationRepository,
+  updateSimulationRepository,
 } from "./simulation.repository";
 import { TPaginationResponse } from "@/types/meta";
 import { TSimulation } from "@/types/database";
 import { paginationResponseMapper } from "@/lib/pagination";
+import { findCurrentUserByClerkUserIdService } from "../user/user.service";
+import { uploadFileService } from "../files/file.service";
 
 export const createSimulationService = async (
   clerkUserId: string,
@@ -56,4 +62,30 @@ export const getSimulationByIdService = async (simulationId: string) => {
   }
 
   return simulation[0];
+};
+
+export const uploadSimulationFileService = async (
+  clerkUserId: string,
+  simulationId: string,
+  file: File,
+) => {
+  const user = await findCurrentUserByClerkUserIdService(clerkUserId);
+
+  const simulation = await getSimulationByIdService(simulationId);
+
+  const minioUploadedFile = await uploadFileService(file, `dataset/raw/${simulationId}`);
+
+  const uploadedFile = await createSimulationUploadedFileRepository({
+    fileName: minioUploadedFile.fileName,
+    filePath: minioUploadedFile.filePath,
+    userId: user.id,
+  });
+
+  const updatedSimulation = await updateSimulationRepository(simulation.id, {
+    uploadId: uploadedFile[0].id,
+  });
+
+  // TODO: Add background job to process the uploaded file and update the simulation status accordingly
+
+  return updatedSimulation;
 };

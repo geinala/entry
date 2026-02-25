@@ -12,8 +12,10 @@ import { Item, ItemContent } from "@/app/_components/ui/item";
 import { truncateText } from "@/lib/utils";
 import { Field, FieldError, FieldLabel } from "@/app/_components/ui/field";
 import { Input } from "@/app/_components/ui/input";
+import { useParams } from "next/navigation";
 
 export default function CSVInput() {
+  const { id: simulationId } = useParams<{ id: string }>();
   const { mutateAsync, isPending } = useUploadCSVMutation();
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -39,7 +41,7 @@ export default function CSVInput() {
     }
 
     try {
-      await mutateAsync(formData);
+      await mutateAsync({ formData, simulationId });
       form.setFieldValue("file", null);
     } catch {
       form.setFieldValue("file", null);
