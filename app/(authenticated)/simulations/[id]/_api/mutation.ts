@@ -5,8 +5,14 @@ import { toast } from "sonner";
 export const simulationDetailMutation = {
   uploadCSV: (api: AxiosInstance) => {
     return mutationOptions({
-      mutationFn: async (formData: FormData) => {
-        return await api.post("/files", formData, {
+      mutationFn: async ({
+        formData,
+        simulationId,
+      }: {
+        formData: FormData;
+        simulationId: string;
+      }) => {
+        return await api.post(`/simulations/${simulationId}/upload`, formData, {
           headers: {
             "Content-Type": "multipart/form-data",
           },

@@ -85,6 +85,27 @@
       "when": 1771899316149,
       "tag": "0011_old_cobalt_man",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1771986134046,
+      "tag": "0012_zippy_ironclad",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1771986246711,
+      "tag": "0013_curious_alex_power",
+      "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1771991164561,
+      "tag": "0014_ancient_betty_ross",
+      "breakpoints": true
     }
   ]
 }
