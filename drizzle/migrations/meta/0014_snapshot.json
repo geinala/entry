@@ -34,9 +34,7 @@
         "permissions_name_unique": {
           "name": "permissions_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "policies": {},
@@ -103,12 +101,8 @@
           "name": "role_permissions_role_id_roles_id_fk",
           "tableFrom": "role_permissions",
           "tableTo": "roles",
-          "columnsFrom": [
-            "role_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["role_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -116,12 +110,8 @@
           "name": "role_permissions_permission_id_permissions_id_fk",
           "tableFrom": "role_permissions",
           "tableTo": "permissions",
-          "columnsFrom": [
-            "permission_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["permission_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -162,9 +152,7 @@
         "roles_name_unique": {
           "name": "roles_name_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "name"
-          ]
+          "columns": ["name"]
         }
       },
       "policies": {},
@@ -272,12 +260,8 @@
           "name": "simulations_user_id_users_id_fk",
           "tableFrom": "simulations",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -285,12 +269,8 @@
           "name": "simulations_upload_id_simulation_uploaded_files_id_fk",
           "tableFrom": "simulations",
           "tableTo": "simulation_uploaded_files",
-          "columnsFrom": [
-            "upload_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["upload_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -398,12 +378,8 @@
           "name": "simulation_uploaded_files_user_id_users_id_fk",
           "tableFrom": "simulation_uploaded_files",
           "tableTo": "users",
-          "columnsFrom": [
-            "user_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -493,12 +469,8 @@
           "name": "users_role_id_roles_id_fk",
           "tableFrom": "users",
           "tableTo": "roles",
-          "columnsFrom": [
-            "role_id"
-          ],
-          "columnsTo": [
-            "id"
-          ],
+          "columnsFrom": ["role_id"],
+          "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -508,9 +480,7 @@
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         }
       },
       "policies": {},
@@ -644,23 +614,17 @@
         "waitlist_clerk_invitation_id_unique": {
           "name": "waitlist_clerk_invitation_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "clerk_invitation_id"
-          ]
+          "columns": ["clerk_invitation_id"]
         },
         "waitlist_email_unique": {
           "name": "waitlist_email_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "email"
-          ]
+          "columns": ["email"]
         },
         "waitlist_ticket_id_unique": {
           "name": "waitlist_ticket_id_unique",
           "nullsNotDistinct": false,
-          "columns": [
-            "ticket_id"
-          ]
+          "columns": ["ticket_id"]
         }
       },
       "policies": {},
@@ -672,22 +636,12 @@
     "public.simulation_status_enum": {
       "name": "simulation_status_enum",
       "schema": "public",
-      "values": [
-        "pending",
-        "running",
-        "completed",
-        "failed"
-      ]
+      "values": ["pending", "running", "completed", "failed"]
     },
     "public.simulation_upload_status_enum": {
       "name": "simulation_upload_status_enum",
       "schema": "public",
-      "values": [
-        "uploaded",
-        "validating",
-        "failed",
-        "ready"
-      ]
+      "values": ["uploaded", "validating", "failed", "ready"]
     },
     "public.waitlist_status_enum": {
       "name": "waitlist_status_enum",
