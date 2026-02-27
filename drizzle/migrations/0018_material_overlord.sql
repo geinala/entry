@@ -1,0 +1,1 @@
+ALTER TABLE "nodes" ALTER COLUMN "demand" SET DATA TYPE real;

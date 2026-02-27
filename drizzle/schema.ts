@@ -4,6 +4,7 @@ import {
   integer,
   pgEnum,
   pgTable,
+  real,
   serial,
   timestamp,
   uuid,
@@ -138,6 +139,8 @@ export const simulationTable = pgTable(
 export const simulationUploadStatusEnum = pgEnum("simulation_upload_status_enum", [
   "uploaded",
   "validating",
+  "validated",
+  "processing",
   "failed",
   "ready",
 ]);
@@ -178,7 +181,7 @@ export const nodeTable = pgTable(
     simulationId: uuid("simulation_id").references(() => simulationTable.id),
     latitude: varchar("latitude").notNull(),
     longitude: varchar("longitude").notNull(),
-    demand: integer("demand").notNull(),
+    demand: real("demand").notNull(),
     isDepot: integer("is_depot").notNull().default(0),
   },
   (table) => [
@@ -200,7 +203,7 @@ export const nodeDetailTable = pgTable(
     address: varchar("address").notNull(),
     city: varchar("city").notNull(),
     district: varchar("district").notNull(),
-    weight: integer("weight").notNull(),
+    weight: real("weight").notNull(),
   },
   (table) => [
     foreignKey({

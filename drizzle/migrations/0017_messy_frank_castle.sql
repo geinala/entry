@@ -1,0 +1,2 @@
+ALTER TYPE "public"."simulation_upload_status_enum" ADD VALUE 'validated' BEFORE 'failed';--> statement-breakpoint
+ALTER TYPE "public"."simulation_upload_status_enum" ADD VALUE 'processing' BEFORE 'failed';

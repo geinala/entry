@@ -133,7 +133,8 @@ export const SimulationFileUploadedItem = ({
   const description =
     status === "uploaded"
       ? "File uploaded successfully. Ready for validation."
-      : `${totalRows} rows`;
+      : `${totalRows} rows.`;
+  const processingDescription = `File is validated successfully. ${totalRows} rows started processing.`;
 
   useEffect(() => {
     if (data?.uploadedFile?.status === "failed" && errorReportFileUrl?.data) {
@@ -156,13 +157,22 @@ export const SimulationFileUploadedItem = ({
 
   return (
     <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
-      {status !== "validating" && (
+      {(status === "ready" || status === "uploaded" || status === "failed") && (
         <FileStatusItem
           icon={File}
           title={fileName}
           description={description}
           variant={status === "failed" ? "error" : "success"}
           statusIcon={getStatusIcon()}
+        />
+      )}
+
+      {status === "processing" && (
+        <FileStatusItem
+          icon={File}
+          title={fileName}
+          description={processingDescription}
+          variant="info"
         />
       )}
 
@@ -195,11 +205,13 @@ export const SimulationFileUploadedItem = ({
           description="Please check the file format and content."
           footer={
             <div className="flex flex-col w-full">
-              <Link href={errorReportFileUrl?.data || ""} download target="_self">
-                <Button variant={"destructive"} className="w-full">
-                  Download Error Report
-                </Button>
-              </Link>
+              {errorReportFileUrl?.data && (
+                <Link href={errorReportFileUrl?.data} download target="_self">
+                  <Button variant={"destructive"} className="w-full">
+                    Download Error Report
+                  </Button>
+                </Link>
+              )}
               <DialogTrigger asChild>
                 <Button variant={"outline"} className="w-full mt-2">
                   Re-upload File
