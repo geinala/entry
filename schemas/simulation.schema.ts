@@ -3,6 +3,10 @@ import { createSortSchema } from "@/lib/validation";
 import { IndexQueryParams } from "@/types/query-params";
 import z from "zod";
 
+export const SimulationIdParamSchema = z.object({
+  simulationId: z.string().uuid("Invalid simulation ID format"),
+});
+
 export const CreateSimulationSchema = z.object({
   title: z
     .string()

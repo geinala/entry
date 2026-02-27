@@ -6,6 +6,7 @@ import { QueryProvider } from "@/lib/tanstack";
 import "maplibre-gl/dist/maplibre-gl.css";
 import { SidebarProvider } from "./_components/ui/sidebar";
 import { ensureEnvValidated } from "@/lib/validate-env";
+import { BreadcrumbProvider } from "./_contexts/breadcrumb.context";
 
 ensureEnvValidated();
 
@@ -25,7 +26,9 @@ export default function RootLayout({
       <ClerkProvider>
         <html lang="en">
           <body className={`antialiased`}>
-            <SidebarProvider defaultOpen={false}>{children}</SidebarProvider>
+            <BreadcrumbProvider>
+              <SidebarProvider defaultOpen={false}>{children}</SidebarProvider>
+            </BreadcrumbProvider>
             <Toaster position="top-center" />
           </body>
         </html>

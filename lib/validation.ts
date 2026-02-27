@@ -13,12 +13,18 @@ interface IValidationResult<T> {
  * @param data - Data yang akan divalidasi
  * @returns Hasil validasi dengan data atau error
  */
-export function validateSchema<T>(schema: ZodSchema, data: unknown): IValidationResult<T> {
+export function validateSchema<T>(
+  schema: ZodSchema,
+  data: unknown,
+  customException?: (error: z.ZodError) => Error,
+): IValidationResult<T> {
   try {
     const result = schema.safeParse(data);
 
     if (result.error && !result.data) {
-      throw new ValidationException("Validation failed", result.error);
+      throw customException
+        ? customException(result.error)
+        : new ValidationException("Validation failed", result.error);
     }
 
     return {

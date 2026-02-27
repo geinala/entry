@@ -28,7 +28,7 @@ import { TFilterItem } from "@/app/_components/data-table/filter-collections/fac
 import { simulationStatusEnum } from "@/drizzle/schema";
 import { convertUtcToLocalTime, toTitleCase, truncateText } from "@/lib/utils";
 import { InfinityScroll } from "@/app/_components/infinity-scroll";
-import { TSimulation } from "@/types/database";
+import { TSimulation, TSimulationStatus } from "@/types/database";
 import { Paragraph } from "@/app/_components/typography";
 
 interface ISimulationHistorySidebar {
@@ -82,16 +82,22 @@ export const SimulationHistorySidebar = ({ onSelectSimulation }: ISimulationHist
         </div>
       </SidebarHeader>
       <SidebarContent className="px-3 flex-1 min-h-0 overflow-hidden">
-        <div className="overflow-y-auto h-full space-y-4 scrollbar-thin">
-          {data?.map((page) => (
-            <SimulationCard {...page} key={page.id} onSelectSimulation={onSelectSimulation} />
-          ))}
-          <InfinityScroll
-            handleLoadMore={fetchNextPage}
-            isLoading={isFetchingNextPage}
-            hasMore={hasNextPage}
-          />
-        </div>
+        {data?.length === 0 ? (
+          <div className="flex justify-center items-center h-full">
+            <Paragraph className="text-muted-foreground">No simulations found</Paragraph>
+          </div>
+        ) : (
+          <div className="overflow-y-auto h-full space-y-4 scrollbar-thin">
+            {data?.map((page) => (
+              <SimulationCard {...page} key={page.id} onSelectSimulation={onSelectSimulation} />
+            ))}
+            <InfinityScroll
+              handleLoadMore={fetchNextPage}
+              isLoading={isFetchingNextPage}
+              hasMore={hasNextPage}
+            />
+          </div>
+        )}
       </SidebarContent>
       <SidebarFooter>
         <GuardComponent requirePermission={PERMISSIONS.CREATE_SIMULATION}>
@@ -105,6 +111,13 @@ export const SimulationHistorySidebar = ({ onSelectSimulation }: ISimulationHist
     </Sidebar>
   );
 };
+
+const STATUS_CONFIG = {
+  pending: { color: "bg-amber-100 text-amber-800", label: "Pending" },
+  running: { color: "bg-blue-100 text-blue-800", label: "Running" },
+  completed: { color: "bg-green-100 text-green-800", label: "Completed" },
+  failed: { color: "bg-red-100 text-red-800", label: "Failed" },
+} as const satisfies Record<TSimulationStatus, { color: string; label: string }>;
 
 const SimulationCard = (
   data: TSimulation & { onSelectSimulation: (simulationId: string) => void },
@@ -120,7 +133,9 @@ const SimulationCard = (
       <CardContent className="px-4">
         <div className="w-full flex justify-between items-center">
           <CardTitle className="text-primary text-md">{truncateText(data.id, 15)}</CardTitle>
-          <Badge variant={"success"}>{data.status}</Badge>
+          <Badge variant={"success"} className={STATUS_CONFIG[data.status].color}>
+            {STATUS_CONFIG[data.status].label}
+          </Badge>
         </div>
         <CardTitle>{truncateText(data.title, 30)}</CardTitle>
       </CardContent>

@@ -1,8 +1,21 @@
 "use client";
 
 import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/app/_components/ui/empty";
+import { useBreadcrumb } from "@/app/_contexts/breadcrumb.context";
+import { useEffect } from "react";
 
 export default function DashboardPage() {
+  const { setBreadcrumbs } = useBreadcrumb();
+
+  useEffect(() => {
+    setBreadcrumbs([
+      {
+        label: "Dashboard",
+        href: "/dashboard",
+      },
+    ]);
+  }, [setBreadcrumbs]);
+
   return (
     <div className="w-full h-full flex justify-center items-center flex-col gap-4">
       <Empty>

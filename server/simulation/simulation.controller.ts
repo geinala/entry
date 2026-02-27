@@ -5,6 +5,7 @@ import { parseQueryParams, validateSchema } from "@/lib/validation";
 import {
   CreateSimulationSchema,
   IndexSimulationQueryParams,
+  SimulationIdParamSchema,
   TCreateSimulationSchema,
 } from "@/schemas/simulation.schema";
 import { NextRequest } from "next/server";
@@ -20,6 +21,7 @@ import { PERMISSIONS } from "@/common/constants/permissions/permissions";
 import { parseSortParams } from "@/lib/query-param";
 import { handleException } from "@/common/exception/helper";
 import { CSVUploadedSchema, TCSVUploaded } from "@/schemas/file.schema";
+import { NotFoundException } from "@/common/exception/not-found.exception";
 
 export const createSimulationController = async (clerkUserId: string, request: NextRequest) => {
   try {
@@ -77,6 +79,12 @@ export const getSimulationsController = async (clerkUserId: string, req: NextReq
 
 export const getSimulationByIdController = async (clerkUserId: string, simulationId: string) => {
   try {
+    validateSchema(
+      SimulationIdParamSchema,
+      { simulationId },
+      () => new NotFoundException("Simulation not found"),
+    );
+
     await checkUserPermissionsService(clerkUserId, [PERMISSIONS.VIEW_SIMULATION]);
 
     const simulation = await getSimulationByIdService(simulationId);
@@ -96,6 +104,14 @@ export const uploadSimulationFileController = async (
   request: NextRequest,
 ) => {
   try {
+    validateSchema(
+      SimulationIdParamSchema,
+      { simulationId },
+      () => new NotFoundException("Simulation not found"),
+    );
+
+    await checkUserPermissionsService(clerkUserId, [PERMISSIONS.VIEW_SIMULATION]);
+
     const formData = await request.formData();
 
     const file = formData.get("file");
@@ -119,6 +135,12 @@ export const getSimulationUploadedFileController = async (
   simulationId: string,
 ) => {
   try {
+    validateSchema(
+      SimulationIdParamSchema,
+      { simulationId },
+      () => new NotFoundException("Simulation not found"),
+    );
+
     await checkUserPermissionsService(clerkUserId, [PERMISSIONS.VIEW_SIMULATION]);
 
     const file = await getSimulationUploadedFileBySimulationIdService(simulationId);

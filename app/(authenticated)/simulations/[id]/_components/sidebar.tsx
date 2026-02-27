@@ -15,13 +15,16 @@ import { SimulationFileUploadedItem } from "./file-status.item";
 import { useGetFileWithSimulationIdQuery } from "../_hooks/use-queries";
 import { useParams } from "next/navigation";
 import { StartButton } from "./button";
+import { TSimulationStatus } from "@/types/database";
 
 interface SimulationDetailSidebarLeftProps {
   hasUploadedCSV: boolean;
+  status?: TSimulationStatus;
 }
 
 export const SimulationDetailLeftSidebar = ({
   hasUploadedCSV,
+  status,
 }: SimulationDetailSidebarLeftProps) => {
   const { id } = useParams<{ id: string }>();
   const { data, isLoading } = useGetFileWithSimulationIdQuery(id, hasUploadedCSV);
@@ -40,7 +43,7 @@ export const SimulationDetailLeftSidebar = ({
             {data?.data.uploadedFile?.status === "ready" && <StartButton />}
           </>
         )}
-        <StatItem status={data?.data?.status} /> {/* TODO: Replace with dynamic status */}
+        <StatItem status={status} />
       </SidebarContent>
     </Sidebar>
   );

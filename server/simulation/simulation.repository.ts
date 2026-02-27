@@ -67,7 +67,10 @@ export const getSimulationByIdRepository = async (simulationId: string) => {
 export const updateSimulationRepository = async (simulationId: string, data: TUpdateSimulation) => {
   return await db
     .update(simulationTable)
-    .set(data)
+    .set({
+      ...data,
+      updatedAt: new Date(),
+    })
     .where(eq(simulationTable.id, simulationId))
     .returning();
 };

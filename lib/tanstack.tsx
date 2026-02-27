@@ -101,10 +101,6 @@ const handleGlobalError = (error: AxiosError) => {
       toast.error(message || "You do not have permission to perform this action.");
       break;
 
-    case 404:
-      toast.error(message || "The requested resource was not found.");
-      break;
-
     case 409:
       toast.error(message || "Conflict occurred. Please try again.");
       break;
