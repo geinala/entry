@@ -7,7 +7,7 @@ import { TApiSuccessResponseWithData } from "@/types/response";
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import { AxiosInstance } from "axios";
 
-const SIMULATIONS_QUERY_KEYS = {
+export const SIMULATIONS_QUERY_KEYS = {
   all: ["simulations"] as const,
   findById: (id: string) => ["simulations", id] as const,
 };

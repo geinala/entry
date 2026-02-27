@@ -93,7 +93,7 @@ export default function CSVInput({ onFileUpload, ...props }: CSVInputProps) {
                         <Empty className="p-1!">
                           <EmptyContent className="gap-2">
                             <CloudUpload className="text-muted-foreground w-7! h-7!" />
-                            <EmptyDescription className="leading-5">
+                            <EmptyDescription>
                               <span className="text-primary font-semibold">Click to upload</span>{" "}
                               CSV file {"(max 10MB)"}
                             </EmptyDescription>

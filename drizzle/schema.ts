@@ -170,3 +170,44 @@ export const simulationUploadedFileTable = pgTable(
     index("simulation_uploaded_files_user_id_idx").on(table.userId),
   ],
 );
+
+export const nodeTable = pgTable(
+  "nodes",
+  {
+    id: serial().primaryKey(),
+    simulationId: uuid("simulation_id").references(() => simulationTable.id),
+    latitude: varchar("latitude").notNull(),
+    longitude: varchar("longitude").notNull(),
+    demand: integer("demand").notNull(),
+    isDepot: integer("is_depot").notNull().default(0),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.simulationId],
+      foreignColumns: [simulationTable.id],
+      name: "nodes_simulation_id_simulations_id_fk",
+    }),
+    index("nodes_simulation_id_idx").on(table.simulationId),
+  ],
+);
+
+export const nodeDetailTable = pgTable(
+  "node_details",
+  {
+    id: serial().primaryKey(),
+    nodeId: integer("node_id").references(() => nodeTable.id),
+    name: varchar("name").notNull(),
+    address: varchar("address").notNull(),
+    city: varchar("city").notNull(),
+    district: varchar("district").notNull(),
+    weight: integer("weight").notNull(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.nodeId],
+      foreignColumns: [nodeTable.id],
+      name: "node_details_node_id_nodes_id_fk",
+    }),
+    index("node_details_node_id_idx").on(table.nodeId),
+  ],
+);
