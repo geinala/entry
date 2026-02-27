@@ -89,10 +89,14 @@ export const uploadSimulationFileService = async (
   });
 
   try {
-    await server.post(`/simulations/${simulationId}/files/validate`);
+    await server.post(`/simulations/${simulationId}/files`);
   } catch {
     await updateSimulationUploadedFileRepository(uploadedFile[0].id, {
       status: "failed",
+    });
+
+    await updateSimulationRepository(simulation.id, {
+      uploadId: null,
     });
   }
 
