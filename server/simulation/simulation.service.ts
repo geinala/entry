@@ -14,7 +14,7 @@ import {
   updateSimulationUploadedFileRepository,
 } from "./simulation.repository";
 import { TPaginationResponse } from "@/types/meta";
-import { TSimulation, TSimulationWithUploadedFile } from "@/types/database";
+import { TSimulation, TSimulationWithDepot, TSimulationWithUploadedFile } from "@/types/database";
 import { paginationResponseMapper } from "@/lib/pagination";
 import { findCurrentUserByClerkUserIdService } from "../user/user.service";
 import { uploadFileService } from "../files/file.service";
@@ -57,14 +57,19 @@ export const getSimulationsWithPaginationService = async (
   });
 };
 
-export const getSimulationByIdService = async (simulationId: string) => {
+export const getSimulationByIdService = async (
+  simulationId: string,
+): Promise<TSimulationWithDepot> => {
   const simulation = await getSimulationByIdRepository(simulationId);
 
   if (!simulation || simulation.length === 0) {
     throw new NotFoundException("Simulation not found");
   }
 
-  return simulation[0];
+  return {
+    ...simulation[0].simulations,
+    depot: simulation[0].nodes ?? null,
+  };
 };
 
 export const uploadSimulationFileService = async (

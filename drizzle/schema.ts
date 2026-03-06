@@ -1,4 +1,5 @@
 import {
+  doublePrecision,
   foreignKey,
   index,
   integer,
@@ -179,8 +180,8 @@ export const nodeTable = pgTable(
   {
     id: serial().primaryKey(),
     simulationId: uuid("simulation_id").references(() => simulationTable.id),
-    latitude: varchar("latitude").notNull(),
-    longitude: varchar("longitude").notNull(),
+    latitude: doublePrecision("latitude").notNull(),
+    longitude: doublePrecision("longitude").notNull(),
     demand: real("demand").notNull(),
     isDepot: integer("is_depot").notNull().default(0),
   },
