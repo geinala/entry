@@ -13,6 +13,7 @@ import { Input } from "@/app/_components/ui/input";
 import { CreateSimulationSchema } from "@/schemas/simulation.schema";
 import { useForm } from "@tanstack/react-form";
 import { useCreateSimulationMutation } from "../../_hooks/use-mutations";
+import { ClickMarker, MapSearch, TomTomMap } from "@/app/_components/map";
 
 interface CreateSimulationFormDialogProps {
   onSuccess?: () => void;
@@ -24,6 +25,8 @@ export const CreateSimulationFormDialog = ({ onSuccess }: CreateSimulationFormDi
   const form = useForm({
     defaultValues: {
       title: "",
+      latitude: 0,
+      longitude: 0,
     },
     validators: { onSubmit: CreateSimulationSchema },
     onSubmit: async (values) => {
@@ -73,6 +76,27 @@ export const CreateSimulationFormDialog = ({ onSuccess }: CreateSimulationFormDi
             );
           }}
         />
+        <Field>
+          <FieldLabel htmlFor="latitude">Start Location</FieldLabel>
+          <div className="w-full h-64 border-secondary rounded-md border">
+            <TomTomMap
+              zoom={14}
+              showTrafficFlow={true}
+              showTrafficIncidents={true}
+              style="monoLight"
+            >
+              <div className="absolute top-2 left-2 z-10 w-60">
+                <MapSearch placeholder="Search for start location..." />
+                <ClickMarker
+                  onChange={(lngLat) => {
+                    form.setFieldValue("latitude", lngLat.lat);
+                    form.setFieldValue("longitude", lngLat.lng);
+                  }}
+                />
+              </div>
+            </TomTomMap>
+          </div>
+        </Field>
         <DialogFooter>
           <Button
             type="submit"

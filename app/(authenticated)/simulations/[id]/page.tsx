@@ -12,7 +12,7 @@ import { Empty, EmptyContent, EmptyDescription } from "@/app/_components/ui/empt
 import { useGetSimulationByIdQuery } from "../_hooks/use-queries";
 import { isNotFoundError } from "@/common/exception/helper";
 
-const TomTomMap = dynamic(() => import("./_components/tomtom-map"), {
+const Map = dynamic(() => import("./_components/map"), {
   loading: () => <Loading />,
   ssr: false,
 });
@@ -62,7 +62,9 @@ export default function SimulationDetailPage() {
           </EmptyContent>
         </Empty>
       )}
-      {!isShowEmptyState && <TomTomMap />}
+      {!isShowEmptyState && data?.data.depot && (
+        <Map center={[data.data.depot.longitude, data.data.depot.latitude]} zoom={18} />
+      )}
     </SimulationsLayoutShell>
   );
 }
