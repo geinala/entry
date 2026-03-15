@@ -1,1 +1,0 @@
-ALTER TABLE "node_details" ALTER COLUMN "weight" SET DATA TYPE real;

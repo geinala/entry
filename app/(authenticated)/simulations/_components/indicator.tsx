@@ -12,7 +12,9 @@ export const Indicator = ({ color = "blue" }: { color?: string }) => {
   const colors = colorMap[color] || colorMap.blue;
 
   return (
-    <div className={`h-5 w-5 rounded-full ${colors.bg} flex items-center justify-center`}>
+    <div
+      className={`h-5 w-5 rounded-full ${colors.bg} flex items-center justify-center animate-caret-blink`}
+    >
       <div className={`h-2.5 w-2.5 rounded-full ${colors.dot}`} />
     </div>
   );

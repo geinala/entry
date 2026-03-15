@@ -1,6 +1,11 @@
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
-import { format as dateFnsFormat } from "date-fns";
+import {
+  format as dateFnsFormat,
+  DurationUnit,
+  formatDuration,
+  intervalToDuration,
+} from "date-fns";
 import { toZonedTime } from "date-fns-tz";
 import env from "@/common/config/environtment";
 
@@ -35,3 +40,21 @@ export const truncateText = (text: string, maxLength: number) => {
   }
   return text.slice(0, maxLength) + "...";
 };
+
+export function metersToKm(meters: number): number {
+  return meters / 1000;
+}
+
+export function formatSeconds(totalSeconds: number, format: DurationUnit[]): string {
+  const duration = intervalToDuration({
+    start: 0,
+    end: totalSeconds * 1000,
+  });
+
+  const formatted = formatDuration(duration, {
+    format,
+    delimiter: " ",
+  });
+
+  return formatted || "0 seconds";
+}

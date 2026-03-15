@@ -3,6 +3,7 @@ import "server-only";
 import { responseFormatter } from "@/lib/response-formatter";
 import { parseQueryParams, validateSchema } from "@/lib/validation";
 import {
+  CreateSimulationConstraintsSchema,
   CreateSimulationSchema,
   IndexSimulationQueryParams,
   SimulationIdParamSchema,
@@ -14,6 +15,7 @@ import {
   getSimulationByIdService,
   getSimulationsWithPaginationService,
   getSimulationUploadedFileBySimulationIdService,
+  startSimulationService,
   uploadSimulationFileService,
 } from "./simulation.service";
 import { checkUserPermissionsService } from "../permission/permission.service";
@@ -148,6 +150,22 @@ export const getSimulationUploadedFileController = async (
     return responseFormatter.successWithData({
       data: file,
       message: "Uploaded file retrieved successfully",
+    });
+  } catch (error) {
+    return handleException(error);
+  }
+};
+
+export const startSimulationController = async (simulationId: string, request: NextRequest) => {
+  try {
+    const body = await request.json();
+
+    validateSchema(CreateSimulationConstraintsSchema, body);
+
+    await startSimulationService(simulationId, body);
+
+    return responseFormatter.success({
+      message: "Simulation started successfully",
     });
   } catch (error) {
     return handleException(error);

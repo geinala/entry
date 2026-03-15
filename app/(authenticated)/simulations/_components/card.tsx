@@ -4,8 +4,8 @@ import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/app/_com
 import { ItemMedia } from "@/app/_components/ui/item";
 import { MapPin, Clock, Truck, CheckCircle } from "lucide-react";
 
-interface StatisticsCardProps {
-  icon: React.ReactNode;
+interface StatisticsCardProps extends Omit<React.ComponentProps<typeof Card>, "content"> {
+  icon?: React.ReactNode;
   title: string;
   content: React.ReactNode;
   footer: React.ReactNode;
@@ -16,20 +16,19 @@ interface DynamicCardProps {
   footer?: React.ReactNode;
 }
 
-const StatisticsCard = ({ icon, title, content, footer }: StatisticsCardProps) => {
+const StatisticsCard = ({ icon, title, content, footer, ...rest }: StatisticsCardProps) => {
   return (
-    <Card className="flex-1 gap-3">
+    <Card className="flex-1 gap-3" {...rest}>
       <CardHeader className="flex items-center gap-3">
         {icon}
         <CardTitle>{title}</CardTitle>
       </CardHeader>
       <CardContent>{content}</CardContent>
-      <CardFooter>{footer}</CardFooter>
+      {footer && <CardFooter>{footer}</CardFooter>}
     </Card>
   );
 };
 
-// TODO: Replace static data with dynamic data from simulation stats
 const CARD_CONFIG = {
   distance: {
     icon: (
@@ -38,8 +37,6 @@ const CARD_CONFIG = {
       </ItemMedia>
     ),
     title: "Total Distance",
-    defaultContent: "1234 km",
-    defaultFooter: "Since last month",
   },
   time: {
     icon: (
@@ -48,8 +45,6 @@ const CARD_CONFIG = {
       </ItemMedia>
     ),
     title: "Total Time Travel",
-    defaultContent: "56 hours",
-    defaultFooter: "Since last month",
   },
   vehicles: {
     icon: (
@@ -58,8 +53,6 @@ const CARD_CONFIG = {
       </ItemMedia>
     ),
     title: "Total Active Vehicles",
-    defaultContent: "78 Vehicles",
-    defaultFooter: "Since last month",
   },
   nodes: {
     icon: (
@@ -68,41 +61,23 @@ const CARD_CONFIG = {
       </ItemMedia>
     ),
     title: "Total Completed Nodes",
-    defaultContent: "45 Nodes",
-    defaultFooter: "Since last month",
   },
 };
 
 const TotalDistanceCard = ({ content, footer }: DynamicCardProps) => (
-  <StatisticsCard
-    {...CARD_CONFIG.distance}
-    content={content ?? CARD_CONFIG.distance.defaultContent} // TODO: Replace with dynamic data
-    footer={footer ?? CARD_CONFIG.distance.defaultFooter} // TODO: Replace with dynamic data
-  />
+  <StatisticsCard {...CARD_CONFIG.distance} content={content} footer={footer} />
 );
 
 const TotalTimeTravelCard = ({ content, footer }: DynamicCardProps) => (
-  <StatisticsCard
-    {...CARD_CONFIG.time}
-    content={content ?? CARD_CONFIG.time.defaultContent} // TODO: Replace with dynamic data
-    footer={footer ?? CARD_CONFIG.time.defaultFooter} // TODO: Replace with dynamic data
-  />
+  <StatisticsCard {...CARD_CONFIG.time} content={content} footer={footer} />
 );
 
 const TotalActiveVehiclesCard = ({ content, footer }: DynamicCardProps) => (
-  <StatisticsCard
-    {...CARD_CONFIG.vehicles}
-    content={content ?? CARD_CONFIG.vehicles.defaultContent} // TODO: Replace with dynamic data
-    footer={footer ?? CARD_CONFIG.vehicles.defaultFooter} // TODO: Replace with dynamic data
-  />
+  <StatisticsCard {...CARD_CONFIG.vehicles} content={content} footer={footer} />
 );
 
 const TotalCompletedNodesCard = ({ content, footer }: DynamicCardProps) => (
-  <StatisticsCard
-    {...CARD_CONFIG.nodes}
-    content={content ?? CARD_CONFIG.nodes.defaultContent} // TODO: Replace with dynamic data
-    footer={footer ?? CARD_CONFIG.nodes.defaultFooter} // TODO: Replace with dynamic data
-  />
+  <StatisticsCard {...CARD_CONFIG.nodes} content={content} footer={footer} />
 );
 
 export { TotalDistanceCard, TotalTimeTravelCard, TotalActiveVehiclesCard, TotalCompletedNodesCard };

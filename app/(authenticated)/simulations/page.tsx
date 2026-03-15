@@ -21,6 +21,10 @@ import { PERMISSIONS } from "@/common/constants/permissions/permissions";
 import { useGetSimulationByIdQuery } from "./_hooks/use-queries";
 import { Empty, EmptyContent, EmptyDescription } from "@/app/_components/ui/empty";
 import Link from "next/link";
+import { formatSeconds, metersToKm } from "@/lib/utils";
+import { Paragraph } from "@/app/_components/typography";
+import { Clock } from "lucide-react";
+import { formatDistanceToNow } from "date-fns";
 
 const SHORTCUT_KEY_TO_REMOVE_DETAILS = "Escape";
 
@@ -79,10 +83,66 @@ export default function HistoryPage() {
           >
             <main className="flex flex-col gap-4">
               <section className="flex gap-3 w-full">
-                <TotalDistanceCard />
-                <TotalTimeTravelCard />
-                <TotalActiveVehiclesCard />
-                <TotalCompletedNodesCard />
+                <TotalDistanceCard
+                  content={
+                    <Paragraph className="font-medium text-2xl">
+                      {metersToKm(data.data.totalDistanceInMeters)} km
+                    </Paragraph>
+                  }
+                  footer={
+                    <>
+                      <Clock className="text-muted-foreground w-3 h-3 mr-1" />
+                      <Paragraph className="text-muted-foreground">
+                        Updated {formatDistanceToNow(data.data.updatedAt, { addSuffix: true })}
+                      </Paragraph>
+                    </>
+                  }
+                />
+                <TotalTimeTravelCard
+                  content={
+                    <Paragraph className="font-medium text-2xl">
+                      {formatSeconds(data.data.totalDurationInSeconds, ["hours", "minutes"])}
+                    </Paragraph>
+                  }
+                  footer={
+                    <>
+                      <Clock className="text-muted-foreground w-3 h-3 mr-1" />
+                      <Paragraph className="text-muted-foreground">
+                        Updated {formatDistanceToNow(data.data.updatedAt, { addSuffix: true })}
+                      </Paragraph>
+                    </>
+                  }
+                />
+                <TotalActiveVehiclesCard
+                  content={
+                    <Paragraph className="font-medium text-2xl">
+                      {data.data.totalActiveVehicles} vehicles
+                    </Paragraph>
+                  }
+                  footer={
+                    <>
+                      <Clock className="w-3 h-3 mr-1 text-muted-foreground" />
+                      <Paragraph className="text-muted-foreground">
+                        Updated {formatDistanceToNow(data.data.updatedAt, { addSuffix: true })}
+                      </Paragraph>
+                    </>
+                  }
+                />
+                <TotalCompletedNodesCard
+                  content={
+                    <Paragraph className="font-medium text-2xl">
+                      {data.data.totalCompletedNodes} nodes
+                    </Paragraph>
+                  }
+                  footer={
+                    <>
+                      <Clock className="w-3 h-3 mr-1 text-muted-foreground" />
+                      <Paragraph className="text-muted-foreground">
+                        Updated {formatDistanceToNow(data.data.updatedAt, { addSuffix: true })}
+                      </Paragraph>
+                    </>
+                  }
+                />
               </section>
               <section>
                 <LogTable />

@@ -21,6 +21,13 @@ COPY . .
 
 RUN pnpm build
 
+FROM base as migrator
+
+COPY --from=deps /app/node_modules ./node_modules
+COPY . .
+
+CMD ["pnpm", "drizzle:migrate"]
+
 FROM base as runner
 
 ENV NODE_ENV=production

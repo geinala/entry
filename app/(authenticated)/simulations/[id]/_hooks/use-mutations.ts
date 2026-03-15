@@ -10,3 +10,10 @@ export const useUploadCSVMutation = () => {
 
   return useMutation(simulationDetailMutation.uploadCSV(api, queryClient));
 };
+
+export const useStartSimulation = () => {
+  const api = useAuthenticatedClient();
+  const queryClient = useQueryClient();
+
+  return useMutation(simulationDetailMutation.startSimulation(api, queryClient));
+};
