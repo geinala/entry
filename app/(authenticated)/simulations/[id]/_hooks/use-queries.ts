@@ -11,3 +11,9 @@ export const useGetFileWithSimulationIdQuery = (simulationId: string, hasUploade
     simulationDetailQueries.findFileWithSimulationId(api, simulationId, hasUploadedCSV),
   );
 };
+
+export const useGetAllActiveVehiclesQuery = (simulationId?: string) => {
+  const api = useAuthenticatedClient();
+
+  return useQuery(simulationDetailQueries.getAllActiveVehicles(api, simulationId));
+};

@@ -11,6 +11,8 @@ import { Route } from "next";
 import { Empty, EmptyContent, EmptyDescription } from "@/app/_components/ui/empty";
 import { useGetSimulationByIdQuery } from "../_hooks/use-queries";
 import { isNotFoundError } from "@/common/exception/helper";
+import { Dialog } from "@/app/_components/ui/dialog";
+import { ConstraintsFormDialog } from "./_components/dialog";
 
 const Map = dynamic(() => import("./_components/map"), {
   loading: () => <Loading />,
@@ -39,32 +41,35 @@ export default function SimulationDetailPage() {
     ]);
   }, [setBreadcrumbs, simulationId]);
 
-  const isShowEmptyState =
-    !isLoading && (data?.data.status === "failed" || data?.data.status === "pending");
+  const isShowEmptyState = !isLoading && data?.data.status === "failed";
 
   return (
-    <SimulationsLayoutShell
-      leftSidebar={
-        <SimulationDetailLeftSidebar
-          hasUploadedCSV={!!data?.data.uploadId}
-          status={data?.data.status}
-        />
-      }
-      rightSidebar={<SimulationDetailRightSidebar />}
-      isLoading={isLoading}
-    >
-      {isShowEmptyState && (
-        <Empty>
-          <EmptyContent>
-            <EmptyDescription>
-              Visualization for this simulation is not available yet. Please check back later.
-            </EmptyDescription>
-          </EmptyContent>
-        </Empty>
-      )}
-      {!isShowEmptyState && data?.data.depot && (
-        <Map center={[data.data.depot.longitude, data.data.depot.latitude]} zoom={18} />
-      )}
-    </SimulationsLayoutShell>
+    <Dialog>
+      <SimulationsLayoutShell
+        leftSidebar={
+          <SimulationDetailLeftSidebar
+            hasUploadedCSV={!!data?.data.uploadId}
+            status={data?.data.status}
+          />
+        }
+        rightSidebar={<SimulationDetailRightSidebar data={data?.data} />}
+        isLoading={isLoading}
+      >
+        {isShowEmptyState && (
+          <Empty>
+            <EmptyContent>
+              <EmptyDescription>
+                Visualization for this simulation is not available yet. Please check back later.
+              </EmptyDescription>
+            </EmptyContent>
+          </Empty>
+        )}
+        {!isShowEmptyState && data?.data.depot && (
+          <Map center={[data.data.depot.longitude, data.data.depot.latitude]} zoom={18} />
+        )}
+      </SimulationsLayoutShell>
+
+      <ConstraintsFormDialog />
+    </Dialog>
   );
 }

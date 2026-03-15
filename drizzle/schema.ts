@@ -1,13 +1,17 @@
 import {
+  boolean,
   doublePrecision,
   foreignKey,
   index,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   real,
   serial,
+  text,
   timestamp,
+  uniqueIndex,
   uuid,
   varchar,
 } from "drizzle-orm/pg-core";
@@ -103,6 +107,7 @@ export const waitlistTable = pgTable(
 
 export const simulationStatusEnum = pgEnum("simulation_status_enum", [
   "pending",
+  "processing",
   "running",
   "completed",
   "failed",
@@ -117,6 +122,16 @@ export const simulationTable = pgTable(
     status: simulationStatusEnum("status").notNull().default("pending"),
     startedAt: timestamp("started_at", { withTimezone: true }),
     completedAt: timestamp("completed_at", { withTimezone: true }),
+    computationTimeLimitInSeconds: integer("computation_time_limit_in_seconds")
+      .notNull()
+      .default(300), // in seconds
+    totalDemandInKilograms: real("total_demand_in_kilograms").notNull().default(0),
+    totalDistanceInMeters: integer("total_distance_in_meters").notNull().default(0),
+    totalVehicles: integer("total_vehicles").notNull().default(0),
+    totalDurationInSeconds: integer("total_duration_in_seconds").notNull().default(0),
+    totalActiveVehicles: integer("total_active_vehicles").notNull().default(0),
+    totalCompletedNodes: integer("total_completed_nodes").notNull().default(0),
+    totalNodes: integer("total_nodes").notNull().default(0),
     uploadId: integer("upload_id").references(() => simulationUploadedFileTable.id),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
@@ -180,6 +195,7 @@ export const nodeTable = pgTable(
   {
     id: serial().primaryKey(),
     simulationId: uuid("simulation_id").references(() => simulationTable.id),
+    matrixIndex: integer("matrix_index").notNull(),
     latitude: doublePrecision("latitude").notNull(),
     longitude: doublePrecision("longitude").notNull(),
     demand: real("demand").notNull(),
@@ -213,5 +229,193 @@ export const nodeDetailTable = pgTable(
       name: "node_details_node_id_nodes_id_fk",
     }),
     index("node_details_node_id_idx").on(table.nodeId),
+  ],
+);
+
+export const matrixBatchStatusEnum = pgEnum("matrix_batch_status_enum", [
+  "submitted",
+  "validated",
+  "completed",
+  "failed",
+]);
+
+export const matrixBatchTable = pgTable(
+  "matrix_batches",
+  {
+    id: serial().primaryKey(),
+    simulationId: uuid("simulation_id").references(() => simulationTable.id),
+    originStartIndex: integer("origin_start_index").notNull(),
+    originEndIndex: integer("origin_end_index").notNull(),
+    destinationStartIndex: integer("destination_start_index").notNull(),
+    destinationEndIndex: integer("destination_end_index").notNull(),
+    tomtomJobId: varchar("tomtom_job_id").notNull(),
+    status: matrixBatchStatusEnum("status").notNull().default("submitted"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.simulationId],
+      foreignColumns: [simulationTable.id],
+      name: "matrix_batches_simulation_id_simulations_id_fk",
+    }),
+    index("matrix_batches_simulation_id_idx").on(table.simulationId),
+  ],
+);
+
+export const matrixResultTable = pgTable(
+  "matrix_results",
+  {
+    id: serial().primaryKey(),
+    simulationId: uuid("simulation_id").references(() => simulationTable.id),
+    originIndex: integer("origin_index").notNull(),
+    destinationIndex: integer("destination_index").notNull(),
+    lengthInMeters: integer("length_in_meters").notNull(),
+    travelTimeInSeconds: integer("travel_time_in_seconds").notNull(),
+    trafficDelayInSeconds: integer("traffic_delay_in_seconds").notNull(),
+    matrixBatchId: integer("matrix_batch_id").references(() => matrixBatchTable.id),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.matrixBatchId],
+      foreignColumns: [matrixBatchTable.id],
+      name: "matrix_results_matrix_batch_id_matrix_batches_id_fk",
+    }),
+    foreignKey({
+      columns: [table.simulationId],
+      foreignColumns: [simulationTable.id],
+      name: "matrix_results_simulation_id_simulations_id_fk",
+    }),
+    index("matrix_results_simulation_id_idx").on(table.simulationId),
+    index("matrix_results_matrix_batch_id_idx").on(table.matrixBatchId),
+  ],
+);
+
+export const vehicleTable = pgTable(
+  "vehicles",
+  {
+    id: serial().primaryKey(),
+    simulationId: uuid("simulation_id").references(() => simulationTable.id),
+    name: varchar("name").notNull(),
+    maxCapacity: real("max_capacity").notNull(),
+    isActive: boolean("is_active").notNull().default(true),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.simulationId],
+      foreignColumns: [simulationTable.id],
+      name: "vehicles_simulation_id_simulations_id_fk",
+    }),
+    index("vehicles_simulation_id_idx").on(table.simulationId),
+  ],
+);
+
+export const solutionTable = pgTable(
+  "solutions",
+  {
+    id: serial().primaryKey(),
+    simulationId: uuid("simulation_id").references(() => simulationTable.id),
+    vehicleId: integer("vehicle_id").references(() => vehicleTable.id),
+    routes: jsonb("routes").notNull(), // Array of node indices representing the route
+    demandInKilograms: real("demand_in_kilograms").notNull(), // Total demand served by this vehicle
+    timeInSeconds: integer("time_in_seconds").notNull(), // Total time for this route
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.simulationId],
+      foreignColumns: [simulationTable.id],
+      name: "solutions_simulation_id_simulations_id_fk",
+    }),
+    foreignKey({
+      columns: [table.vehicleId],
+      foreignColumns: [vehicleTable.id],
+      name: "solutions_vehicle_id_vehicles_id_fk",
+    }),
+    index("solutions_simulation_id_idx").on(table.simulationId),
+    index("solutions_vehicle_id_idx").on(table.vehicleId),
+  ],
+);
+
+export const vehicleRouteTable = pgTable(
+  "vehicle_routes",
+  {
+    id: serial().primaryKey(),
+    solutionId: integer("solution_id").references(() => solutionTable.id),
+    vehicleId: integer("vehicle_id").references(() => vehicleTable.id),
+    routeVersion: integer("route_version").notNull().default(1), // To track changes in routes over time
+    isActive: boolean("is_active").notNull().default(true), // To indicate if this route is currently active
+    totalDistanceInMeters: integer("total_distance_in_meters").notNull(), // Total distance for this route
+    totalTimeInSeconds: integer("total_time_in_seconds").notNull(), // Total time for this route
+    fullEncodedPolyline: text("full_encoded_polyline"), // To store the full encoded polyline for the route
+    fullEncodedPolylinePrecision: integer("full_encoded_polyline_precision").default(5), // Precision of the full encoded polyline
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.solutionId],
+      foreignColumns: [solutionTable.id],
+      name: "vehicle_routes_solution_id_solutions_id_fk",
+    }),
+    foreignKey({
+      columns: [table.vehicleId],
+      foreignColumns: [vehicleTable.id],
+      name: "vehicle_routes_vehicle_id_vehicles_id_fk",
+    }),
+    index("vehicle_routes_solution_id_idx").on(table.solutionId),
+    index("vehicle_routes_vehicle_id_idx").on(table.vehicleId),
+  ],
+);
+
+export const routeLegTable = pgTable(
+  "route_legs",
+  {
+    id: serial().primaryKey(),
+    vehicleRouteId: integer("vehicle_route_id").references(() => vehicleRouteTable.id),
+    originNodeId: integer("origin_node_id").references(() => nodeTable.id),
+    destinationNodeId: integer("destination_node_id").references(() => nodeTable.id),
+    sequence: integer("sequence").notNull(), // To maintain the order of legs in the route
+    encodedPolyline: text("encoded_polyline").notNull(), // To store the encoded polyline for this leg
+    encodedPolylinePrecision: integer("encoded_polyline_precision").notNull().default(5), // Precision of the encoded polyline
+    distanceInMeters: integer("distance_in_meters").notNull(),
+    travelTimeInSeconds: integer("travel_time_in_seconds").notNull(),
+    trafficDelayInSeconds: integer("traffic_delay_in_seconds").notNull(),
+    trafficDistanceInMeters: integer("traffic_distance_in_meters").notNull(),
+    departureTime: timestamp("departure_time", { withTimezone: true }).notNull(),
+    arrivalTime: timestamp("arrival_time", { withTimezone: true }).notNull(),
+    noTrafficTravelTimeInSeconds: integer("no_traffic_travel_time_in_seconds").notNull(),
+    historicTrafficTravelTimeInSeconds: integer(
+      "historic_traffic_travel_time_in_seconds",
+    ).notNull(),
+    liveTrafficIncidentsTravelTimeInSeconds: integer(
+      "live_traffic_incidents_travel_time_in_seconds",
+    ).notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.vehicleRouteId],
+      foreignColumns: [vehicleRouteTable.id],
+      name: "route_legs_vehicle_route_id_vehicle_routes_id_fk",
+    }),
+    foreignKey({
+      columns: [table.originNodeId],
+      foreignColumns: [nodeTable.id],
+      name: "route_legs_origin_node_id_nodes_id_fk",
+    }),
+    foreignKey({
+      columns: [table.destinationNodeId],
+      foreignColumns: [nodeTable.id],
+      name: "route_legs_destination_node_id_nodes_id_fk",
+    }),
+    index("route_legs_vehicle_route_id_idx").on(table.vehicleRouteId),
+    index("route_legs_origin_node_id_idx").on(table.originNodeId),
+    index("route_legs_destination_node_id_idx").on(table.destinationNodeId),
+    uniqueIndex("route_legs_vehicle_route_sequence_unique").on(
+      table.vehicleRouteId,
+      table.sequence,
+    ),
+    index("route_legs_sequence_idx").on(table.sequence),
   ],
 );

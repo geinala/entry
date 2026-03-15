@@ -8,6 +8,7 @@ import {
   simulationUploadedFileTable,
   simulationStatusEnum,
   nodeTable,
+  vehicleTable,
 } from "@/drizzle/schema";
 
 // User Types
@@ -35,6 +36,7 @@ export type TSimulationWithDepot = TSimulation & {
 export type TUpdateSimulation = Partial<Omit<TSimulation, "id" | "createdAt" | "updatedAt">>;
 export type TSimulationWithUploadedFile = TSimulation & {
   uploadedFile: TSimulationUploadedFile | null;
+  totalDemand: number;
 };
 
 // Simulation Uploaded File Types
@@ -44,3 +46,7 @@ export type TSimulationStatus = (typeof simulationStatusEnum.enumValues)[number]
 
 // Node Types
 export type TNode = InferSelectModel<typeof nodeTable>;
+
+// Vehicle Types
+export type TVehicle = InferSelectModel<typeof vehicleTable>;
+export type TNewVehicle = InferInsertModel<typeof vehicleTable>;
