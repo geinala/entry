@@ -1,5 +1,5 @@
 import { and, asc, Column, desc, eq, ilike, InferSelectModel, or, sql, SQL } from "drizzle-orm";
-import { PgTable } from "drizzle-orm/pg-core";
+import { PgSelect, PgTable } from "drizzle-orm/pg-core";
 import { db } from "./db";
 import { calculateOffset } from "./pagination";
 import { TIndexQueryParams } from "@/types/query-params";
@@ -23,10 +23,24 @@ export type TColumnDefinition<TTable extends PgTable> = {
  */
 export type TColumnsDefinition<TTable extends PgTable> = Record<string, TColumnDefinition<TTable>>;
 
+/**
+ * Definisi join untuk query builder
+ */
+type TJoin = {
+  /** Tabel yang di-join */
+  table: PgTable;
+  /** Kondisi join (ON clause) */
+  on: SQL;
+  /** Tipe join (default: "inner") */
+  type?: "inner" | "left" | "right" | "full";
+};
+
 type TPaginationParams<TTable extends PgTable> = {
   table: TTable;
   columns: TColumnsDefinition<TTable>;
   queryParams: TIndexQueryParams;
+  baseConditions?: SQL[];
+  applyJoins?: (query: PgSelect) => PgSelect;
 };
 
 type TBuildWhereParams<TTable extends PgTable> = {
@@ -94,34 +108,63 @@ const buildGenericWhereClause = <TTable extends PgTable>({
   );
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+const applyJoins = (query: any, joins: TJoin[]): any => {
+  for (const { table, on, type } of joins) {
+    switch (type ?? "inner") {
+      case "left":
+        query = query.leftJoin(table, on);
+        break;
+      case "right":
+        query = query.rightJoin(table, on);
+        break;
+      case "full":
+        query = query.fullJoin(table, on);
+        break;
+      default:
+        query = query.innerJoin(table, on);
+    }
+  }
+  return query;
+};
+
 export const buildCountQuery = async <TTable extends PgTable>({
   table,
   columns,
   queryParams,
+  baseConditions,
+  applyJoins: applyJoinsFn,
 }: Omit<TPaginationParams<TTable>, "queryParams"> & {
   queryParams: Pick<TIndexQueryParams, "search"> & Record<string, unknown>;
+  baseConditions?: SQL[];
+  applyJoins?: (query: PgSelect) => PgSelect;
 }) => {
-  const whereClause = buildGenericWhereClause({
-    table,
-    queryParams,
-    columns,
-  });
+  const whereClause = buildGenericWhereClause({ table, queryParams, columns });
 
-  const result = await db
-    .select({
-      count: sql<number>`count(*)`.mapWith(Number),
-    })
+  let query = db
+    .select({ count: sql<number>`count(*)`.mapWith(Number) })
     .from(table as PgTable)
-    .where(whereClause);
+    .where(and(...(baseConditions ?? []), whereClause))
+    .$dynamic();
 
-  return result[0]?.count ?? 0;
+  if (applyJoinsFn) {
+    query = applyJoinsFn(query as unknown as PgSelect) as unknown as typeof query;
+  }
+
+  const result = await query;
+  return (result[0]?.count ?? 0) as number;
 };
 
-export const buildPaginatedQuery = async <TTable extends PgTable>({
+export const buildPaginatedQuery = async <
+  TTable extends PgTable,
+  TResult = InferSelectModel<TTable>,
+>({
   table,
   columns,
   queryParams,
-}: TPaginationParams<TTable>) => {
+  baseConditions,
+  applyJoins: applyJoinsFn,
+}: TPaginationParams<TTable>): Promise<TResult[]> => {
   const { page, pageSize, sort } = queryParams;
   const offset = calculateOffset(page, pageSize);
 
@@ -131,27 +174,30 @@ export const buildPaginatedQuery = async <TTable extends PgTable>({
     columns,
   });
 
-  const query = db
+  let query = db
     .select()
     .from(table as PgTable)
-    .where(whereClause)
+    .where(and(...(baseConditions ?? []), whereClause))
     .limit(pageSize)
-    .offset(offset);
+    .offset(offset)
+    .$dynamic();
+
+  if (applyJoinsFn) {
+    query = applyJoinsFn(query as unknown as PgSelect) as unknown as typeof query;
+  }
 
   if (sort && sort.length > 0) {
     for (const { key: columnKey, direction } of sort) {
       const config = columns[columnKey];
       if (!config?.sortable) continue;
 
-      // Handle computed columns
       if (config.compute) {
         const computedExpr = config.compute(table);
-        query.orderBy(direction === "asc" ? asc(computedExpr) : desc(computedExpr));
+        query = query.orderBy(direction === "asc" ? asc(computedExpr) : desc(computedExpr));
       } else {
-        // Handle regular columns
         const column = table[columnKey as keyof typeof table] as Column;
         if (column) {
-          query.orderBy(direction === "asc" ? asc(column) : desc(column));
+          query = query.orderBy(direction === "asc" ? asc(column) : desc(column));
         }
       }
     }
@@ -159,5 +205,5 @@ export const buildPaginatedQuery = async <TTable extends PgTable>({
 
   const rows = await query;
 
-  return rows as InferSelectModel<TTable>[];
+  return rows as TResult[];
 };

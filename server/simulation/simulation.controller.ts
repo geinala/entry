@@ -3,8 +3,10 @@ import "server-only";
 import { responseFormatter } from "@/lib/response-formatter";
 import { parseQueryParams, validateSchema } from "@/lib/validation";
 import {
+  CreateSimulationConstraintsSchema,
   CreateSimulationSchema,
   IndexSimulationQueryParams,
+  SimulationIdParamSchema,
   TCreateSimulationSchema,
 } from "@/schemas/simulation.schema";
 import { NextRequest } from "next/server";
@@ -13,6 +15,7 @@ import {
   getSimulationByIdService,
   getSimulationsWithPaginationService,
   getSimulationUploadedFileBySimulationIdService,
+  startSimulationService,
   uploadSimulationFileService,
 } from "./simulation.service";
 import { checkUserPermissionsService } from "../permission/permission.service";
@@ -20,6 +23,7 @@ import { PERMISSIONS } from "@/common/constants/permissions/permissions";
 import { parseSortParams } from "@/lib/query-param";
 import { handleException } from "@/common/exception/helper";
 import { CSVUploadedSchema, TCSVUploaded } from "@/schemas/file.schema";
+import { NotFoundException } from "@/common/exception/not-found.exception";
 
 export const createSimulationController = async (clerkUserId: string, request: NextRequest) => {
   try {
@@ -77,6 +81,12 @@ export const getSimulationsController = async (clerkUserId: string, req: NextReq
 
 export const getSimulationByIdController = async (clerkUserId: string, simulationId: string) => {
   try {
+    validateSchema(
+      SimulationIdParamSchema,
+      { simulationId },
+      () => new NotFoundException("Simulation not found"),
+    );
+
     await checkUserPermissionsService(clerkUserId, [PERMISSIONS.VIEW_SIMULATION]);
 
     const simulation = await getSimulationByIdService(simulationId);
@@ -96,6 +106,14 @@ export const uploadSimulationFileController = async (
   request: NextRequest,
 ) => {
   try {
+    validateSchema(
+      SimulationIdParamSchema,
+      { simulationId },
+      () => new NotFoundException("Simulation not found"),
+    );
+
+    await checkUserPermissionsService(clerkUserId, [PERMISSIONS.VIEW_SIMULATION]);
+
     const formData = await request.formData();
 
     const file = formData.get("file");
@@ -119,6 +137,12 @@ export const getSimulationUploadedFileController = async (
   simulationId: string,
 ) => {
   try {
+    validateSchema(
+      SimulationIdParamSchema,
+      { simulationId },
+      () => new NotFoundException("Simulation not found"),
+    );
+
     await checkUserPermissionsService(clerkUserId, [PERMISSIONS.VIEW_SIMULATION]);
 
     const file = await getSimulationUploadedFileBySimulationIdService(simulationId);
@@ -126,6 +150,22 @@ export const getSimulationUploadedFileController = async (
     return responseFormatter.successWithData({
       data: file,
       message: "Uploaded file retrieved successfully",
+    });
+  } catch (error) {
+    return handleException(error);
+  }
+};
+
+export const startSimulationController = async (simulationId: string, request: NextRequest) => {
+  try {
+    const body = await request.json();
+
+    validateSchema(CreateSimulationConstraintsSchema, body);
+
+    await startSimulationService(simulationId, body);
+
+    return responseFormatter.success({
+      message: "Simulation started successfully",
     });
   } catch (error) {
     return handleException(error);

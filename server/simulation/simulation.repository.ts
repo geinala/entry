@@ -1,20 +1,40 @@
 import "server-only";
 
-import { simulationTable, simulationUploadedFileTable } from "@/drizzle/schema";
+import {
+  nodeTable,
+  simulationTable,
+  simulationUploadedFileTable,
+  vehicleTable,
+} from "@/drizzle/schema";
 import { db } from "@/lib/db";
 import { buildCountQuery, buildPaginatedQuery, TColumnsDefinition } from "@/lib/query-builder";
-import { TCreateSimulationSchema, TIndexSimulationQueryParams } from "@/schemas/simulation.schema";
-import { eq } from "drizzle-orm";
-import { TNewSimulationUploadedFile, TUpdateSimulation } from "@/types/database";
+import {
+  TCreateSimulationConstraintsSchema,
+  TCreateSimulationSchema,
+  TIndexSimulationQueryParams,
+} from "@/schemas/simulation.schema";
+import { eq, sum } from "drizzle-orm";
+import { TNewSimulationUploadedFile, TNewVehicle, TUpdateSimulation } from "@/types/database";
 
 export const createSimulationRepository = async (userId: number, data: TCreateSimulationSchema) => {
-  return await db
+  const [createdSimulation] = await db
     .insert(simulationTable)
     .values({
       title: data.title,
       userId,
     })
     .returning();
+
+  await db.insert(nodeTable).values({
+    latitude: data.latitude,
+    longitude: data.longitude,
+    isDepot: 1,
+    demand: 0,
+    matrixIndex: 0,
+    simulationId: createdSimulation.id,
+  });
+
+  return createdSimulation;
 };
 
 const SIMULATION_COLUMNS: TColumnsDefinition<typeof simulationTable> = {
@@ -61,13 +81,17 @@ export const getSimulationByIdRepository = async (simulationId: string) => {
     .select()
     .from(simulationTable)
     .where(eq(simulationTable.id, simulationId))
+    .leftJoin(nodeTable, eq(simulationTable.id, nodeTable.simulationId))
     .limit(1);
 };
 
 export const updateSimulationRepository = async (simulationId: string, data: TUpdateSimulation) => {
   return await db
     .update(simulationTable)
-    .set(data)
+    .set({
+      ...data,
+      updatedAt: new Date(),
+    })
     .where(eq(simulationTable.id, simulationId))
     .returning();
 };
@@ -97,4 +121,38 @@ export const updateSimulationUploadedFileRepository = async (
     .set(data)
     .where(eq(simulationUploadedFileTable.id, uploadedFileId))
     .returning();
+};
+
+const createSimulationVehiclesConstraintsRepository = async (
+  simulationId: string,
+  vehiclesConstraints: TCreateSimulationConstraintsSchema["vehiclesConstraints"],
+) => {
+  const insertData: Array<TNewVehicle> = vehiclesConstraints.map((constraint) => ({
+    simulationId,
+    maxCapacity: constraint.maxCapacity,
+    name: constraint.vehicleName,
+  }));
+
+  await db.insert(vehicleTable).values(insertData);
+};
+
+export const createSimulationConstraintsRepository = async (
+  simulationId: string,
+  constraints: TCreateSimulationConstraintsSchema,
+) => {
+  return await Promise.all([
+    updateSimulationRepository(simulationId, {
+      computationTimeLimitInSeconds: constraints.computationTimeLimit,
+    }),
+    createSimulationVehiclesConstraintsRepository(simulationId, constraints.vehiclesConstraints),
+  ]);
+};
+
+export const getAccumulatedSimulationNodeDemandRepository = async (simulationId: string) => {
+  return await db
+    .select({
+      totalDemand: sum(nodeTable.demand),
+    })
+    .from(nodeTable)
+    .where(eq(nodeTable.simulationId, simulationId));
 };

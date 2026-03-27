@@ -5,12 +5,13 @@ import { Indicator } from "../../_components/indicator";
 import { Paragraph } from "@/app/_components/typography";
 import { TSimulationStatus } from "@/types/database";
 
-interface IStatItemProps {
+interface ISimulationStatusItemProps {
   status?: TSimulationStatus;
 }
 
 const SIMULATION_STATUS_COLOR_MAP = {
   pending: { color: "yellow", label: "Pending" },
+  processing: { color: "yellow", label: "Processing" },
   running: { color: "blue", label: "Running" },
   completed: { color: "green", label: "Completed" },
   failed: { color: "red", label: "Failed" },
@@ -20,11 +21,11 @@ const getStatusConfig = (status: TSimulationStatus) => {
   return SIMULATION_STATUS_COLOR_MAP[status];
 };
 
-export default function StatItem({ status }: IStatItemProps) {
+const SimulationStatusItem = ({ status }: ISimulationStatusItemProps) => {
   const statusConfig = status ? getStatusConfig(status) : undefined;
 
   return (
-    <Item variant={"muted"} className={`gap-2`}>
+    <Item variant={"outline"} className={`gap-2 bg-muted`}>
       <ItemHeader>
         <ItemTitle className="text-muted-foreground">Status</ItemTitle>
       </ItemHeader>
@@ -38,4 +39,17 @@ export default function StatItem({ status }: IStatItemProps) {
       )}
     </Item>
   );
-}
+};
+
+const StatisticsItem = ({ title, content }: { title: string; content: React.ReactNode }) => {
+  return (
+    <Item variant={"outline"} className={`gap-2`}>
+      <ItemHeader>
+        <ItemTitle className="text-muted-foreground font-semibold">{title}</ItemTitle>
+      </ItemHeader>
+      <ItemContent>{content}</ItemContent>
+    </Item>
+  );
+};
+
+export { SimulationStatusItem, StatisticsItem };

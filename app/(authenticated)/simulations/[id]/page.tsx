@@ -4,14 +4,17 @@ import SimulationsLayoutShell from "../_components/layout-shell";
 import { SimulationDetailLeftSidebar, SimulationDetailRightSidebar } from "./_components/sidebar";
 import { useBreadcrumb } from "@/app/_contexts/breadcrumb.context";
 import { useEffect } from "react";
-import { useParams } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import Loading from "@/app/_components/loading";
 import { Route } from "next";
 import { Empty, EmptyContent, EmptyDescription } from "@/app/_components/ui/empty";
 import { useGetSimulationByIdQuery } from "../_hooks/use-queries";
+import { isNotFoundError } from "@/common/exception/helper";
+import { Dialog } from "@/app/_components/ui/dialog";
+import { ConstraintsFormDialog } from "./_components/dialog";
 
-const TomTomMap = dynamic(() => import("./_components/tomtom-map"), {
+const Map = dynamic(() => import("./_components/map"), {
   loading: () => <Loading />,
   ssr: false,
 });
@@ -19,7 +22,11 @@ const TomTomMap = dynamic(() => import("./_components/tomtom-map"), {
 export default function SimulationDetailPage() {
   const { id: simulationId } = useParams<{ id: string }>();
   const { setBreadcrumbs } = useBreadcrumb();
-  const { data, isLoading } = useGetSimulationByIdQuery(simulationId);
+  const { data, isLoading, error } = useGetSimulationByIdQuery(simulationId);
+
+  if (isNotFoundError(error)) {
+    notFound();
+  }
 
   useEffect(() => {
     setBreadcrumbs([
@@ -34,20 +41,35 @@ export default function SimulationDetailPage() {
     ]);
   }, [setBreadcrumbs, simulationId]);
 
+  const isShowEmptyState = !isLoading && data?.data.status === "failed";
+
   return (
-    <SimulationsLayoutShell
-      leftSidebar={<SimulationDetailLeftSidebar hasUploadedCSV={!!data?.data.uploadId} />}
-      rightSidebar={<SimulationDetailRightSidebar />}
-      isLoading={isLoading}
-    >
-      {/* <TomTomMap /> */}
-      <Empty>
-        <EmptyContent>
-          <EmptyDescription>
-            Visualization for this simulation is not available yet. Please check back later.
-          </EmptyDescription>
-        </EmptyContent>
-      </Empty>
-    </SimulationsLayoutShell>
+    <Dialog>
+      <SimulationsLayoutShell
+        leftSidebar={
+          <SimulationDetailLeftSidebar
+            hasUploadedCSV={!!data?.data.uploadId}
+            status={data?.data.status}
+          />
+        }
+        rightSidebar={<SimulationDetailRightSidebar data={data?.data} />}
+        isLoading={isLoading}
+      >
+        {isShowEmptyState && (
+          <Empty>
+            <EmptyContent>
+              <EmptyDescription>
+                Visualization for this simulation is not available yet. Please check back later.
+              </EmptyDescription>
+            </EmptyContent>
+          </Empty>
+        )}
+        {!isShowEmptyState && data?.data.depot && (
+          <Map center={[data.data.depot.longitude, data.data.depot.latitude]} zoom={18} />
+        )}
+      </SimulationsLayoutShell>
+
+      <ConstraintsFormDialog />
+    </Dialog>
   );
 }

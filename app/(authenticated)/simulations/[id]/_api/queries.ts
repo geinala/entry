@@ -1,6 +1,6 @@
 "use client";
 
-import { TSimulationWithUploadedFile } from "@/types/database";
+import { TSimulationWithUploadedFile, TVehicle } from "@/types/database";
 import { TApiSuccessResponseWithData } from "@/types/response";
 import { queryOptions } from "@tanstack/react-query";
 import { AxiosInstance, AxiosResponse } from "axios";
@@ -31,8 +31,18 @@ export const simulationDetailQueries = {
       },
     });
   },
+  getAllActiveVehicles: (api: AxiosInstance, simulationId?: string) => {
+    return queryOptions({
+      queryKey: SIMULATION_DETAIL_QUERY_KEYS.getAllActiveVehicles(simulationId),
+      queryFn: async (): Promise<TApiSuccessResponseWithData<TVehicle[]>> => {
+        return await api.get(`/simulations/${simulationId}/vehicles`);
+      },
+      enabled: !!simulationId,
+    });
+  },
 };
 
 const SIMULATION_DETAIL_QUERY_KEYS = {
   findFileWithSimulationId: (simulationId: string) => ["simulation-file", simulationId] as const,
+  getAllActiveVehicles: (simulationId?: string) => ["active-vehicles", simulationId] as const,
 };

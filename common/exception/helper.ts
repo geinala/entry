@@ -2,8 +2,11 @@ import { responseFormatter } from "@/lib/response-formatter";
 import { NotFoundException } from "./not-found.exception";
 import { ValidationException } from "./validation.exception";
 import { BadRequestException } from "./bad-request.exception";
+import { isAxiosError } from "axios";
 
 export const handleException = (error: unknown) => {
+  console.log("Error: ", error);
+
   if (error instanceof NotFoundException) {
     return responseFormatter.notFound(error.message);
   } else if (error instanceof ValidationException) {
@@ -17,3 +20,6 @@ export const handleException = (error: unknown) => {
 
   return responseFormatter.error({ message: "An unexpected error occurred" });
 };
+
+export const isNotFoundError = (error: unknown) =>
+  isAxiosError(error) && error.response?.status === 404;

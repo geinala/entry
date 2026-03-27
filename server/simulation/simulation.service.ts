@@ -1,11 +1,17 @@
 import "server-only";
 
-import { TCreateSimulationSchema, TIndexSimulationQueryParams } from "@/schemas/simulation.schema";
+import {
+  TCreateSimulationConstraintsSchema,
+  TCreateSimulationSchema,
+  TIndexSimulationQueryParams,
+} from "@/schemas/simulation.schema";
 import { findCurrentUserByClerkUserIdRepository } from "../user/user.repository";
 import { NotFoundException } from "@/common/exception/not-found.exception";
 import {
+  createSimulationConstraintsRepository,
   createSimulationRepository,
   createSimulationUploadedFileRepository,
+  getAccumulatedSimulationNodeDemandRepository,
   getSimulationByIdRepository,
   getSimulationsCountRepository,
   getSimulationsWithPaginationRepository,
@@ -14,11 +20,12 @@ import {
   updateSimulationUploadedFileRepository,
 } from "./simulation.repository";
 import { TPaginationResponse } from "@/types/meta";
-import { TSimulation, TSimulationWithUploadedFile } from "@/types/database";
+import { TSimulation, TSimulationWithDepot, TSimulationWithUploadedFile } from "@/types/database";
 import { paginationResponseMapper } from "@/lib/pagination";
 import { findCurrentUserByClerkUserIdService } from "../user/user.service";
 import { uploadFileService } from "../files/file.service";
 import { server } from "@/lib/axios";
+import { BadRequestException } from "@/common/exception/bad-request.exception";
 
 export const createSimulationService = async (
   clerkUserId: string,
@@ -57,14 +64,19 @@ export const getSimulationsWithPaginationService = async (
   });
 };
 
-export const getSimulationByIdService = async (simulationId: string) => {
+export const getSimulationByIdService = async (
+  simulationId: string,
+): Promise<TSimulationWithDepot> => {
   const simulation = await getSimulationByIdRepository(simulationId);
 
   if (!simulation || simulation.length === 0) {
     throw new NotFoundException("Simulation not found");
   }
 
-  return simulation[0];
+  return {
+    ...simulation[0].simulations,
+    depot: simulation[0].nodes ?? null,
+  };
 };
 
 export const uploadSimulationFileService = async (
@@ -89,10 +101,14 @@ export const uploadSimulationFileService = async (
   });
 
   try {
-    await server.post(`/simulations/${simulationId}/files/validate`);
+    await server.post(`/simulations/${simulationId}/files`);
   } catch {
     await updateSimulationUploadedFileRepository(uploadedFile[0].id, {
       status: "failed",
+    });
+
+    await updateSimulationRepository(simulation.id, {
+      uploadId: null,
     });
   }
 
@@ -114,10 +130,42 @@ export const getSimulationUploadedFileBySimulationIdService = async (
     throw new NotFoundException("Uploaded file not found");
   }
 
+  const result = await getAccumulatedSimulationNodeDemandRepository(simulationId);
+  const totalDemand = Number(result[0]?.totalDemand ?? 0);
+
   return {
     ...uploadedFile[0].simulations,
     uploadedFile: {
       ...uploadedFile[0].simulation_uploaded_files,
     },
+    totalDemand,
   };
+};
+
+export const startSimulationService = async (
+  simulationId: string,
+  constraints: TCreateSimulationConstraintsSchema,
+) => {
+  const result = await getAccumulatedSimulationNodeDemandRepository(simulationId);
+  const totalDemand = Number(result[0]?.totalDemand ?? 0);
+
+  const constraintsTotalCapacity = constraints.vehiclesConstraints.reduce(
+    (acc, vehicle) => acc + vehicle.maxCapacity,
+    0,
+  );
+
+  if (totalDemand > constraintsTotalCapacity) {
+    throw new BadRequestException(
+      "Total demand exceeds total vehicle capacity. Please adjust the constraints.",
+    );
+  }
+
+  return await Promise.all([
+    updateSimulationRepository(simulationId, {
+      startedAt: new Date(),
+      status: "processing",
+    }),
+    createSimulationConstraintsRepository(simulationId, constraints),
+    server.post(`/optimizations/${simulationId}`),
+  ]);
 };
