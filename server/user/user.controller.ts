@@ -10,6 +10,7 @@ import { clerkService } from "@/server/clerk/clerk.service";
 import { parseQueryParams } from "@/lib/validation";
 import { parseSortParams } from "@/lib/query-param";
 import { GetUsersQueryParams } from "@/schemas/user.schema";
+import { handleException } from "@/common/exception/helper";
 
 export const onBoardingUserController = async (clerkUserId: string): Promise<NextResponse> => {
   try {
@@ -22,8 +23,8 @@ export const onBoardingUserController = async (clerkUserId: string): Promise<Nex
     await clerkService.updateUserMetadata(clerkUserId, { onboardingStarted: true });
 
     return NextResponse.json({ registered: false, redirectTo: "/onboarding" }, { status: 200 });
-  } catch {
-    return NextResponse.json({ message: "Something went wrong" }, { status: 500 });
+  } catch (error) {
+    return handleException(error);
   }
 };
 
@@ -41,8 +42,8 @@ export const getUserDetailsController = async (
     }
 
     return NextResponse.json(user, { status: 200 });
-  } catch {
-    return NextResponse.json({ message: "Something went wrong" }, { status: 500 });
+  } catch (error) {
+    return handleException(error);
   }
 };
 
@@ -66,7 +67,7 @@ export const getUsersWithPaginationController = async (req: NextRequest): Promis
     const users = await getUsersWithPaginationService(result.data);
 
     return NextResponse.json(users, { status: 200 });
-  } catch {
-    return NextResponse.json({ message: "Something went wrong" }, { status: 500 });
+  } catch (error) {
+    return handleException(error);
   }
 };

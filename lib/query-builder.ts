@@ -1,5 +1,5 @@
 import { and, asc, Column, desc, eq, ilike, InferSelectModel, or, sql, SQL } from "drizzle-orm";
-import { PgTable } from "drizzle-orm/pg-core";
+import { PgSelect, PgTable } from "drizzle-orm/pg-core";
 import { db } from "./db";
 import { calculateOffset } from "./pagination";
 import { TIndexQueryParams } from "@/types/query-params";
@@ -40,7 +40,7 @@ type TPaginationParams<TTable extends PgTable> = {
   columns: TColumnsDefinition<TTable>;
   queryParams: TIndexQueryParams;
   baseConditions?: SQL[];
-  joins?: TJoin[];
+  applyJoins?: (query: PgSelect) => PgSelect;
 };
 
 type TBuildWhereParams<TTable extends PgTable> = {
@@ -133,21 +133,22 @@ export const buildCountQuery = async <TTable extends PgTable>({
   columns,
   queryParams,
   baseConditions,
-  joins,
+  applyJoins: applyJoinsFn,
 }: Omit<TPaginationParams<TTable>, "queryParams"> & {
   queryParams: Pick<TIndexQueryParams, "search"> & Record<string, unknown>;
   baseConditions?: SQL[];
-  joins?: TJoin[];
+  applyJoins?: (query: PgSelect) => PgSelect;
 }) => {
   const whereClause = buildGenericWhereClause({ table, queryParams, columns });
 
   let query = db
     .select({ count: sql<number>`count(*)`.mapWith(Number) })
     .from(table as PgTable)
-    .where(and(...(baseConditions ?? []), whereClause));
+    .where(and(...(baseConditions ?? []), whereClause))
+    .$dynamic();
 
-  if (joins?.length) {
-    query = applyJoins(query, joins);
+  if (applyJoinsFn) {
+    query = applyJoinsFn(query as unknown as PgSelect) as unknown as typeof query;
   }
 
   const result = await query;
@@ -162,7 +163,7 @@ export const buildPaginatedQuery = async <
   columns,
   queryParams,
   baseConditions,
-  joins,
+  applyJoins: applyJoinsFn,
 }: TPaginationParams<TTable>): Promise<TResult[]> => {
   const { page, pageSize, sort } = queryParams;
   const offset = calculateOffset(page, pageSize);
@@ -181,8 +182,8 @@ export const buildPaginatedQuery = async <
     .offset(offset)
     .$dynamic();
 
-  if (joins?.length) {
-    query = applyJoins(query, joins);
+  if (applyJoinsFn) {
+    query = applyJoinsFn(query as unknown as PgSelect) as unknown as typeof query;
   }
 
   if (sort && sort.length > 0) {
