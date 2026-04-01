@@ -53,7 +53,7 @@ export const getSimulationsController = async (clerkUserId: string, req: NextReq
       pageSize: searchParams.get("pageSize"),
       search: searchParams.get("search") || undefined,
       sort: parseSortParams(searchParams),
-      status: searchParams.get("status") || "pending",
+      status: searchParams.get("status") || undefined,
     };
 
     const result = parseQueryParams(IndexSimulationQueryParams, rawQueryParams);

@@ -1,9 +1,19 @@
 "use client";
 
-import { TSimulationWithUploadedFile, TVehicle } from "@/types/database";
+import {
+  TLatestRouteBySimulationRow,
+  TSimulationWithUploadedFile,
+  TVehicle,
+} from "@/types/database";
 import { TApiSuccessResponseWithData } from "@/types/response";
 import { queryOptions } from "@tanstack/react-query";
 import { AxiosInstance, AxiosResponse } from "axios";
+
+export const SIMULATION_DETAIL_QUERY_KEYS = {
+  findFileWithSimulationId: (simulationId: string) => ["simulation-file", simulationId] as const,
+  getAllActiveVehicles: (simulationId?: string) => ["active-vehicles", simulationId] as const,
+  getFinalRoutes: (simulationId?: string) => ["final-routes", simulationId] as const,
+};
 
 export const simulationDetailQueries = {
   findFileWithSimulationId: (api: AxiosInstance, simulationId: string, hasUploadedCSV: boolean) => {
@@ -40,9 +50,13 @@ export const simulationDetailQueries = {
       enabled: !!simulationId,
     });
   },
-};
-
-const SIMULATION_DETAIL_QUERY_KEYS = {
-  findFileWithSimulationId: (simulationId: string) => ["simulation-file", simulationId] as const,
-  getAllActiveVehicles: (simulationId?: string) => ["active-vehicles", simulationId] as const,
+  getFinalRoutes: (api: AxiosInstance, simulationId?: string) => {
+    return queryOptions({
+      queryKey: SIMULATION_DETAIL_QUERY_KEYS.getFinalRoutes(simulationId),
+      queryFn: async (): Promise<TApiSuccessResponseWithData<TLatestRouteBySimulationRow[]>> => {
+        return await api.get(`/simulations/${simulationId}/routes`);
+      },
+      enabled: !!simulationId,
+    });
+  },
 };
