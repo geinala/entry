@@ -39,22 +39,36 @@ export const Marker = ({
 
     if (icon) {
       const element = document.createElement("div");
-      element.className = className;
       element.style.cursor = onClick ? "pointer" : "default";
       element.style.display = "flex";
       element.style.alignItems = "center";
       element.style.justifyContent = "center";
 
       if (typeof icon === "string") {
+        element.className = className;
         element.style.backgroundImage = `url('${icon}')`;
         element.style.backgroundSize = "contain";
         element.style.backgroundRepeat = "no-repeat";
+        if (style) {
+          Object.assign(element.style, style);
+        }
       } else if (iconContainer) {
-        element.appendChild(iconContainer);
-      }
-
-      if (style) {
-        Object.assign(element.style, style);
+        if (style) {
+          Object.assign(element.style, style);
+        } else {
+          element.className = className;
+        }
+        // Create a wrapper div for the React element with proper sizing
+        const wrapper = document.createElement("div");
+        wrapper.style.width = "100%";
+        wrapper.style.height = "100%";
+        wrapper.style.display = "flex";
+        wrapper.style.alignItems = "center";
+        wrapper.style.justifyContent = "center";
+        wrapper.appendChild(iconContainer);
+        element.appendChild(wrapper);
+      } else {
+        element.className = className;
       }
 
       if (onClick) {

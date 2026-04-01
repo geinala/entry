@@ -9,6 +9,8 @@ import {
   simulationStatusEnum,
   nodeTable,
   vehicleTable,
+  routeLegTable,
+  vehicleRouteTable,
 } from "@/drizzle/schema";
 
 // User Types
@@ -50,3 +52,34 @@ export type TNode = InferSelectModel<typeof nodeTable>;
 // Vehicle Types
 export type TVehicle = InferSelectModel<typeof vehicleTable>;
 export type TNewVehicle = InferInsertModel<typeof vehicleTable>;
+
+// Route Types
+export type TVehicleRoute = InferSelectModel<typeof vehicleRouteTable>;
+export type TRouteLeg = InferSelectModel<typeof routeLegTable>;
+
+export type TRouteVehicleSummary = {
+  id: TVehicle["id"];
+  name: TVehicle["name"];
+};
+
+export type TLatestRouteBySimulationRow = {
+  id: TRouteLeg["id"];
+  vehicle: TRouteVehicleSummary;
+  is_active: TVehicleRoute["isActive"];
+  origin_latitude: TNode["latitude"];
+  origin_longitude: TNode["longitude"];
+  destination_latitude: TNode["latitude"];
+  destination_longitude: TNode["longitude"];
+  sequence: TRouteLeg["sequence"];
+  encoded_polyline: TRouteLeg["encodedPolyline"];
+  encoded_polyline_precision: TRouteLeg["encodedPolylinePrecision"];
+  distance_in_meters: TRouteLeg["distanceInMeters"];
+  travel_time_in_seconds: TRouteLeg["travelTimeInSeconds"];
+  traffic_delay_in_seconds: TRouteLeg["trafficDelayInSeconds"];
+  traffic_distance_in_meters: TRouteLeg["trafficDistanceInMeters"];
+  departure_time: TRouteLeg["departureTime"];
+  arrival_time: TRouteLeg["arrivalTime"];
+  no_traffic_travel_time_in_seconds: TRouteLeg["noTrafficTravelTimeInSeconds"];
+  historic_traffic_travel_time_in_seconds: TRouteLeg["historicTrafficTravelTimeInSeconds"];
+  live_traffic_incidents_travel_time_in_seconds: TRouteLeg["liveTrafficIncidentsTravelTimeInSeconds"];
+};
