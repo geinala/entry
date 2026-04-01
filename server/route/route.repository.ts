@@ -1,4 +1,10 @@
-import { nodeTable, routeLegTable, solutionTable, vehicleRouteTable, vehicleTable } from "@/drizzle/schema";
+import {
+  nodeTable,
+  routeLegTable,
+  solutionTable,
+  vehicleRouteTable,
+  vehicleTable,
+} from "@/drizzle/schema";
 import { db } from "@/lib/db";
 import { sql } from "drizzle-orm";
 import { TLatestRouteBySimulationRow } from "@/types/database";
