@@ -9,7 +9,7 @@ export const GET = async (request: NextRequest, context: { params: Promise<{ id:
   return await handleAuthenticatedRequest({
     request,
     callback: async () => {
-      return await getLatestRouteBySimulationIdController(id);
+      return await getLatestRouteBySimulationIdController(request, id);
     },
   });
 };

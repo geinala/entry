@@ -19,9 +19,8 @@ import {
 export const userTable = pgTable(
   "users",
   {
-    id: serial().primaryKey(),
     roleId: integer("role_id").notNull(),
-    clerkUserId: varchar("clerk_user_id").notNull(),
+    userId: varchar("user_id").notNull().unique().primaryKey(), // This is the Clerk user ID, which is a string. We use it as the primary key for the users table to simplify integration with Clerk.
     email: varchar("email").notNull().unique(),
     fullName: varchar("full_name").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
@@ -32,7 +31,7 @@ export const userTable = pgTable(
       foreignColumns: [roleTable.id],
       name: "users_role_id_roles_id_fk",
     }),
-    index("users_clerk_user_id_idx").on(table.clerkUserId),
+    index("users_user_id_idx").on(table.userId),
     index("users_role_id_idx").on(table.roleId),
   ],
 );
@@ -105,6 +104,66 @@ export const waitlistTable = pgTable(
   ],
 );
 
+export const simulationJobStatusEnum = pgEnum("simulation_job_status_enum", [
+  "uploaded", // uploaded === draft, just uploaded but not processed yet
+  "processing",
+  "completed",
+  "failed",
+]);
+
+export const geocodingStatusEnum = pgEnum("geocoding_status_enum", [
+  "pending",
+  "in_progress",
+  "completed",
+  "failed",
+]);
+
+export const calculationStatusEnum = pgEnum("calculation_status_enum", [
+  "pending",
+  "processing",
+  "completed",
+  "failed",
+]);
+
+export const simulationJobTable = pgTable("simulation_jobs", {
+  // Basic info
+  id: uuid().primaryKey().defaultRandom(),
+  userId: varchar("user_id")
+    .references(() => userTable.userId)
+    .notNull(),
+  title: varchar("title", { length: 300 }).notNull(),
+  depotLocationAddress: varchar("depot_location_address").notNull(),
+  depotLocationLatitude: doublePrecision("depot_location_latitude").notNull(),
+  depotLocationLongitude: doublePrecision("depot_location_longitude").notNull(),
+  maxComputationTimeInSeconds: integer("max_computation_time_in_seconds").notNull().default(600), // in seconds
+  filePath: varchar("file_path").notNull(),
+  startedAt: timestamp("started_at", { withTimezone: true }),
+
+  // State tracking
+  status: simulationJobStatusEnum("status").notNull().default("uploaded"),
+  currentStep: integer("current_step").notNull().default(0),
+
+  // Progress tracking
+  totalRows: integer("total_rows"),
+  validRows: integer("valid_rows").notNull().default(0),
+  invalidRows: integer("invalid_rows").notNull().default(0),
+
+  // Result tracking
+  geocodingStatus: geocodingStatusEnum("geocoding_status").notNull().default("pending"),
+  geocodedAt: timestamp("geocoded_at", { withTimezone: true }), // Timestamp when geocoding is completed
+
+  // Calculation tracking
+  calculationStatus: calculationStatusEnum("calculation_status").notNull().default("pending"),
+  calculatedAt: timestamp("calculated_at", { withTimezone: true }), // Timestamp when calculation is completed
+
+  // Summary results
+  totalVehicles: integer("total_vehicles").notNull().default(0),
+  totalNodes: integer("total_nodes").notNull().default(0),
+
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
 export const simulationStatusEnum = pgEnum("simulation_status_enum", [
   "pending",
   "processing",
@@ -117,14 +176,16 @@ export const simulationTable = pgTable(
   "simulations",
   {
     id: uuid().primaryKey().defaultRandom(),
-    userId: integer("user_id").references(() => userTable.id),
+    userId: varchar("user_id")
+      .references(() => userTable.userId)
+      .notNull(),
     title: varchar("title", { length: 300 }).notNull(),
     status: simulationStatusEnum("status").notNull().default("pending"),
     startedAt: timestamp("started_at", { withTimezone: true }),
     completedAt: timestamp("completed_at", { withTimezone: true }),
     computationTimeLimitInSeconds: integer("computation_time_limit_in_seconds")
       .notNull()
-      .default(300), // in seconds
+      .default(600), // in seconds
     totalDemandInKilograms: real("total_demand_in_kilograms").notNull().default(0),
     totalDistanceInMeters: integer("total_distance_in_meters").notNull().default(0),
     totalVehicles: integer("total_vehicles").notNull().default(0),
@@ -139,8 +200,8 @@ export const simulationTable = pgTable(
   (table) => [
     foreignKey({
       columns: [table.userId],
-      foreignColumns: [userTable.id],
-      name: "simulations_user_id_users_id_fk",
+      foreignColumns: [userTable.userId],
+      name: "simulations_user_id_users_user_id_fk",
     }),
     foreignKey({
       columns: [table.uploadId],
@@ -165,8 +226,8 @@ export const simulationUploadedFileTable = pgTable(
   "simulation_uploaded_files",
   {
     id: serial().primaryKey(),
-    userId: integer("user_id")
-      .references(() => userTable.id)
+    userId: varchar("user_id")
+      .references(() => userTable.userId)
       .notNull(),
     fileName: varchar("file_name").notNull(),
     filePath: varchar("file_path").notNull(),
@@ -183,8 +244,8 @@ export const simulationUploadedFileTable = pgTable(
   (table) => [
     foreignKey({
       columns: [table.userId],
-      foreignColumns: [userTable.id],
-      name: "simulation_uploaded_files_user_id_users_id_fk",
+      foreignColumns: [userTable.userId],
+      name: "simulation_uploaded_files_user_id_users_user_id_fk",
     }),
     index("simulation_uploaded_files_user_id_idx").on(table.userId),
   ],
@@ -348,8 +409,9 @@ export const vehicleRouteTable = pgTable(
     isActive: boolean("is_active").notNull().default(true), // To indicate if this route is currently active
     totalDistanceInMeters: integer("total_distance_in_meters").notNull(), // Total distance for this route
     totalTimeInSeconds: integer("total_time_in_seconds").notNull(), // Total time for this route
-    fullEncodedPolyline: text("full_encoded_polyline"), // To store the full encoded polyline for the route
-    fullEncodedPolylinePrecision: integer("full_encoded_polyline_precision").default(5), // Precision of the full encoded polyline
+    reoptimizedFromRouteId: integer("reoptimized_from_route_id"),
+    triggerNodeId: integer("trigger_node_id").references(() => nodeTable.id),
+    triggeredByTraffic: boolean("triggered_by_traffic").default(false),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
@@ -363,18 +425,32 @@ export const vehicleRouteTable = pgTable(
       foreignColumns: [vehicleTable.id],
       name: "vehicle_routes_vehicle_id_vehicles_id_fk",
     }),
+    foreignKey({
+      columns: [table.reoptimizedFromRouteId],
+      foreignColumns: [table.id],
+      name: "vehicle_routes_reoptimized_from_route_id_vehicle_routes_id_fk",
+    }),
     index("vehicle_routes_solution_id_idx").on(table.solutionId),
     index("vehicle_routes_vehicle_id_idx").on(table.vehicleId),
   ],
 );
+
+export const routeStatusEnum = pgEnum("route_status_enum", [
+  "planned",
+  "running",
+  "completed",
+  "cancelled",
+]);
 
 export const routeLegTable = pgTable(
   "route_legs",
   {
     id: serial().primaryKey(),
     vehicleRouteId: integer("vehicle_route_id").references(() => vehicleRouteTable.id),
-    originNodeId: integer("origin_node_id").references(() => nodeTable.id),
-    destinationNodeId: integer("destination_node_id").references(() => nodeTable.id),
+    originLatitude: doublePrecision("origin_latitude").notNull(),
+    originLongitude: doublePrecision("origin_longitude").notNull(),
+    destinationLatitude: doublePrecision("destination_latitude").notNull(),
+    destinationLongitude: doublePrecision("destination_longitude").notNull(),
     sequence: integer("sequence").notNull(), // To maintain the order of legs in the route
     encodedPolyline: text("encoded_polyline").notNull(), // To store the encoded polyline for this leg
     encodedPolylinePrecision: integer("encoded_polyline_precision").notNull().default(5), // Precision of the encoded polyline
@@ -391,6 +467,7 @@ export const routeLegTable = pgTable(
     liveTrafficIncidentsTravelTimeInSeconds: integer(
       "live_traffic_incidents_travel_time_in_seconds",
     ).notNull(),
+    routeStatus: routeStatusEnum("route_status").notNull().default("planned"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
@@ -399,19 +476,12 @@ export const routeLegTable = pgTable(
       foreignColumns: [vehicleRouteTable.id],
       name: "route_legs_vehicle_route_id_vehicle_routes_id_fk",
     }),
-    foreignKey({
-      columns: [table.originNodeId],
-      foreignColumns: [nodeTable.id],
-      name: "route_legs_origin_node_id_nodes_id_fk",
-    }),
-    foreignKey({
-      columns: [table.destinationNodeId],
-      foreignColumns: [nodeTable.id],
-      name: "route_legs_destination_node_id_nodes_id_fk",
-    }),
     index("route_legs_vehicle_route_id_idx").on(table.vehicleRouteId),
-    index("route_legs_origin_node_id_idx").on(table.originNodeId),
-    index("route_legs_destination_node_id_idx").on(table.destinationNodeId),
+    index("route_legs_origin_coordinates_idx").on(table.originLatitude, table.originLongitude),
+    index("route_legs_destination_coordinates_idx").on(
+      table.destinationLatitude,
+      table.destinationLongitude,
+    ),
     uniqueIndex("route_legs_vehicle_route_sequence_unique").on(
       table.vehicleRouteId,
       table.sequence,

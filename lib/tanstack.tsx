@@ -1,5 +1,6 @@
 "use client";
 
+import { TApiValidationErrorResponse, ValidationErrorDetail } from "@/types/response";
 import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { AxiosError, AxiosResponse, isAxiosError } from "axios";
 import { useState } from "react";
@@ -85,7 +86,7 @@ const handleGlobalError = (error: AxiosError) => {
   if (!error.response) return;
 
   const status = error.response.status;
-  const response = error.response.data as AxiosError["response"];
+  const response = error.response.data;
   const { message } = response as { message?: string };
 
   switch (status) {
@@ -106,7 +107,14 @@ const handleGlobalError = (error: AxiosError) => {
       break;
 
     case 422:
-      toast.error(message || "Validation error occurred. Please check your input.");
+      const validationErrors = (response as TApiValidationErrorResponse).errors;
+      handleZodError(validationErrors);
       break;
   }
+};
+
+const handleZodError = (errors: ValidationErrorDetail[]) => {
+  const errorMessages = errors.map((e) => `${e.message}`);
+
+  errorMessages.forEach((msg) => toast.error(msg));
 };

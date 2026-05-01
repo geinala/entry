@@ -32,3 +32,13 @@ export const server = axios.create({
     "X-API-KEY": env.API_KEY,
   },
 });
+
+export const tomtomServer = axios.create({
+  baseURL: env.NEXT_PUBLIC_TOMTOM_API_URL,
+  headers: {
+    "Content-Type": "application/json",
+  },
+  params: {
+    key: env.NEXT_PUBLIC_TOMTOM_API_KEY,
+  },
+});

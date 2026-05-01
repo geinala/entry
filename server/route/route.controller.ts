@@ -1,14 +1,33 @@
 import { handleException } from "@/common/exception/helper";
 import { validateSchema } from "@/lib/validation";
-import { SimulationIdParamSchema } from "@/schemas/simulation.schema";
+import {
+  TVehicleIdParamWithSimulationIdParamSchema,
+  VehicleIdParamWithSimulationIdParamSchema,
+} from "@/schemas/simulation.schema";
 import { responseFormatter } from "@/lib/response-formatter";
 import { getLatestRouteBySimulationIdService } from "./route.service";
+import { NextRequest } from "next/server";
 
-export const getLatestRouteBySimulationIdController = async (simulationId: string) => {
+export const getLatestRouteBySimulationIdController = async (
+  req: NextRequest,
+  simulationId: string,
+) => {
   try {
-    validateSchema(SimulationIdParamSchema, { simulationId });
+    const { searchParams } = new URL(req.url);
 
-    const result = await getLatestRouteBySimulationIdService(simulationId);
+    const rawQueryParams = {
+      vehicleId: searchParams.get("vehicleId") || undefined,
+    };
+
+    const parsed = validateSchema<TVehicleIdParamWithSimulationIdParamSchema>(
+      VehicleIdParamWithSimulationIdParamSchema,
+      { simulationId, ...rawQueryParams },
+    );
+
+    const result = await getLatestRouteBySimulationIdService(
+      parsed.data.simulationId,
+      parsed.data.vehicleId,
+    );
 
     return responseFormatter.successWithData({
       data: result,

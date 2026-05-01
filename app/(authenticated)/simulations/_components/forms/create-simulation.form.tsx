@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/app/_components/ui/button";
 import {
   DialogContent,
@@ -21,6 +22,9 @@ interface CreateSimulationFormDialogProps {
 
 export const CreateSimulationFormDialog = ({ onSuccess }: CreateSimulationFormDialogProps) => {
   const { mutateAsync, isPending } = useCreateSimulationMutation();
+  const [selectedPosition, setSelectedPosition] = useState<{ lng: number; lat: number } | null>(
+    null,
+  );
 
   const form = useForm({
     defaultValues: {
@@ -86,9 +90,18 @@ export const CreateSimulationFormDialog = ({ onSuccess }: CreateSimulationFormDi
               style="monoLight"
             >
               <div className="absolute top-2 left-2 z-10 w-60">
-                <MapSearch placeholder="Search for start location..." />
+                <MapSearch
+                  placeholder="Search for start location..."
+                  onSelect={(result) => {
+                    setSelectedPosition({ lat: result.lat, lng: result.lng });
+                    form.setFieldValue("latitude", result.lat);
+                    form.setFieldValue("longitude", result.lng);
+                  }}
+                />
                 <ClickMarker
+                  position={selectedPosition}
                   onChange={(lngLat) => {
+                    setSelectedPosition(lngLat);
                     form.setFieldValue("latitude", lngLat.lat);
                     form.setFieldValue("longitude", lngLat.lng);
                   }}

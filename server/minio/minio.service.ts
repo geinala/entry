@@ -21,6 +21,12 @@ export const minioService = {
     file,
     metadata,
   }: IUploadFileParams): Promise<UploadedObjectInfo> {
+    const existingObject = await minioClient.bucketExists(bucketName).catch(() => false);
+
+    if (!existingObject) {
+      await minioClient.makeBucket(bucketName);
+    }
+
     return await minioClient.putObject(bucketName, objectName, file, undefined, metadata);
   },
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useId } from "react";
 import type { GeoJSONSource } from "maplibre-gl";
 import { useMap } from "./context";
 
@@ -29,16 +29,28 @@ interface RouteProps {
 
 export const Route = ({
   coordinates,
-  id = `route-${Math.random()}`,
+  id,
   color = "#FF0000",
-  width = 3,
+  width = 6,
   opacity = 1,
   label,
 }: RouteProps) => {
   const { mapLibreMap } = useMap();
+  const fallbackId = `route-${useId().replace(/:/g, "")}`;
+  const routeId = id ?? fallbackId;
 
   useEffect(() => {
     if (!mapLibreMap || coordinates.length < 2) return;
+
+    const hasStyle = () => {
+      try {
+        return Boolean(mapLibreMap.getStyle());
+      } catch {
+        return false;
+      }
+    };
+
+    if (!hasStyle()) return;
 
     const data: GeoJSONFeature = {
       type: "Feature",
@@ -49,19 +61,41 @@ export const Route = ({
       properties: { label: label ?? null },
     };
 
-    const existingSource = mapLibreMap.getSource(id) as GeoJSONSource | undefined;
+    const existingSource = mapLibreMap.getSource(routeId) as GeoJSONSource | undefined;
     if (!existingSource) {
-      mapLibreMap.addSource(id, { type: "geojson", data });
+      mapLibreMap.addSource(routeId, { type: "geojson", data });
     } else {
       existingSource.setData(data);
     }
 
-    const layerId = `${id}-layer`;
+    const outlineLayerId = `${routeId}-outline-layer`;
+    if (!mapLibreMap.getLayer(outlineLayerId)) {
+      mapLibreMap.addLayer({
+        id: outlineLayerId,
+        type: "line",
+        source: routeId,
+        layout: {
+          "line-cap": "round",
+          "line-join": "round",
+        },
+        paint: {
+          "line-color": "#000000",
+          "line-width": width + 2,
+          "line-opacity": opacity,
+        },
+      });
+    }
+
+    const layerId = `${routeId}-layer`;
     if (!mapLibreMap.getLayer(layerId)) {
       mapLibreMap.addLayer({
         id: layerId,
         type: "line",
-        source: id,
+        source: routeId,
+        layout: {
+          "line-cap": "round",
+          "line-join": "round",
+        },
         paint: {
           "line-color": color,
           "line-width": width,
@@ -71,14 +105,19 @@ export const Route = ({
     }
 
     return () => {
+      if (!hasStyle()) return;
+
       if (mapLibreMap.getLayer(layerId)) {
         mapLibreMap.removeLayer(layerId);
       }
-      if (mapLibreMap.getSource(id)) {
-        mapLibreMap.removeSource(id);
+      if (mapLibreMap.getLayer(outlineLayerId)) {
+        mapLibreMap.removeLayer(outlineLayerId);
+      }
+      if (mapLibreMap.getSource(routeId)) {
+        mapLibreMap.removeSource(routeId);
       }
     };
-  }, [mapLibreMap, coordinates, id, color, width, opacity, label]);
+  }, [mapLibreMap, coordinates, routeId, color, width, opacity, label]);
 
   return null;
 };

@@ -10,3 +10,9 @@ export const useCreateSimulationMutation = () => {
 
   return useMutation(simulationMutations.createSimulation(api, queryClient));
 };
+
+export const useDeleteDraftSimulationJobMutation = () => {
+  const api = useAuthenticatedClient();
+
+  return useMutation(simulationMutations.deleteDraftSimulationJob(api));
+};

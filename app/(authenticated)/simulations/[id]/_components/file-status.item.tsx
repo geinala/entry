@@ -30,7 +30,6 @@ import {
   DialogTitle,
 } from "@/app/_components/ui/dialog";
 import { Alert, AlertDescription, AlertTitle } from "@/app/_components/ui/alert";
-import CSVInput from "./input";
 import { FileStatusSkeleton } from "./skeleton";
 import { TSimulationWithUploadedFile } from "@/types/database";
 import Link from "next/link";
@@ -238,12 +237,6 @@ export const SimulationFileUploadedItem = ({
             </AlertDescription>
           </Alert>
         </DialogHeader>
-        <CSVInput
-          className="py-10! [&_#remove-file-button]:hidden"
-          onFileUpload={() => {
-            setDialogOpen(false);
-          }}
-        />
       </DialogContent>
     </Dialog>
   );

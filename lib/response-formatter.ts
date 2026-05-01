@@ -158,6 +158,13 @@ export const responseFormatter = {
     return responseFormatter.success({ message, status: HTTP_STATUS.CREATED });
   },
 
+  deleted: ({ message }: { message?: string }): NextResponse => {
+    return responseFormatter.success({
+      message: message || "Resource deleted successfully",
+      status: HTTP_STATUS.OK,
+    });
+  },
+
   badRequest: ({
     message,
     details,

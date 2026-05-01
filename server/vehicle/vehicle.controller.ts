@@ -4,7 +4,7 @@ import { responseFormatter } from "@/lib/response-formatter";
 
 export const getAllActiveVehiclesController = async (simulationId: string) => {
   try {
-    const result = getAllActiveVehiclesService(simulationId);
+    const result = await getAllActiveVehiclesService(simulationId);
 
     return responseFormatter.successWithData({
       data: result,

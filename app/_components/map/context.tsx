@@ -7,6 +7,7 @@ import maplibregl from "maplibre-gl";
 export interface MapContextType {
   map: TTM | null;
   mapLibreMap: maplibregl.Map | null;
+  marker: maplibregl.Marker | null;
 }
 
 const MapContext = createContext<MapContextType | null>(null);

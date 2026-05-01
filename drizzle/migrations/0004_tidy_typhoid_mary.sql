@@ -1,1 +1,0 @@
-ALTER TYPE "public"."simulation_status_enum" ADD VALUE 'processing' BEFORE 'running';

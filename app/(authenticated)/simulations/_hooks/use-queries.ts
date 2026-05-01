@@ -16,3 +16,9 @@ export const useGetSimulationByIdQuery = (id?: string) => {
 
   return useQuery(simulationQueries.findById(api, id));
 };
+
+export const useGetDraftSimulationJobQuery = () => {
+  const api = useAuthenticatedClient();
+
+  return useQuery(simulationQueries.getDraftSimulationJob(api));
+};

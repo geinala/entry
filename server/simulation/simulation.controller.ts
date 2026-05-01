@@ -1,173 +1,153 @@
-import "server-only";
+// import "server-only";
 
-import { responseFormatter } from "@/lib/response-formatter";
-import { parseQueryParams, validateSchema } from "@/lib/validation";
-import {
-  CreateSimulationConstraintsSchema,
-  CreateSimulationSchema,
-  IndexSimulationQueryParams,
-  SimulationIdParamSchema,
-  TCreateSimulationSchema,
-} from "@/schemas/simulation.schema";
-import { NextRequest } from "next/server";
-import {
-  createSimulationService,
-  getSimulationByIdService,
-  getSimulationsWithPaginationService,
-  getSimulationUploadedFileBySimulationIdService,
-  startSimulationService,
-  uploadSimulationFileService,
-} from "./simulation.service";
-import { checkUserPermissionsService } from "../permission/permission.service";
-import { PERMISSIONS } from "@/common/constants/permissions/permissions";
-import { parseSortParams } from "@/lib/query-param";
-import { handleException } from "@/common/exception/helper";
-import { CSVUploadedSchema, TCSVUploaded } from "@/schemas/file.schema";
-import { NotFoundException } from "@/common/exception/not-found.exception";
+// import { responseFormatter } from "@/lib/response-formatter";
+// import { parseQueryParams, validateSchema } from "@/lib/validation";
+// import {
+//   CreateSimulationConstraintsSchema,
+//   IndexSimulationQueryParams,
+//   SimulationIdParamSchema,
+// } from "@/schemas/simulation.schema";
+// import { NextRequest } from "next/server";
+// import {
+//   getSimulationByIdService,
+//   getSimulationsWithPaginationService,
+//   getSimulationUploadedFileBySimulationIdService,
+//   startSimulationService,
+//   uploadSimulationFileService,
+// } from "./simulation.service";
+// import { checkUserPermissionsService } from "../permission/permission.service";
+// import { PERMISSIONS } from "@/common/constants/permissions/permissions";
+// import { parseSortParams } from "@/lib/query-param";
+// import { handleException } from "@/common/exception/helper";
+// import { CSVUploadedSchema, TCSVUploaded } from "@/schemas/file.schema";
+// import { NotFoundException } from "@/common/exception/not-found.exception";
 
-export const createSimulationController = async (clerkUserId: string, request: NextRequest) => {
-  try {
-    const body = await request.json();
+// export const getSimulationsController = async (clerkUserId: string, req: NextRequest) => {
+//   try {
+//     await checkUserPermissionsService(clerkUserId, [PERMISSIONS.VIEW_SIMULATION]);
 
-    const { data } = validateSchema<TCreateSimulationSchema>(CreateSimulationSchema, body);
+//     const { searchParams } = new URL(req.url);
 
-    const createdSimulation = await createSimulationService(clerkUserId, data);
+//     const rawQueryParams = {
+//       page: searchParams.get("page"),
+//       pageSize: searchParams.get("pageSize"),
+//       search: searchParams.get("search") || undefined,
+//       sort: parseSortParams(searchParams),
+//       status: searchParams.get("status") || undefined,
+//     };
 
-    return responseFormatter.created({
-      data: createdSimulation,
-      message: "Simulation created successfully",
-    });
-  } catch (error) {
-    return handleException(error);
-  }
-};
+//     const result = parseQueryParams(IndexSimulationQueryParams, rawQueryParams);
 
-export const getSimulationsController = async (clerkUserId: string, req: NextRequest) => {
-  try {
-    await checkUserPermissionsService(clerkUserId, [PERMISSIONS.VIEW_SIMULATION]);
+//     if (!result.success) {
+//       return responseFormatter.validationError({
+//         error: result.error,
+//         message: "Invalid query parameters",
+//       });
+//     }
 
-    const { searchParams } = new URL(req.url);
+//     const queryParams = result.data;
 
-    const rawQueryParams = {
-      page: searchParams.get("page"),
-      pageSize: searchParams.get("pageSize"),
-      search: searchParams.get("search") || undefined,
-      sort: parseSortParams(searchParams),
-      status: searchParams.get("status") || undefined,
-    };
+//     const { data, meta } = await getSimulationsWithPaginationService(clerkUserId, queryParams);
 
-    const result = parseQueryParams(IndexSimulationQueryParams, rawQueryParams);
+//     return responseFormatter.successWithPagination({
+//       data,
+//       meta,
+//       message: "Simulations retrieved successfully",
+//     });
+//   } catch (error) {
+//     return handleException(error);
+//   }
+// };
 
-    if (!result.success) {
-      return responseFormatter.validationError({
-        error: result.error,
-        message: "Invalid query parameters",
-      });
-    }
+// export const getSimulationByIdController = async (clerkUserId: string, simulationId: string) => {
+//   try {
+//     validateSchema(
+//       SimulationIdParamSchema,
+//       { simulationId },
+//       () => new NotFoundException("Simulation not found"),
+//     );
 
-    const queryParams = result.data;
+//     await checkUserPermissionsService(clerkUserId, [PERMISSIONS.VIEW_SIMULATION]);
 
-    const { data, meta } = await getSimulationsWithPaginationService(clerkUserId, queryParams);
+//     const simulation = await getSimulationByIdService(simulationId);
 
-    return responseFormatter.successWithPagination({
-      data,
-      meta,
-      message: "Simulations retrieved successfully",
-    });
-  } catch (error) {
-    return handleException(error);
-  }
-};
+//     return responseFormatter.successWithData({
+//       data: simulation,
+//       message: "Simulation retrieved successfully",
+//     });
+//   } catch (error) {
+//     return handleException(error);
+//   }
+// };
 
-export const getSimulationByIdController = async (clerkUserId: string, simulationId: string) => {
-  try {
-    validateSchema(
-      SimulationIdParamSchema,
-      { simulationId },
-      () => new NotFoundException("Simulation not found"),
-    );
+// export const uploadSimulationFileController = async (
+//   clerkUserId: string,
+//   simulationId: string,
+//   request: NextRequest,
+// ) => {
+//   try {
+//     validateSchema(
+//       SimulationIdParamSchema,
+//       { simulationId },
+//       () => new NotFoundException("Simulation not found"),
+//     );
 
-    await checkUserPermissionsService(clerkUserId, [PERMISSIONS.VIEW_SIMULATION]);
+//     await checkUserPermissionsService(clerkUserId, [PERMISSIONS.VIEW_SIMULATION]);
 
-    const simulation = await getSimulationByIdService(simulationId);
+//     const formData = await request.formData();
 
-    return responseFormatter.successWithData({
-      data: simulation,
-      message: "Simulation retrieved successfully",
-    });
-  } catch (error) {
-    return handleException(error);
-  }
-};
+//     const file = formData.get("file");
 
-export const uploadSimulationFileController = async (
-  clerkUserId: string,
-  simulationId: string,
-  request: NextRequest,
-) => {
-  try {
-    validateSchema(
-      SimulationIdParamSchema,
-      { simulationId },
-      () => new NotFoundException("Simulation not found"),
-    );
+//     const { data } = validateSchema<TCSVUploaded>(CSVUploadedSchema, { file });
+//     const { file: validatedFile } = data;
 
-    await checkUserPermissionsService(clerkUserId, [PERMISSIONS.VIEW_SIMULATION]);
+//     const result = await uploadSimulationFileService(clerkUserId, simulationId, validatedFile);
 
-    const formData = await request.formData();
+//     return responseFormatter.successWithData({
+//       message: "File uploaded successfully",
+//       data: result,
+//     });
+//   } catch (error) {
+//     return handleException(error);
+//   }
+// };
 
-    const file = formData.get("file");
+// export const getSimulationUploadedFileController = async (
+//   clerkUserId: string,
+//   simulationId: string,
+// ) => {
+//   try {
+//     validateSchema(
+//       SimulationIdParamSchema,
+//       { simulationId },
+//       () => new NotFoundException("Simulation not found"),
+//     );
 
-    const { data } = validateSchema<TCSVUploaded>(CSVUploadedSchema, { file });
-    const { file: validatedFile } = data;
+//     await checkUserPermissionsService(clerkUserId, [PERMISSIONS.VIEW_SIMULATION]);
 
-    const result = await uploadSimulationFileService(clerkUserId, simulationId, validatedFile);
+//     const file = await getSimulationUploadedFileBySimulationIdService(simulationId);
 
-    return responseFormatter.successWithData({
-      message: "File uploaded successfully",
-      data: result,
-    });
-  } catch (error) {
-    return handleException(error);
-  }
-};
+//     return responseFormatter.successWithData({
+//       data: file,
+//       message: "Uploaded file retrieved successfully",
+//     });
+//   } catch (error) {
+//     return handleException(error);
+//   }
+// };
 
-export const getSimulationUploadedFileController = async (
-  clerkUserId: string,
-  simulationId: string,
-) => {
-  try {
-    validateSchema(
-      SimulationIdParamSchema,
-      { simulationId },
-      () => new NotFoundException("Simulation not found"),
-    );
+// export const startSimulationController = async (simulationId: string, request: NextRequest) => {
+//   try {
+//     const body = await request.json();
 
-    await checkUserPermissionsService(clerkUserId, [PERMISSIONS.VIEW_SIMULATION]);
+//     validateSchema(CreateSimulationConstraintsSchema, body);
 
-    const file = await getSimulationUploadedFileBySimulationIdService(simulationId);
+//     await startSimulationService(simulationId, body);
 
-    return responseFormatter.successWithData({
-      data: file,
-      message: "Uploaded file retrieved successfully",
-    });
-  } catch (error) {
-    return handleException(error);
-  }
-};
-
-export const startSimulationController = async (simulationId: string, request: NextRequest) => {
-  try {
-    const body = await request.json();
-
-    validateSchema(CreateSimulationConstraintsSchema, body);
-
-    await startSimulationService(simulationId, body);
-
-    return responseFormatter.success({
-      message: "Simulation started successfully",
-    });
-  } catch (error) {
-    return handleException(error);
-  }
-};
+//     return responseFormatter.success({
+//       message: "Simulation started successfully",
+//     });
+//   } catch (error) {
+//     return handleException(error);
+//   }
+// };

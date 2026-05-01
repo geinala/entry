@@ -11,6 +11,9 @@ import maplibregl from "maplibre-gl";
 import env from "@/common/config/environtment";
 import { MapProvider, type MapContextType } from "./context";
 
+const DEFAULT_CENTER: [number, number] = [112.6156684, -7.9467136];
+const DEFAULT_ZOOM = 14;
+
 type MapStyleInclude = "hillshade" | "trafficIncidents" | "trafficFlow";
 type MapStyleId =
   | "monoLight"
@@ -34,19 +37,24 @@ interface TomTomMapProps {
 
 const TomTomMapInner = ({
   children,
-  center = [112.6156684, -7.9467136],
-  zoom = 14,
+  center,
+  zoom,
   showTrafficFlow = true,
   showTrafficIncidents = true,
   style = "monoLight",
   containerClassName = "relative w-full h-full rounded-lg overflow-hidden",
   onClick,
 }: TomTomMapProps) => {
+  const targetCenter = center ?? DEFAULT_CENTER;
+  const targetZoom = zoom ?? DEFAULT_ZOOM;
+
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<TTM | null>(null);
+  const lastViewportRef = useRef<{ center: [number, number]; zoom: number } | null>(null);
   const [mapContext, setMapContext] = useState<MapContextType>({
     map: null,
     mapLibreMap: null,
+    marker: null,
   });
 
   useEffect(() => {
@@ -70,10 +78,12 @@ const TomTomMapInner = ({
       },
       mapLibre: {
         container: mapContainerRef.current,
-        center,
-        zoom,
+        center: targetCenter,
+        zoom: targetZoom,
       },
     });
+
+    lastViewportRef.current = { center: targetCenter, zoom: targetZoom };
 
     if (showTrafficFlow) {
       TrafficFlowModule.get(map, { visible: true });
@@ -89,7 +99,7 @@ const TomTomMapInner = ({
     mapInstanceRef.current = map;
 
     const onLoad = () => {
-      setMapContext({ map, mapLibreMap: map.mapLibreMap });
+      setMapContext({ map, mapLibreMap: map.mapLibreMap, marker: null });
     };
 
     if (map.mapLibreMap.loaded()) {
@@ -122,8 +132,26 @@ const TomTomMapInner = ({
 
   useEffect(() => {
     if (!mapInstanceRef.current) return;
-    mapInstanceRef.current.mapLibreMap.flyTo({ center, zoom, duration: 1000 });
-  }, [center, zoom]);
+
+    const previousViewport = lastViewportRef.current;
+    const hasCenterChanged =
+      !previousViewport ||
+      previousViewport.center[0] !== targetCenter[0] ||
+      previousViewport.center[1] !== targetCenter[1];
+    const hasZoomChanged = !previousViewport || previousViewport.zoom !== targetZoom;
+
+    if (!hasCenterChanged && !hasZoomChanged) {
+      return;
+    }
+
+    mapInstanceRef.current.mapLibreMap.flyTo({
+      center: targetCenter,
+      zoom: targetZoom,
+      duration: 1000,
+    });
+
+    lastViewportRef.current = { center: targetCenter, zoom: targetZoom };
+  }, [targetCenter, targetZoom]);
 
   return (
     <MapProvider value={mapContext}>
