@@ -10,32 +10,10 @@ import { db } from "@/lib/db";
 import { buildCountQuery, buildPaginatedQuery, TColumnsDefinition } from "@/lib/query-builder";
 import {
   TCreateSimulationConstraintsSchema,
-  TCreateSimulationSchema,
   TIndexSimulationQueryParams,
 } from "@/schemas/simulation.schema";
 import { eq, sum } from "drizzle-orm";
 import { TNewSimulationUploadedFile, TNewVehicle, TUpdateSimulation } from "@/types/database";
-
-export const createSimulationRepository = async (userId: number, data: TCreateSimulationSchema) => {
-  const [createdSimulation] = await db
-    .insert(simulationTable)
-    .values({
-      title: data.title,
-      userId,
-    })
-    .returning();
-
-  await db.insert(nodeTable).values({
-    latitude: data.latitude,
-    longitude: data.longitude,
-    isDepot: 1,
-    demand: 0,
-    matrixIndex: 0,
-    simulationId: createdSimulation.id,
-  });
-
-  return createdSimulation;
-};
 
 const SIMULATION_COLUMNS: TColumnsDefinition<typeof simulationTable> = {
   title: { searchable: true, sortable: true },

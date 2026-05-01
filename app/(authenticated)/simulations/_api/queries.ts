@@ -2,10 +2,10 @@
 
 import { getNextPage } from "@/lib/infinite-scroll";
 import { TIndexSimulationQueryParams } from "@/schemas/simulation.schema";
-import { TSimulationWithDepot } from "@/types/database";
+import { TSimulationJob, TSimulationWithDepot } from "@/types/database";
 import { TApiSuccessResponseWithData } from "@/types/response";
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
-import { AxiosInstance } from "axios";
+import { AxiosInstance, AxiosResponse } from "axios";
 
 export const SIMULATIONS_QUERY_KEYS = {
   all: ["simulations"] as const,
@@ -37,6 +37,17 @@ export const simulationQueries = {
         return await api.get(`/simulations/${id}`);
       },
       enabled: !!id,
+    });
+  },
+  getDraftSimulationJob: (api: AxiosInstance) => {
+    return queryOptions({
+      queryKey: ["simulations", "draft-job"] as const,
+      queryFn: async (): Promise<TApiSuccessResponseWithData<TSimulationJob>> => {
+        const response: AxiosResponse<TApiSuccessResponseWithData<TSimulationJob>> =
+          await api.get("/simulations/jobs/draft");
+
+        return response.data;
+      },
     });
   },
 };

@@ -13,7 +13,7 @@ export const getUserPermissionsByClerkUserId = async (clerkUserId: string) => {
     .innerJoin(roleTable, eq(userTable.roleId, roleTable.id))
     .innerJoin(rolePermissionTable, eq(roleTable.id, rolePermissionTable.roleId))
     .innerJoin(permissionTable, eq(rolePermissionTable.permissionId, permissionTable.id))
-    .where(eq(userTable.clerkUserId, clerkUserId));
+    .where(eq(userTable.userId, clerkUserId));
 
   return permissions.map((p) => p.name);
 };

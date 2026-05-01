@@ -17,7 +17,7 @@ export const CSVPlaceholder = ({ fileName }: CSVPlaceholderProps) => {
         height={32}
         className="mx-auto mb-2"
       />
-      <Paragraph>{fileName}</Paragraph>
+      <Paragraph className="text-center">{fileName}</Paragraph>
     </div>
   );
 };

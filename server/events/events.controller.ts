@@ -14,7 +14,8 @@ export const streamEventsController = async (request: NextRequest): Promise<Resp
       });
     }
 
-    const res = await streamEventsService(request.signal);
+    const simulationId = request.nextUrl.searchParams.get("simulationId") ?? undefined;
+    const res = await streamEventsService(request.signal, simulationId);
 
     if (!res.ok) {
       const detail = await res.text().catch(() => "Failed to read upstream response");

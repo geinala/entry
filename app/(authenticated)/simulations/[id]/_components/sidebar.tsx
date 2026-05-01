@@ -6,7 +6,6 @@ import {
   SidebarHeader,
   SidebarSeparator,
 } from "@/app/_components/ui/sidebar";
-import CSVInput from "./input";
 import { Separator } from "@/app/_components/ui/separator";
 import { ChartNoAxesCombined } from "lucide-react";
 import { Paragraph, Title } from "@/app/_components/typography";
@@ -17,6 +16,7 @@ import { useParams } from "next/navigation";
 import { StartButton } from "./button";
 import { TSimulation, TSimulationStatus } from "@/types/database";
 import { VehicleSelect } from "./vehicle.select";
+import { formatSeconds, metersToKm } from "@/lib/utils";
 
 interface SimulationDetailSidebarLeftProps {
   hasUploadedCSV: boolean;
@@ -29,21 +29,21 @@ export const SimulationDetailLeftSidebar = ({
 }: SimulationDetailSidebarLeftProps) => {
   const { id } = useParams<{ id: string }>();
   const { data, isLoading } = useGetFileWithSimulationIdQuery(id, hasUploadedCSV);
+  const isDisabledStartButton =
+    data?.data?.uploadedFile?.status !== "ready" ||
+    (status !== "pending" && status !== "processing");
 
   return (
     <Sidebar containerClassName="relative h-full" className="h-full relative w-full" side="left">
       <SidebarContent className="p-4">
         {!hasUploadedCSV ? (
           <>
-            <CSVInput />
             <Separator />
           </>
         ) : (
           <>
             <SimulationFileUploadedItem data={data?.data} isLoading={isLoading} />
-            {data?.data.uploadedFile?.status === "ready" && data?.data.status === "pending" && (
-              <StartButton />
-            )}
+            {!isDisabledStartButton && <StartButton />}
           </>
         )}
         <SimulationStatusItem status={status} />
@@ -71,19 +71,18 @@ export const SimulationDetailRightSidebar = ({ data }: RightSidebarProps) => {
           <div className="grid grid-cols-2 gap-2">
             <StatisticsItem
               title="Distance"
-              // TODO: change with real data
               content={
                 <Paragraph className="text-xl font-medium">
-                  100<span className="text-sm">km</span>
+                  {metersToKm(data?.totalDistanceInMeters ?? 0) ?? 0}
+                  <span className="text-sm">km</span>
                 </Paragraph>
               }
             />
             <StatisticsItem
               title="Time"
-              // TODO: change with real data
               content={
                 <Paragraph className="text-xl font-medium">
-                  1<span className="text-sm">hour</span>
+                  {formatSeconds(data?.totalDurationInSeconds ?? 0, ["hours", "minutes"])}
                 </Paragraph>
               }
             />

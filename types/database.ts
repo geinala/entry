@@ -11,6 +11,7 @@ import {
   vehicleTable,
   routeLegTable,
   vehicleRouteTable,
+  simulationJobTable,
 } from "@/drizzle/schema";
 
 // User Types
@@ -29,6 +30,9 @@ export type TUserWithRoleAndPermissionNames = TUser & {
 export type TWaitlistEntry = InferSelectModel<typeof waitlistTable>;
 export type TNewWaitlistEntry = InferInsertModel<typeof waitlistTable>;
 export type TWaitlistStatus = (typeof waitlistStatusEnum.enumValues)[number];
+
+// Simulation Job Types
+export type TSimulationJob = InferSelectModel<typeof simulationJobTable>;
 
 // Simulation Types
 export type TSimulation = InferSelectModel<typeof simulationTable>;
@@ -82,4 +86,5 @@ export type TLatestRouteBySimulationRow = {
   no_traffic_travel_time_in_seconds: TRouteLeg["noTrafficTravelTimeInSeconds"];
   historic_traffic_travel_time_in_seconds: TRouteLeg["historicTrafficTravelTimeInSeconds"];
   live_traffic_incidents_travel_time_in_seconds: TRouteLeg["liveTrafficIncidentsTravelTimeInSeconds"];
+  route_status: TRouteLeg["routeStatus"];
 };

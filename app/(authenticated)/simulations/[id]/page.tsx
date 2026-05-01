@@ -4,7 +4,7 @@ import SimulationsLayoutShell from "../_components/layout-shell";
 import { SimulationDetailLeftSidebar, SimulationDetailRightSidebar } from "./_components/sidebar";
 import { useBreadcrumb } from "@/app/_contexts/breadcrumb.context";
 import { useEffect } from "react";
-import { notFound, useParams } from "next/navigation";
+import { notFound, useParams, useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import Loading from "@/app/_components/loading";
 import { Route } from "next";
@@ -13,7 +13,12 @@ import { useGetSimulationByIdQuery } from "../_hooks/use-queries";
 import { isNotFoundError } from "@/common/exception/helper";
 import { Dialog } from "@/app/_components/ui/dialog";
 import { ConstraintsFormDialog } from "./_components/dialog";
-import { EVENT_TYPES, eventHandlers, parseEventData } from "@/lib/events";
+import {
+  EVENT_TYPES,
+  eventHandlers,
+  parseEventData,
+  shouldHandleSimulationEvent,
+} from "@/lib/events";
 import { useQueryClient } from "@tanstack/react-query";
 import { useGetFinalRoutesQuery } from "./_hooks/use-queries";
 
@@ -24,9 +29,11 @@ const Map = dynamic(() => import("./_components/map"), {
 
 export default function SimulationDetailPage() {
   const { id: simulationId } = useParams<{ id: string }>();
+  const searchParams = useSearchParams();
+  const selectedVehicleId = searchParams.get("vehicleId") ?? undefined;
   const { setBreadcrumbs } = useBreadcrumb();
   const { data, isLoading, error } = useGetSimulationByIdQuery(simulationId);
-  const { data: finalRoutesData } = useGetFinalRoutesQuery(simulationId);
+  const { data: finalRoutesData } = useGetFinalRoutesQuery(simulationId, Number(selectedVehicleId));
   const queryClient = useQueryClient();
 
   if (isNotFoundError(error)) {
@@ -34,11 +41,16 @@ export default function SimulationDetailPage() {
   }
 
   useEffect(() => {
-    const es = new EventSource("/api/events/stream");
+    const es = new EventSource(`/api/events/stream?simulationId=${simulationId}`);
 
     const handlers = EVENT_TYPES.map((eventType) => {
       const handler = (event: MessageEvent<string>) => {
         const payload = parseEventData(event.data);
+
+        if (!shouldHandleSimulationEvent(payload, simulationId)) {
+          return;
+        }
+
         eventHandlers[eventType]?.({ queryClient, payload, simulationId });
       };
 

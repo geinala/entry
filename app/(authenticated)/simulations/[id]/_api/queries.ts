@@ -12,7 +12,8 @@ import { AxiosInstance, AxiosResponse } from "axios";
 export const SIMULATION_DETAIL_QUERY_KEYS = {
   findFileWithSimulationId: (simulationId: string) => ["simulation-file", simulationId] as const,
   getAllActiveVehicles: (simulationId?: string) => ["active-vehicles", simulationId] as const,
-  getFinalRoutes: (simulationId?: string) => ["final-routes", simulationId] as const,
+  getFinalRoutes: (simulationId?: string, vehicleId?: number) =>
+    ["final-routes", simulationId, vehicleId ?? null] as const,
 };
 
 export const simulationDetailQueries = {
@@ -50,11 +51,13 @@ export const simulationDetailQueries = {
       enabled: !!simulationId,
     });
   },
-  getFinalRoutes: (api: AxiosInstance, simulationId?: string) => {
+  getFinalRoutes: (api: AxiosInstance, simulationId?: string, vehicleId?: number) => {
     return queryOptions({
-      queryKey: SIMULATION_DETAIL_QUERY_KEYS.getFinalRoutes(simulationId),
+      queryKey: SIMULATION_DETAIL_QUERY_KEYS.getFinalRoutes(simulationId, vehicleId),
       queryFn: async (): Promise<TApiSuccessResponseWithData<TLatestRouteBySimulationRow[]>> => {
-        return await api.get(`/simulations/${simulationId}/routes`);
+        return await api.get(`/simulations/${simulationId}/routes`, {
+          params: vehicleId ? { vehicleId } : undefined,
+        });
       },
       enabled: !!simulationId,
     });

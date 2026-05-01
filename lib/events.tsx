@@ -4,10 +4,31 @@ import { SIMULATIONS_QUERY_KEYS } from "@/app/(authenticated)/simulations/_api/q
 
 type TEventPayload = Record<string, unknown> | string | null;
 
+const isSimulationEventPayload = (
+  payload: TEventPayload,
+): payload is Record<string, unknown> & { simulationId: string } => {
+  return (
+    typeof payload === "object" &&
+    payload !== null &&
+    typeof payload.simulationId === "string"
+  );
+};
+
+export const shouldHandleSimulationEvent = (
+  payload: TEventPayload,
+  simulationId: string,
+) => {
+  if (!isSimulationEventPayload(payload)) {
+    return false;
+  }
+
+  return payload.simulationId === simulationId;
+};
+
 type TEventHandlerContext = {
   queryClient: QueryClient;
   payload: TEventPayload;
-  simulationId?: string;
+  simulationId: string;
 };
 
 type TEventHandler = (context: TEventHandlerContext) => void;
@@ -27,8 +48,18 @@ export const eventHandlers: Record<string, TEventHandler> = {
     queryClient.invalidateQueries({
       queryKey: SIMULATION_DETAIL_QUERY_KEYS.getFinalRoutes(simulationId),
     });
+
     queryClient.invalidateQueries({
-      queryKey: SIMULATIONS_QUERY_KEYS.findById(simulationId as string),
+      queryKey: SIMULATIONS_QUERY_KEYS.findById(simulationId),
+    });
+  },
+  VEHICLE_ARRIVED: ({ queryClient, simulationId }) => {
+    queryClient.invalidateQueries({
+      queryKey: SIMULATION_DETAIL_QUERY_KEYS.getFinalRoutes(simulationId),
+    });
+
+    queryClient.invalidateQueries({
+      queryKey: SIMULATIONS_QUERY_KEYS.findById(simulationId),
     });
   },
 };

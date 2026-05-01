@@ -5,36 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1773302550311,
-      "tag": "0000_simple_slayback",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1773386024663,
-      "tag": "0001_moaning_dagger",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1773391507987,
-      "tag": "0002_ordinary_corsair",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1773423922242,
-      "tag": "0003_tough_captain_marvel",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1773550936935,
-      "tag": "0004_tidy_typhoid_mary",
+      "when": 1777631544449,
+      "tag": "0000_white_union_jack",
       "breakpoints": true
     }
   ]

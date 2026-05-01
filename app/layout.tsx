@@ -25,7 +25,7 @@ export default function RootLayout({
     <QueryProvider>
       <ClerkProvider>
         <html lang="en">
-          <body className={`antialiased`}>
+          <body suppressHydrationWarning className={`antialiased`}>
             <BreadcrumbProvider>
               <SidebarProvider defaultOpen={false}>{children}</SidebarProvider>
             </BreadcrumbProvider>

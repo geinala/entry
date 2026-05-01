@@ -1,20 +1,16 @@
 "use client";
 
 import { Button } from "@/app/_components/ui/button";
-import { Empty, EmptyContent, EmptyDescription } from "@/app/_components/ui/empty";
-import { CSVPlaceholder } from "@/app/_components/csv-placeholder";
 import { CSVUploadedSchema } from "@/schemas/file.schema";
 import { useForm } from "@tanstack/react-form";
-import { CloudUpload, Trash } from "lucide-react";
 import { useUploadCSVMutation } from "../_hooks/use-mutations";
 import React, { useState } from "react";
-import { Item, ItemContent } from "@/app/_components/ui/item";
-import { cn, truncateText } from "@/lib/utils";
-import { Field, FieldError, FieldLabel } from "@/app/_components/ui/field";
-import { Input } from "@/app/_components/ui/input";
+import { Field, FieldError } from "@/app/_components/ui/field";
 import { useParams } from "next/navigation";
+import { CsvFileDropzone } from "@/app/_components/csv-file-dropzone";
+import { cn } from "@/lib/utils";
 
-interface CSVInputProps extends React.ComponentProps<typeof Item> {
+interface CSVInputProps extends React.ComponentProps<typeof CsvFileDropzone> {
   onFileUpload?: () => void;
 }
 
@@ -65,86 +61,40 @@ export default function CSVInput({ onFileUpload, ...props }: CSVInputProps) {
         form.handleSubmit();
       }}
     >
-      <Item
-        {...props}
-        variant={"muted"}
-        className={cn(
-          "border border-neutral-400 border-dashed flex items-center rounded-md flex-col justify-center text-center cursor-pointer hover:bg-gray-50 bg-muted",
-          props.className,
-        )}
-      >
-        <ItemContent>
-          {!selectedFile ? (
-            /* eslint-disable react/no-children-prop */
-            <form.Field
-              name="file"
-              children={(field) => {
-                const { isTouched, isValid } = field.state.meta;
+      {/* eslint-disable react/no-children-prop */}
+      <form.Field
+        name="file"
+        children={(field) => {
+          const { isTouched, isValid } = field.state.meta;
 
-                const isInvalid = isTouched && !isValid;
+          const isInvalid = isTouched && !isValid;
 
-                return (
-                  <>
-                    <Field data-invalid={isInvalid}>
-                      <FieldLabel
-                        htmlFor={field.name}
-                        className="flex flex-col items-center cursor-pointer"
-                      >
-                        <Empty className="p-1!">
-                          <EmptyContent className="gap-2">
-                            <CloudUpload className="text-muted-foreground w-7! h-7!" />
-                            <EmptyDescription>
-                              <span className="text-primary font-semibold">Click to upload</span>{" "}
-                              CSV file {"(max 10MB)"}
-                            </EmptyDescription>
-                          </EmptyContent>
-                        </Empty>
-                      </FieldLabel>
-                      <Input
-                        id={field.name}
-                        name={field.name}
-                        onBlur={field.handleBlur}
-                        onChange={(e) => {
-                          const file = e.target.files ? e.target.files[0] : null;
-                          setSelectedFile(file);
-                          field.handleChange(file);
-                        }}
-                        max={1}
-                        type="file"
-                        hidden
-                        aria-invalid={isInvalid}
-                        placeholder="Enter simulation title"
-                        autoComplete="off"
-                        accept=".csv"
-                        min={1}
-                      />
-                    </Field>
-                  </>
-                );
-              }}
-            />
-          ) : (
-            <>
-              <Button
-                variant={"ghost"}
-                id="remove-file-button"
-                size={"icon"}
-                type="button"
-                className="absolute top-4 right-4 hover:bg-transparent"
-                onClick={() => {
-                  setSelectedFile(null);
-                  form.setFieldValue("file", null);
+          return (
+            <Field data-invalid={isInvalid}>
+              <CsvFileDropzone
+                {...props}
+                inputId={field.name}
+                file={selectedFile}
+                onFileChange={(file) => {
+                  setSelectedFile(file);
+                  field.setValue(file as File);
                 }}
-              >
-                <Trash className="w-4 h-4 text-red-500" />
-              </Button>
-              <CSVPlaceholder
-                fileName={`${truncateText(selectedFile.name.split(".").slice(0, -1).join("."), 40)}`}
+                onRemove={() => {
+                  setSelectedFile(null);
+                  field.setValue(null as unknown as File);
+                }}
+                onBlur={field.handleBlur}
+                isInvalid={isInvalid}
+                variant={props.variant ?? "muted"}
+                    className={cn(
+                      "border border-neutral-400 border-dashed flex items-center rounded-md flex-col justify-center text-center cursor-pointer hover:bg-gray-50 bg-muted",
+                      props.className,
+                    )}
               />
-            </>
-          )}
-        </ItemContent>
-      </Item>
+            </Field>
+          );
+        }}
+      />
 
       <form.Subscribe selector={(state) => state.errorMap.onSubmit}>
         {(error) => (error ? <FieldError errors={error.file} /> : null)}

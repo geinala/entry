@@ -18,8 +18,8 @@ export const useGetAllActiveVehiclesQuery = (simulationId?: string) => {
   return useQuery(simulationDetailQueries.getAllActiveVehicles(api, simulationId));
 };
 
-export const useGetFinalRoutesQuery = (simulationId?: string) => {
+export const useGetFinalRoutesQuery = (simulationId?: string, vehicleId?: number) => {
   const api = useAuthenticatedClient();
 
-  return useQuery(simulationDetailQueries.getFinalRoutes(api, simulationId));
+  return useQuery(simulationDetailQueries.getFinalRoutes(api, simulationId, vehicleId));
 };
