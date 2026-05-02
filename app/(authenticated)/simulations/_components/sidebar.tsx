@@ -19,6 +19,7 @@ import { TFilterItem } from "@/app/_components/data-table/filter-collections/fac
 import { simulationStatusEnum } from "@/drizzle/schema";
 import { toTitleCase } from "@/lib/utils";
 import { useGetDraftSimulationJobQuery } from "../_hooks/use-queries";
+import Link from "next/link";
 
 interface ISimulationHistorySidebar {
   onSelectSimulation: (simulationId: string) => void;
@@ -91,11 +92,11 @@ export const SimulationHistorySidebar = ({ onSelectSimulation }: ISimulationHist
       </SidebarContent>
       <SidebarFooter>
         <GuardComponent requirePermission={PERMISSIONS.CREATE_SIMULATION}>
-          <DialogTrigger asChild>
-            <Button>
+          <Link href="/simulations/create">
+            <Button className="w-full">
               <Plus /> Create New Simulation
             </Button>
-          </DialogTrigger>
+          </Link>
         </GuardComponent>
       </SidebarFooter>
     </Sidebar>

@@ -14,6 +14,7 @@ import { useForm } from "@tanstack/react-form";
 import { CreateSimulationJobSchema } from "@/schemas/simulations/create-simulation.schema";
 import { formatDate } from "date-fns";
 import { useCreateSimulationJobMutations } from "../_hooks/use-mutations";
+import DownloadTemplateButton from "@/app/(authenticated)/_components/download-template.button";
 
 const CreateSimulationForm = () => {
   const form = useForm({
@@ -186,7 +187,10 @@ const CreateSimulationForm = () => {
           />
         </div>
         <div className="flex flex-1 flex-col gap-3 min-h-0">
-          <Label htmlFor="customersFile">Customers CSV File</Label>
+          <div className="flex items-start justify-between">
+            <Label htmlFor="customersFile">Customers CSV File</Label>
+            <DownloadTemplateButton />
+          </div>
           {/* eslint-disable react/no-children-prop */}
           <form.Field
             name="customersFile"

@@ -125,6 +125,11 @@ export const calculationStatusEnum = pgEnum("calculation_status_enum", [
   "failed",
 ]);
 
+export const simulationJobFileValidationStatusEnum = pgEnum(
+  "simulation_file_validation_status_enum",
+  ["uploaded", "validating", "validated", "failed"],
+);
+
 export const simulationJobTable = pgTable("simulation_jobs", {
   // Basic info
   id: uuid().primaryKey().defaultRandom(),
@@ -136,7 +141,6 @@ export const simulationJobTable = pgTable("simulation_jobs", {
   depotLocationLatitude: doublePrecision("depot_location_latitude").notNull(),
   depotLocationLongitude: doublePrecision("depot_location_longitude").notNull(),
   maxComputationTimeInSeconds: integer("max_computation_time_in_seconds").notNull().default(600), // in seconds
-  filePath: varchar("file_path").notNull(),
   startedAt: timestamp("started_at", { withTimezone: true }),
 
   // State tracking
@@ -144,16 +148,26 @@ export const simulationJobTable = pgTable("simulation_jobs", {
   currentStep: integer("current_step").notNull().default(0),
 
   // Progress tracking
+  filePath: varchar("file_path"),
+  fileValidationStatus: simulationJobFileValidationStatusEnum("file_validation_status")
+    .notNull()
+    .default("uploaded"),
   totalRows: integer("total_rows"),
   validRows: integer("valid_rows").notNull().default(0),
   invalidRows: integer("invalid_rows").notNull().default(0),
+  processedRows: integer("processed_rows"),
+  progressPercentage: integer("progress_percentage").default(0),
+  validationStartedAt: timestamp("validation_started_at", { withTimezone: true }), // Timestamp when file validation starts
+  validationCompletedAt: timestamp("validation_completed_at", { withTimezone: true }), // Timestamp when file validation is completed
 
   // Result tracking
   geocodingStatus: geocodingStatusEnum("geocoding_status").notNull().default("pending"),
+  geocodingStartedAt: timestamp("geocoding_started_at", { withTimezone: true }), // Timestamp when geocoding starts
   geocodedAt: timestamp("geocoded_at", { withTimezone: true }), // Timestamp when geocoding is completed
 
   // Calculation tracking
   calculationStatus: calculationStatusEnum("calculation_status").notNull().default("pending"),
+  calculationStartedAt: timestamp("calculation_started_at", { withTimezone: true }), // Timestamp when calculation starts
   calculatedAt: timestamp("calculated_at", { withTimezone: true }), // Timestamp when calculation is completed
 
   // Summary results
@@ -163,6 +177,67 @@ export const simulationJobTable = pgTable("simulation_jobs", {
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+export const simulationJobUploadedFileErrorTable = pgTable(
+  "simulation_job_uploaded_file_errors",
+  {
+    id: serial().primaryKey(),
+    simulationJobId: uuid("simulation_job_id").references(() => simulationJobTable.id),
+    rowNumber: integer("row_number").notNull(),
+    fieldName: varchar("field_name").notNull(),
+    invalidValue: text("invalid_value").notNull(),
+    errorMessage: text("error_message").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.simulationJobId],
+      foreignColumns: [simulationJobTable.id],
+      name: "simulation_job_uploaded_file_errors_simulation_job_id_simulation_jobs_id_fk",
+    }),
+    index("simulation_job_uploaded_file_errors_simulation_job_id_idx").on(table.simulationJobId),
+  ],
+);
+
+export const addressTypeEnum = pgEnum("address_type_enum", ["street", "residential", "unknown"]);
+export const addressValidationSourceEnum = pgEnum("address_validation_source_enum", [
+  "manual_correction",
+  "recommendation",
+  "original",
+  "skipped",
+]);
+
+export const addressValidationsTable = pgTable(
+  "address_validations",
+  {
+    id: serial().primaryKey(),
+    simulationJobId: uuid("simulation_job_id").references(() => simulationJobTable.id),
+    nosi: varchar("nosi").notNull(),
+    rowNumber: integer("row_number").notNull(),
+    originalAddress: varchar("original_address").notNull(),
+    cleanedAddress: varchar("cleaned_address").notNull(),
+    streetCandidate: varchar("street_candidate"),
+    fallbackCandidate: varchar("fallback_candidate").notNull(),
+    processedAddress: varchar("processed_address").notNull(),
+    addressType: addressTypeEnum("address_type").notNull().default("unknown"),
+    nearbyRecommendedAddress: varchar("nearby_recommended_address"),
+    chosenSource: addressValidationSourceEnum("validation_source").notNull().default("original"),
+    correctedAt: timestamp("corrected_at", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.simulationJobId],
+      foreignColumns: [simulationJobTable.id],
+      name: "address_validations_simulation_job_id_simulation_jobs_id_fk",
+    }),
+    index("address_validations_simulation_job_id_idx").on(table.simulationJobId),
+    index("address_validations_nosi_idx").on(table.nosi),
+  ],
+);
+
+// Old table
 
 export const simulationStatusEnum = pgEnum("simulation_status_enum", [
   "pending",
@@ -231,7 +306,6 @@ export const simulationUploadedFileTable = pgTable(
       .notNull(),
     fileName: varchar("file_name").notNull(),
     filePath: varchar("file_path").notNull(),
-    fileErrorPath: varchar("file_error_path"),
     totalRows: integer("total_rows"),
     invalidRows: integer("invalid_rows"),
     processedRows: integer("processed_rows"),

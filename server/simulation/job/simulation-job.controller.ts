@@ -29,7 +29,7 @@ export const createSimulationJobController = async (request: NextRequest, clerkU
     const createdSimulation = await createSimulationJobService(clerkUserId, data);
 
     return responseFormatter.created({
-      data: createdSimulation[0],
+      data: createdSimulation,
       message: "Simulation job created successfully",
     });
   } catch (error) {

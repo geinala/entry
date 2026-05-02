@@ -6,6 +6,7 @@ import {
   SidebarHeader,
   SidebarSeparator,
 } from "@/app/_components/ui/sidebar";
+// import CSVInput from "./input";
 import { Separator } from "@/app/_components/ui/separator";
 import { ChartNoAxesCombined } from "lucide-react";
 import { Paragraph, Title } from "@/app/_components/typography";
@@ -38,6 +39,7 @@ export const SimulationDetailLeftSidebar = ({
       <SidebarContent className="p-4">
         {!hasUploadedCSV ? (
           <>
+            {/* <CSVInput /> */}
             <Separator />
           </>
         ) : (

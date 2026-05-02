@@ -21,7 +21,6 @@ const Header = () => {
       <div className="flex gap-4 items-center">
         {!isAdmin && (
           <>
-            <DownloadTemplateButton />
             <NotificationDropdown />
           </>
         )}
