@@ -33,6 +33,7 @@ export type TWaitlistStatus = (typeof waitlistStatusEnum.enumValues)[number];
 
 // Simulation Job Types
 export type TSimulationJob = InferSelectModel<typeof simulationJobTable>;
+export type TUpdateSimulationJob = Partial<Omit<TSimulationJob, "id" | "createdAt">>;
 
 // Simulation Types
 export type TSimulation = InferSelectModel<typeof simulationTable>;

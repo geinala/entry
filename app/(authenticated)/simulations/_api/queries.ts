@@ -42,11 +42,11 @@ export const simulationQueries = {
   getDraftSimulationJob: (api: AxiosInstance) => {
     return queryOptions({
       queryKey: ["simulations", "draft-job"] as const,
-      queryFn: async (): Promise<TApiSuccessResponseWithData<TSimulationJob>> => {
+      queryFn: async (): Promise<TSimulationJob> => {
         const response: AxiosResponse<TApiSuccessResponseWithData<TSimulationJob>> =
           await api.get("/simulations/jobs/draft");
 
-        return response.data;
+        return response.data.data;
       },
     });
   },
