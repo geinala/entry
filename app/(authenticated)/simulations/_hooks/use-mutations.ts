@@ -13,6 +13,14 @@ export const useCreateSimulationMutation = () => {
 
 export const useDeleteDraftSimulationJobMutation = () => {
   const api = useAuthenticatedClient();
+  const queryClient = useQueryClient();
 
-  return useMutation(simulationMutations.deleteDraftSimulationJob(api));
+  return useMutation(simulationMutations.deleteDraftSimulationJob(api, queryClient));
+};
+
+export const useUpdateSimulationJobMutation = () => {
+  const api = useAuthenticatedClient();
+  const queryClient = useQueryClient();
+
+  return useMutation(simulationMutations.updateSimulationJob(api, queryClient));
 };

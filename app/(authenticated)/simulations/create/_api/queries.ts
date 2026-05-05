@@ -1,0 +1,37 @@
+import { TIndexSimulationQueryParams } from "@/schemas/simulation.schema";
+import { TSimulationJobFileValidationStatusEnum, TSimulationUploadedRow } from "@/types/database";
+import { TPaginationResponse } from "@/types/meta";
+import { queryOptions } from "@tanstack/react-query";
+import { AxiosInstance } from "axios";
+
+export const multiStepSimulationCreationQueries = {
+  getSimulationUploadedRows: (
+    api: AxiosInstance,
+    queryParams: TIndexSimulationQueryParams,
+    fileValidationStatus?: TSimulationJobFileValidationStatusEnum,
+    id?: string,
+  ) => {
+    return queryOptions({
+      queryKey: ["simulationUploadedRows", id, queryParams],
+      queryFn: async (): Promise<TPaginationResponse<TSimulationUploadedRow>> => {
+        return await api.get(`/simulations/jobs/${id}/files/rows`, {
+          params: queryParams,
+        });
+      },
+      enabled: fileValidationStatus === "reviewing" || fileValidationStatus === "failed",
+      refetchInterval: (query) => {
+        const state = query.state.data;
+        // Refetch every 5 seconds if the file validation is still in progress
+        if (
+          fileValidationStatus === "uploaded" ||
+          fileValidationStatus === "validating" ||
+          (fileValidationStatus === "reviewing" && state?.data.length === 0)
+        ) {
+          return 5000; // 5 seconds
+        }
+
+        return false; // Stop refetching if validation is completed or failed
+      },
+    });
+  },
+};

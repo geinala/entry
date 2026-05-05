@@ -197,4 +197,8 @@ export const responseFormatter = {
   conflict: (message?: string): NextResponse => {
     return responseFormatter.error({ message, status: HTTP_STATUS.CONFLICT });
   },
+
+  noContent: (): NextResponse => {
+    return new NextResponse(null, { status: HTTP_STATUS.NO_CONTENT });
+  },
 };

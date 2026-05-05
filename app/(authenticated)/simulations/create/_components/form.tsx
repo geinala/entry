@@ -53,7 +53,9 @@ const CreateSimulationForm = () => {
         e.preventDefault();
         form.handleSubmit(e);
       }}
+      className="w-full flex flex-col items-end gap-3"
     >
+      <DownloadTemplateButton />
       <div className="grid grid-cols-2 items-stretch w-full gap-4 min-h-0">
         <div className="flex-1 flex flex-col gap-2 h-full">
           <form.Field
@@ -187,10 +189,7 @@ const CreateSimulationForm = () => {
           />
         </div>
         <div className="flex flex-1 flex-col gap-3 min-h-0">
-          <div className="flex items-start justify-between">
-            <Label htmlFor="customersFile">Customers CSV File</Label>
-            <DownloadTemplateButton />
-          </div>
+          <Label htmlFor="customersFile">Customers CSV File</Label>
           {/* eslint-disable react/no-children-prop */}
           <form.Field
             name="customersFile"
@@ -226,7 +225,7 @@ const CreateSimulationForm = () => {
         </div>
       </div>
 
-      <div className="flex w-full items-center mt-6">
+      <div className="flex w-full items-center">
         <Button type="submit" className="ml-auto" form="create-simulation-job-form">
           Next Step
         </Button>

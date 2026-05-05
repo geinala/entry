@@ -48,6 +48,19 @@ export const simulationQueries = {
 
         return response.data.data;
       },
+      refetchInterval: (query) => {
+        const state = query.state.data;
+        const isFileValidationStepActive =
+          state?.fileValidationStatus === "uploaded" ||
+          state?.fileValidationStatus === "validating";
+
+        if (!isFileValidationStepActive) {
+          return false; // Stop polling if file validation is not active
+        }
+
+        return 3000;
+      },
+      refetchIntervalInBackground: true,
     });
   },
 };
