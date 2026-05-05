@@ -127,7 +127,7 @@ export const calculationStatusEnum = pgEnum("calculation_status_enum", [
 
 export const simulationJobFileValidationStatusEnum = pgEnum(
   "simulation_file_validation_status_enum",
-  ["uploaded", "validating", "validated", "failed"],
+  ["uploaded", "validating", "validated", "reviewing", "completed", "failed"],
 );
 
 export const simulationJobTable = pgTable("simulation_jobs", {
@@ -178,27 +178,6 @@ export const simulationJobTable = pgTable("simulation_jobs", {
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
-export const simulationJobUploadedFileErrorTable = pgTable(
-  "simulation_job_uploaded_file_errors",
-  {
-    id: serial().primaryKey(),
-    simulationJobId: uuid("simulation_job_id").references(() => simulationJobTable.id),
-    rowNumber: integer("row_number").notNull(),
-    fieldName: varchar("field_name").notNull(),
-    invalidValue: text("invalid_value").notNull(),
-    errorMessage: text("error_message").notNull(),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  },
-  (table) => [
-    foreignKey({
-      columns: [table.simulationJobId],
-      foreignColumns: [simulationJobTable.id],
-      name: "simulation_job_uploaded_file_errors_simulation_job_id_simulation_jobs_id_fk",
-    }),
-    index("simulation_job_uploaded_file_errors_simulation_job_id_idx").on(table.simulationJobId),
-  ],
-);
-
 export const addressTypeEnum = pgEnum("address_type_enum", ["street", "residential", "unknown"]);
 export const addressValidationSourceEnum = pgEnum("address_validation_source_enum", [
   "manual_correction",
@@ -234,6 +213,33 @@ export const addressValidationsTable = pgTable(
     }),
     index("address_validations_simulation_job_id_idx").on(table.simulationJobId),
     index("address_validations_nosi_idx").on(table.nosi),
+  ],
+);
+
+export const simulationUploadedRows = pgTable(
+  "simulation_uploaded_rows",
+  {
+    id: serial().primaryKey(),
+    simulationJobId: uuid("simulation_job_id").references(() => simulationJobTable.id),
+    nosi: varchar("nosi"),
+    courier: varchar("courier"),
+    customerName: varchar("customer_name"),
+    address: varchar("address"),
+    city: varchar("city"),
+    weight: real("weight"),
+    startDatetime: timestamp("start_datetime", { withTimezone: true }),
+    endDatetime: timestamp("end_datetime", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    errorDetails: jsonb("error_details"), // To store any error details related to this row during processing
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.simulationJobId],
+      foreignColumns: [simulationJobTable.id],
+      name: "simulation_uploaded_rows_simulation_job_id_simulation_jobs_id_fk",
+    }),
+    index("simulation_uploaded_rows_simulation_job_id_idx").on(table.simulationJobId),
+    index("simulation_uploaded_rows_nosi_idx").on(table.nosi),
   ],
 );
 

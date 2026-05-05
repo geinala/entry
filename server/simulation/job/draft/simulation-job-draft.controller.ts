@@ -24,7 +24,7 @@ export const getDraftSimulationJobController = async (userId: string) => {
 
     return responseFormatter.successWithData({
       message: "Draft simulation job retrieved successfully",
-      data: draftJob[0] ?? null,
+      data: draftJob ?? null,
     });
   } catch (error) {
     return handleException(error);

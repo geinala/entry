@@ -12,6 +12,8 @@ import {
   routeLegTable,
   vehicleRouteTable,
   simulationJobTable,
+  simulationJobFileValidationStatusEnum,
+  simulationUploadedRows,
 } from "@/drizzle/schema";
 
 // User Types
@@ -34,6 +36,9 @@ export type TWaitlistStatus = (typeof waitlistStatusEnum.enumValues)[number];
 // Simulation Job Types
 export type TSimulationJob = InferSelectModel<typeof simulationJobTable>;
 export type TUpdateSimulationJob = Partial<Omit<TSimulationJob, "id" | "createdAt">>;
+
+// Simulation Job Uploaded File Error Types
+export type TSimulationUploadedRow = InferSelectModel<typeof simulationUploadedRows>;
 
 // Simulation Types
 export type TSimulation = InferSelectModel<typeof simulationTable>;
@@ -89,3 +94,6 @@ export type TLatestRouteBySimulationRow = {
   live_traffic_incidents_travel_time_in_seconds: TRouteLeg["liveTrafficIncidentsTravelTimeInSeconds"];
   route_status: TRouteLeg["routeStatus"];
 };
+
+export type TSimulationJobFileValidationStatusEnum =
+  (typeof simulationJobFileValidationStatusEnum.enumValues)[number];

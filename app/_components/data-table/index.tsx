@@ -9,7 +9,7 @@ import {
 } from "@tanstack/react-table";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "../ui/table";
 import { Card, CardContent, CardFooter, CardHeader } from "../ui/card";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 import Loading from "../loading";
 import { useIsMobile } from "../../_hooks/use-mobile";
 import { Button } from "../ui/button";
@@ -31,7 +31,7 @@ export type TFilterValue =
   | undefined
   | Array<string | number>;
 
-interface IDataTableProps<TData, TValue = unknown> {
+export interface IDataTableProps<TData, TValue = unknown> {
   source?: TPaginationResponse<TData>;
   columns: ColumnDef<TData, TValue>[];
   isLoading?: boolean;

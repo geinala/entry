@@ -1,0 +1,1 @@
+ALTER TABLE "simulation_jobs" ADD COLUMN "file_validation_error_path" varchar;

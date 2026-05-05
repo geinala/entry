@@ -1,0 +1,1 @@
+ALTER TABLE "simulation_job_uploaded_file_errors" DROP COLUMN "nosi";
