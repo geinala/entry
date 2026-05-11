@@ -121,7 +121,7 @@ export const SimulationFileUploadedItem = ({
 }: SimulationFileUploadedItemProps) => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const { data: errorReportFileUrl, refetch } = useGetPresignedUrlQuery({
-    objectName: data?.uploadedFile?.fileErrorPath ?? "",
+    objectName: data?.uploadedFile?.filePath ?? "",
     forceDownload: true,
   });
 

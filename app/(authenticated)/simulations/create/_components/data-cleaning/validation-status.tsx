@@ -17,7 +17,6 @@ type Props = {
   processedRows: number;
   totalRows: number;
   isValidated: boolean;
-  needsReview: boolean;
 };
 
 export const ValidationStatus: React.FC<Props> = ({
@@ -31,7 +30,6 @@ export const ValidationStatus: React.FC<Props> = ({
   processedRows,
   totalRows,
   isValidated,
-  needsReview,
 }) => {
   if (isFailed) {
     return (
@@ -89,21 +87,6 @@ export const ValidationStatus: React.FC<Props> = ({
           <p className="text-sm text-muted-foreground">Preparing the next step...</p>
           <Progress value={100} className="h-2" />
         </div>
-      </div>
-    );
-  }
-
-  if (needsReview) {
-    return (
-      <div className="mb-3">
-        <Alert variant={"destructive"} className="w-full">
-          <AlertCircle />
-          <AlertTitle>You have failed rows</AlertTitle>
-          <AlertDescription>
-            Please review the failed rows in the table below. You can choose to edit or delete them.
-            Once all issues are resolved, you can continue to the next step.
-          </AlertDescription>
-        </Alert>
       </div>
     );
   }

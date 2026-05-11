@@ -1,23 +1,24 @@
 import { TSimulationUploadedRow } from "@/types/database";
 import { TPaginationResponse } from "@/types/meta";
-import { TIndexQueryParams } from "@/types/query-params";
 import { paginationResponseMapper } from "@/lib/pagination";
 import {
+  deleteAllSimulationUploadedErrorsAndContinueRepository,
   deleteSimulationUploadedRowRepository,
-  getSimulationUploadedRows,
-  getSimulationUploadedRowsCountRepository,
+  getSimulationUploadedErrorsRowsWithPaginationRepository,
   updateSimulationUploadedRowRepository,
 } from "./simulation-job-files.repository";
 import { TUpdateSimulationUploadedRowSchema } from "@/schemas/simulations/jobs/update-simulation-uploaded-row.schema";
+import { TSimulationJobFilesIndexQueryParams } from "@/schemas/simulations/jobs/simulation-job-index-query-params";
+import { server } from "@/lib/axios";
 
-export const getSimulationUploadedRowsService = async (
+export const getSimulationUploadedErrorsRowsService = async (
   jobId: string,
-  queryParams: TIndexQueryParams,
+  queryParams: TSimulationJobFilesIndexQueryParams,
 ): Promise<TPaginationResponse<TSimulationUploadedRow>> => {
-  const [entries, total] = await Promise.all([
-    getSimulationUploadedRows(jobId, queryParams),
-    getSimulationUploadedRowsCountRepository(jobId, queryParams),
-  ]);
+  const [entries, total] = await getSimulationUploadedErrorsRowsWithPaginationRepository(
+    jobId,
+    queryParams,
+  );
 
   return paginationResponseMapper<TSimulationUploadedRow>(entries, {
     currentPage: queryParams.page,
@@ -36,4 +37,15 @@ export const updateSimulationUploadedRowService = async (
 
 export const deleteSimulationUploadedRowService = async (jobId: string, rowId: number) => {
   return await deleteSimulationUploadedRowRepository(jobId, rowId);
+};
+
+export const deleteAllSimulationUploadedErrorsAndContinueService = async (jobId: string) => {
+  try {
+    await Promise.all([
+      deleteAllSimulationUploadedErrorsAndContinueRepository(jobId),
+      server.post(`/simulations/jobs/${jobId}/cleaning`),
+    ]);
+  } catch (error) {
+    throw error;
+  }
 };

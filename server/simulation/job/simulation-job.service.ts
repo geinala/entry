@@ -23,8 +23,6 @@ export const createSimulationJobService = async (
   try {
     await server.post(`/simulations/jobs/${result.id}/files`);
   } catch (error) {
-    console.log("Error notifying simulation job about uploaded file:", error);
-
     await updateSimulationJobRepository(result.id, {
       fileValidationStatus: "failed",
       filePath: null,
@@ -49,8 +47,19 @@ export const updateSimulationJobService = async (
   simulationJobId: string,
   payload: TUpdateSimulationJobSchema,
 ) => {
-  return await updateSimulationJobStatusRepository(simulationJobId, {
-    currentStep: payload.nextStep,
-    fileValidationStatus: payload.fileValidationStatus,
-  });
+  const updatePayload = {
+    ...(payload.currentStep && {
+      currentStep: payload.currentStep,
+    }),
+
+    ...(payload.fileValidationStatus && {
+      fileValidationStatus: payload.fileValidationStatus,
+    }),
+
+    ...(payload.validationCompletedAt && {
+      validationCompletedAt: new Date(payload.validationCompletedAt),
+    }),
+  };
+
+  return await updateSimulationJobStatusRepository(simulationJobId, updatePayload);
 };

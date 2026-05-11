@@ -26,8 +26,6 @@ export const DraftSimulationJobDialog = () => {
     );
   }
 
-  const draft = data?.data;
-
   return (
     <DialogContent>
       <DialogHeader>
@@ -40,11 +38,11 @@ export const DraftSimulationJobDialog = () => {
       {/* 🔹 Ringkasan Draft */}
       <div className="py-4 space-y-2 text-sm">
         <div>
-          <span className="font-medium">Title:</span> {draft?.title || "-"}
+          <span className="font-medium">Title:</span> {data?.title || "-"}
         </div>
         <div>
           <span className="font-medium">Last updated:</span>{" "}
-          {draft ? formatDistanceToNow(new Date(draft.updatedAt), { addSuffix: true }) : "-"}
+          {data ? formatDistanceToNow(new Date(data.updatedAt), { addSuffix: true }) : "-"}
         </div>
         <div>
           <span className="font-medium">Status:</span> Draft
@@ -61,7 +59,7 @@ export const DraftSimulationJobDialog = () => {
         {/* Continue */}
         <Button
           onClick={() => {
-            router.push(`/simulations/create?id=${draft?.id}`);
+            router.push(`/simulations/create?id=${data?.id}`);
           }}
         >
           Continue Draft

@@ -17,10 +17,3 @@ export const useDeleteDraftSimulationJobMutation = () => {
 
   return useMutation(simulationMutations.deleteDraftSimulationJob(api, queryClient));
 };
-
-export const useUpdateSimulationJobMutation = () => {
-  const api = useAuthenticatedClient();
-  const queryClient = useQueryClient();
-
-  return useMutation(simulationMutations.updateSimulationJob(api, queryClient));
-};

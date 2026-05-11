@@ -1,5 +1,19 @@
-import { and, asc, Column, desc, eq, ilike, InferSelectModel, or, sql, SQL } from "drizzle-orm";
+import {
+  and,
+  asc,
+  Column,
+  desc,
+  eq,
+  getTableColumns,
+  ilike,
+  InferSelectModel,
+  or,
+  sql,
+  SQL,
+} from "drizzle-orm";
+import type { SelectResultFields } from "drizzle-orm/query-builders/select.types";
 import { PgSelect, PgTable } from "drizzle-orm/pg-core";
+import type { SelectedFields } from "drizzle-orm/pg-core/query-builders/select.types";
 import { db } from "./db";
 import { calculateOffset } from "./pagination";
 import { TIndexQueryParams } from "@/types/query-params";
@@ -39,8 +53,15 @@ type TPaginationParams<TTable extends PgTable> = {
   table: TTable;
   columns: TColumnsDefinition<TTable>;
   queryParams: TIndexQueryParams;
-  baseConditions?: SQL[];
+  baseConditions?: Array<SQL | undefined>;
   applyJoins?: (query: PgSelect) => PgSelect;
+};
+
+type TPaginationParamsWithSelect<
+  TTable extends PgTable,
+  TSelected extends SelectedFields,
+> = TPaginationParams<TTable> & {
+  select: TSelected;
 };
 
 type TBuildWhereParams<TTable extends PgTable> = {
@@ -136,7 +157,7 @@ export const buildCountQuery = async <TTable extends PgTable>({
   applyJoins: applyJoinsFn,
 }: Omit<TPaginationParams<TTable>, "queryParams"> & {
   queryParams: Pick<TIndexQueryParams, "search"> & Record<string, unknown>;
-  baseConditions?: SQL[];
+  baseConditions?: Array<SQL | undefined>;
   applyJoins?: (query: PgSelect) => PgSelect;
 }) => {
   const whereClause = buildGenericWhereClause({ table, queryParams, columns });
@@ -155,16 +176,27 @@ export const buildCountQuery = async <TTable extends PgTable>({
   return (result[0]?.count ?? 0) as number;
 };
 
-export const buildPaginatedQuery = async <
+export async function buildPaginatedQuery<TTable extends PgTable>(
+  params: TPaginationParams<TTable>,
+): Promise<InferSelectModel<TTable>[]>;
+
+export async function buildPaginatedQuery<TTable extends PgTable, TSelected extends SelectedFields>(
+  params: TPaginationParamsWithSelect<TTable, TSelected>,
+): Promise<SelectResultFields<TSelected>[]>;
+
+export async function buildPaginatedQuery<
   TTable extends PgTable,
-  TResult = InferSelectModel<TTable>,
+  TSelected extends SelectedFields,
 >({
   table,
   columns,
   queryParams,
   baseConditions,
   applyJoins: applyJoinsFn,
-}: TPaginationParams<TTable>): Promise<TResult[]> => {
+  select,
+}: TPaginationParams<TTable> & {
+  select?: TSelected;
+}): Promise<Array<InferSelectModel<TTable> | SelectResultFields<TSelected>>> {
   const { page, pageSize, sort } = queryParams;
   const offset = calculateOffset(page, pageSize);
 
@@ -174,8 +206,10 @@ export const buildPaginatedQuery = async <
     columns,
   });
 
+  const selection = select ?? getTableColumns(table);
+
   let query = db
-    .select()
+    .select(selection)
     .from(table as PgTable)
     .where(and(...(baseConditions ?? []), whereClause))
     .limit(pageSize)
@@ -205,5 +239,5 @@ export const buildPaginatedQuery = async <
 
   const rows = await query;
 
-  return rows as TResult[];
-};
+  return rows as Array<InferSelectModel<TTable> | SelectResultFields<TSelected>>;
+}
