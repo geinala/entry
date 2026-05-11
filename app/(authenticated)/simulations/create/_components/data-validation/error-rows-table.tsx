@@ -4,8 +4,11 @@ import { Pencil, Trash2 } from "lucide-react";
 
 import DataTable, { IDataTableProps } from "@/app/_components/data-table";
 import { Button } from "@/app/_components/ui/button";
-import type { TSimulationUploadedRowWithErrors, TValidationErrorItem } from "./helpers";
-import { formatDateTime } from "./helpers";
+import {
+  formatDateTime,
+  TSimulationUploadedRowWithErrors,
+  TValidationErrorItem,
+} from "../../helpers";
 
 interface IProps extends Omit<IDataTableProps<TSimulationUploadedRowWithErrors>, "columns"> {
   onEditRow: (row: TSimulationUploadedRowWithErrors) => void;

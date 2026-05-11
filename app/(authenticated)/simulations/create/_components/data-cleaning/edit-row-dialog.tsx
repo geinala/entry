@@ -12,13 +12,13 @@ import {
   DialogTitle,
 } from "@/app/_components/ui/dialog";
 
-import type { TSimulationUploadedRowWithErrors, TEditableRowForm } from "../../helpers";
-import { Textarea } from "@/app/_components/ui/textarea";
+import { TSimulationUploadedRow } from "@/types/database";
+import { TEditableRowForm } from "../../helpers";
 
 type Props = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  selectedRow: TSimulationUploadedRowWithErrors | null;
+  selectedRow: TSimulationUploadedRow | null;
   formValues: TEditableRowForm | null;
   setFormValues: (fn: (current: TEditableRowForm | null) => TEditableRowForm | null) => void;
   isUpdatingRow: boolean;
@@ -99,6 +99,35 @@ export const EditRowDialog: React.FC<Props> = ({
                 />
               </div>
 
+              <div className="space-y-2 md:col-span-2">
+                <Label htmlFor="address">Address</Label>
+                <Input
+                  id="address"
+                  value={formValues.address}
+                  onChange={(event) =>
+                    setFormValues((current) =>
+                      current ? { ...current, address: event.target.value } : current,
+                    )
+                  }
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="weight">Weight</Label>
+                <Input
+                  id="weight"
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formValues.weight}
+                  onChange={(event) =>
+                    setFormValues((current) =>
+                      current ? { ...current, weight: event.target.value } : current,
+                    )
+                  }
+                />
+              </div>
+
               <div className="space-y-2">
                 <Label htmlFor="startDatetime">Start Datetime</Label>
                 <DateTimeInput
@@ -120,35 +149,6 @@ export const EditRowDialog: React.FC<Props> = ({
                   onChange={(value) =>
                     setFormValues((current) =>
                       current ? { ...current, endDatetime: value } : current,
-                    )
-                  }
-                />
-              </div>
-
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="weight">Weight</Label>
-                <Input
-                  id="weight"
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formValues.weight}
-                  onChange={(event) =>
-                    setFormValues((current) =>
-                      current ? { ...current, weight: event.target.value } : current,
-                    )
-                  }
-                />
-              </div>
-
-              <div className="space-y-2 md:col-span-2">
-                <Label htmlFor="address">Address</Label>
-                <Textarea
-                  id="address"
-                  value={formValues.address}
-                  onChange={(event) =>
-                    setFormValues((current) =>
-                      current ? { ...current, address: event.target.value } : current,
                     )
                   }
                 />

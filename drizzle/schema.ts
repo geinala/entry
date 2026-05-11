@@ -225,11 +225,19 @@ export const simulationUploadedRows = pgTable(
     courier: varchar("courier"),
     customerName: varchar("customer_name"),
     address: varchar("address"),
+    cleanedAddress: varchar("cleaned_address"),
+    finalAddress: varchar("final_address"),
+    streetCandidate: varchar("street_candidate"),
+    fallback: varchar("fallback"),
     city: varchar("city"),
     weight: real("weight"),
+    latitude: doublePrecision("latitude"),
+    longitude: doublePrecision("longitude"),
+    isIgnored: boolean("is_ignored").notNull().default(false), // To mark rows that should be ignored in processing
     startDatetime: timestamp("start_datetime", { withTimezone: true }),
     endDatetime: timestamp("end_datetime", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    deletedAt: timestamp("deleted_at", { withTimezone: true }), // To mark when a row is "soft deleted"
     errorDetails: jsonb("error_details"), // To store any error details related to this row during processing
   },
   (table) => [

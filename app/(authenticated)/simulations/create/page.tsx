@@ -8,6 +8,7 @@ import { useBreadcrumb } from "@/app/_contexts/breadcrumb.context";
 import { useGetDraftSimulationJobQuery } from "../_hooks/use-queries";
 import { Card, CardContent } from "@/app/_components/ui/card";
 import { DataValidation } from "./_components/data-validation/index";
+import { DataCleaningTable } from "./_components/data-cleaning";
 
 export default function CreateSimulationPage() {
   const { data } = useGetDraftSimulationJobQuery();
@@ -38,7 +39,7 @@ export default function CreateSimulationPage() {
         <CardContent>
           {!data && <CreateSimulationForm />}
           {data && data.currentStep === 1 && <DataValidation />}
-          {data && data.currentStep === 2 && <div>Data Cleaning and Review</div>}
+          {data && data.currentStep === 2 && <DataCleaningTable />}
           {data && data.currentStep === 3 && <div>Geocoding</div>}
           {data && data.currentStep === 4 && <div>Calculation Best Routes</div>}
         </CardContent>

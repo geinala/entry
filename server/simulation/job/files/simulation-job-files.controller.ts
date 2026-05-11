@@ -4,28 +4,34 @@ import { handleException } from "@/common/exception/helper";
 import { parseQueryParams, validateSchema } from "@/lib/validation";
 import { responseFormatter } from "@/lib/response-formatter";
 import { NextRequest } from "next/server";
-import { IndexQueryParams } from "@/types/query-params";
 import { TSimulationUploadedRow } from "@/types/database";
 import {
+  deleteAllSimulationUploadedErrorsAndContinueService,
   deleteSimulationUploadedRowService,
-  getSimulationUploadedRowsService,
+  getSimulationUploadedErrorsRowsService,
   updateSimulationUploadedRowService,
 } from "./simulation-job-files.service";
 import {
   TUpdateSimulationUploadedRowSchema,
   UpdateSimulationUploadedRowSchema,
 } from "@/schemas/simulations/jobs/update-simulation-uploaded-row.schema";
+import { SimulationJobFilesIndexQueryParams } from "@/schemas/simulations/jobs/simulation-job-index-query-params";
 
-export const getSimulationUploadedRowsController = async (jobId: string, req: NextRequest) => {
+export const getSimulationUploadedErrorRowsWithPaginationController = async (
+  jobId: string,
+  req: NextRequest,
+) => {
   try {
     const { searchParams } = new URL(req.url);
 
     const rawQueryParams = {
       page: searchParams.get("page"),
       pageSize: searchParams.get("pageSize"),
+      onlyAddressErrors: searchParams.get("onlyAddressErrors"),
+      onlyErrors: searchParams.get("onlyErrors"),
     };
 
-    const result = parseQueryParams(IndexQueryParams, rawQueryParams);
+    const result = parseQueryParams(SimulationJobFilesIndexQueryParams, rawQueryParams);
 
     if (!result.success) {
       return responseFormatter.validationError({
@@ -34,7 +40,7 @@ export const getSimulationUploadedRowsController = async (jobId: string, req: Ne
       });
     }
 
-    const { data, meta } = await getSimulationUploadedRowsService(jobId, result.data);
+    const { data, meta } = await getSimulationUploadedErrorsRowsService(jobId, result.data);
 
     return responseFormatter.successWithPagination<TSimulationUploadedRow>({
       data,
@@ -99,6 +105,18 @@ export const deleteSimulationUploadedRowController = async (jobId: string, rowId
 
     return responseFormatter.success({
       message: "Uploaded row deleted successfully",
+    });
+  } catch (error) {
+    return handleException(error);
+  }
+};
+
+export const deleteAllSimulationUploadedErrorsController = async (jobId: string) => {
+  try {
+    await deleteAllSimulationUploadedErrorsAndContinueService(jobId);
+
+    return responseFormatter.deleted({
+      message: "All uploaded errors deleted successfully",
     });
   } catch (error) {
     return handleException(error);

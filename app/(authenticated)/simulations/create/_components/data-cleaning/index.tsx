@@ -1,29 +1,24 @@
 import { useFilters } from "@/app/_hooks/use-filters";
 import { IndexQueryParams } from "@/types/query-params";
-import { FormEvent, useMemo, useState } from "react";
-import { TSimulationUploadedRow } from "@/types/database";
+import { FormEvent, useState } from "react";
 import { Skeleton } from "@/app/_components/ui/skeleton";
 import { ValidationStatus } from "./validation-status";
-import ErrorRowsTable from "./error-rows-table";
+import { CleaningAddressTable } from "./cleaning-address-table";
 import { Button } from "@/app/_components/ui/button";
 import EditRowDialog from "./edit-row-dialog";
 import { useGetDraftSimulationJobQuery } from "../../../_hooks/use-queries";
+import { useDeleteDraftSimulationJobMutation } from "../../../_hooks/use-mutations";
 import {
-  useDeleteAllSimulationUploadedErrorsAndContinueMutation,
   useDeleteSimulationUploadedRowMutation,
   useUpdateSimulationJobMutation,
   useUpdateSimulationUploadedRowMutation,
 } from "../../_hooks/use-mutations";
-import { useGetSimulationUploadedRowsQuery } from "../../_hooks/use-queries";
-import {
-  TEditableRowForm,
-  toEditableForm,
-  TSimulationUploadedRowWithErrors,
-  TValidationErrorItem,
-} from "../../helpers";
-import { useDeleteDraftSimulationJobMutation } from "../../../_hooks/use-mutations";
+import { useGetSimulationAddressErrors } from "../../_hooks/use-queries";
+import { TPaginationResponse } from "@/types/meta";
+import { TSimulationUploadedRow } from "@/types/database";
+import { TEditableRowForm } from "../../helpers";
 
-export const DataValidation = () => {
+export const DataCleaningTable = () => {
   const { handleChange, pagination } = useFilters(IndexQueryParams);
   const { data, isLoading } = useGetDraftSimulationJobQuery();
   const { mutateAsync: deleteDraftAsync, isPending: isReuploading } =
@@ -32,17 +27,16 @@ export const DataValidation = () => {
   const { mutateAsync: deleteRowAsync, isPending: isDeletingRow } =
     useDeleteSimulationUploadedRowMutation();
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const [selectedRow, setSelectedRow] = useState<TSimulationUploadedRowWithErrors | null>(null);
+  const [selectedRow, setSelectedRow] = useState<TSimulationUploadedRow | null>(null);
   const [formValues, setFormValues] = useState<TEditableRowForm | null>(null);
 
   const { data: uploadedRowsData, isLoading: isUploadedRowsLoading } =
-    useGetSimulationUploadedRowsQuery(
+    useGetSimulationAddressErrors(
       {
         ...pagination,
-        onlyAddressErrors: false,
-        onlyErrors: true,
+        onlyAddressErrors: true,
+        onlyErrors: false,
       },
-      data?.fileValidationStatus,
       data?.id,
     );
 
@@ -54,56 +48,21 @@ export const DataValidation = () => {
   const totalRows = Number(data?.totalRows ?? 0);
   const processedRows = Number(data?.processedRows ?? 0);
 
-  // Normalize error details and filter to only rows with errors
-  const errorRowsTableData = useMemo(() => {
-    const rows = uploadedRowsData?.data ?? [];
-
-    const rowsWithErrors = rows
-      .map((row: TSimulationUploadedRow) => {
-        const errorDetails = Array.isArray(row.errorDetails)
-          ? row.errorDetails
-          : row.errorDetails
-            ? [row.errorDetails]
-            : [];
-
-        return {
-          ...row,
-          normalizedErrorDetails: errorDetails.map((detail) => detail as TValidationErrorItem),
-        };
-      })
-      .filter((row) => row.normalizedErrorDetails.length > 0);
-
-    return {
-      data: rowsWithErrors,
-      meta: {
-        page: uploadedRowsData?.meta?.page ?? pagination.page,
-        pageSize: uploadedRowsData?.meta?.pageSize ?? pagination.pageSize,
-        total: rowsWithErrors.length,
-        totalPage: Math.max(
-          1,
-          Math.ceil(
-            rowsWithErrors.length / (uploadedRowsData?.meta?.pageSize ?? pagination.pageSize),
-          ),
-        ),
-      },
-    };
-  }, [uploadedRowsData, pagination.page, pagination.pageSize]);
-
-  // handle edit row, delete row, re-upload file, continue to next step, submit edit form
-  const handleEditRow = (row: TSimulationUploadedRowWithErrors) => {
+  const handleEditRow = (row: TSimulationUploadedRow) => {
     setSelectedRow(row);
-    setFormValues(toEditableForm(row));
+    // setFormValues(toEditableForm(row));
     setIsEditDialogOpen(true);
   };
 
   const handleCloseDialog = () => {
     if (isUpdatingRow || isDeletingRow) return;
+
     setIsEditDialogOpen(false);
     setSelectedRow(null);
     setFormValues(null);
   };
 
-  const handleDeleteRow = async (row: TSimulationUploadedRowWithErrors) => {
+  const handleDeleteRow = async (row: TSimulationUploadedRow) => {
     if (!data?.id) return;
 
     const shouldDelete = window.confirm(
@@ -132,7 +91,6 @@ export const DataValidation = () => {
     await deleteDraftAsync();
   };
 
-  // Update simulation job to move to next step
   const { mutateAsync: updateJobAsync, isPending: isUpdatingJob } =
     useUpdateSimulationJobMutation();
 
@@ -172,24 +130,6 @@ export const DataValidation = () => {
     handleCloseDialog();
   };
 
-  // handle delete all error rows and continue
-  const { mutateAsync: deleteAllErrorsAndContinueAsync, isPending: isDeletingAllErrors } =
-    useDeleteAllSimulationUploadedErrorsAndContinueMutation();
-
-  const handleDeleteAllAndContinue = async () => {
-    if (!data?.id) return;
-
-    const shouldDelete = window.confirm(
-      "This will delete all error rows and continue to the next step. This action cannot be undone. Continue?",
-    );
-
-    if (!shouldDelete) return;
-
-    await deleteAllErrorsAndContinueAsync(data.id);
-
-    // No need to call updateJobAsync here because the backend will handle updating the job status after deleting all errors
-  };
-
   if (isLoading) {
     return (
       <div className="w-full flex flex-col items-center justify-center gap-4 py-6">
@@ -208,7 +148,7 @@ export const DataValidation = () => {
       <div className="h-full w-full">
         <ValidationStatus
           isFailed={isFailed}
-          errorRowsCount={errorRowsTableData.data.length}
+          errorRowsCount={0}
           data={data}
           isReuploading={isReuploading}
           onReupload={handleReuploadFile}
@@ -217,14 +157,11 @@ export const DataValidation = () => {
           processedRows={processedRows}
           totalRows={totalRows}
           isValidated={isValidated}
-          needsReview={
-            data?.fileValidationStatus === "reviewing" && errorRowsTableData.data.length > 0
-          }
         />
 
-        {data?.fileValidationStatus == "reviewing" && (
-          <ErrorRowsTable
-            source={errorRowsTableData}
+        {data?.fileValidationStatus == "completed" && (
+          <CleaningAddressTable
+            source={uploadedRowsData as TPaginationResponse<TSimulationUploadedRow>}
             handleChange={handleChange}
             isLoading={isUploadedRowsLoading}
             pagination={pagination}
@@ -235,23 +172,9 @@ export const DataValidation = () => {
         )}
 
         {/* Continue next step */}
-        {data?.fileValidationStatus === "reviewing" && (
-          <div className="w-full mt-3 flex items-end justify-end gap-3">
-            {errorRowsTableData.data.length > 0 && (
-              <Button
-                variant={"destructive"}
-                onClick={handleDeleteAllAndContinue}
-                disabled={isDeletingAllErrors || isUpdatingJob || isReuploading}
-              >
-                Delete All Errors and Continue
-              </Button>
-            )}
-            <Button
-              disabled={
-                isLoading || errorRowsTableData.data.length > 0 || isUpdatingJob || isReuploading
-              }
-              onClick={handleContinue}
-            >
+        {data?.fileValidationStatus === "completed" && (
+          <div className="w-full mt-3 flex items-end justify-end">
+            <Button disabled={isLoading || isUpdatingJob || isReuploading} onClick={handleContinue}>
               Continue to Cleaning Data
             </Button>
           </div>

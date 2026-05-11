@@ -1,4 +1,5 @@
 import { TCreateSimulationJobSchema } from "@/schemas/simulations/create-simulation.schema";
+import { TUpdateSimulationJobSchema } from "@/schemas/simulations/jobs/update-simulation-job.schema";
 import { TUpdateSimulationUploadedRowSchema } from "@/schemas/simulations/jobs/update-simulation-uploaded-row.schema";
 import { TSimulationJob, TSimulationUploadedRow } from "@/types/database";
 import { TApiSuccessResponseWithData, TBaseApiResponse } from "@/types/response";
@@ -31,11 +32,17 @@ export const createSimulationJobMutations = {
       },
     });
   },
-  nextStep: (api: AxiosInstance, queryClient: QueryClient) => {
+  updateSimulationJob: (api: AxiosInstance, queryClient: QueryClient) => {
     return mutationOptions({
-      mutationFn: async (): Promise<TApiSuccessResponseWithData<TSimulationJob>> => {
+      mutationFn: async ({
+        simulationJobId,
+        payload,
+      }: {
+        simulationJobId: string;
+        payload: TUpdateSimulationJobSchema;
+      }): Promise<TApiSuccessResponseWithData<TSimulationJob>> => {
         const response: AxiosResponse<TApiSuccessResponseWithData<TSimulationJob>> =
-          await api.post("/simulations/jobs/next");
+          await api.patch(`/simulations/jobs/${simulationJobId}`, payload);
 
         return response.data;
       },
@@ -90,6 +97,23 @@ export const createSimulationJobMutations = {
         toast.success(data.message);
 
         queryClient.invalidateQueries({ queryKey: ["simulationUploadedRows", variables.jobId] });
+        queryClient.invalidateQueries({ queryKey: ["simulations", "draft-job"] as const });
+      },
+    });
+  },
+  deleteAllSimulationUploadedErrorsAndContinue: (api: AxiosInstance, queryClient: QueryClient) => {
+    return mutationOptions({
+      mutationFn: async (jobId: string): Promise<TBaseApiResponse> => {
+        const response: AxiosResponse<TBaseApiResponse> = await api.delete(
+          `/simulations/jobs/${jobId}/files/validates`,
+        );
+
+        return response.data;
+      },
+      onSuccess: (data, jobId) => {
+        toast.success(data.message);
+
+        queryClient.invalidateQueries({ queryKey: ["simulationUploadedRows", jobId] });
         queryClient.invalidateQueries({ queryKey: ["simulations", "draft-job"] as const });
       },
     });

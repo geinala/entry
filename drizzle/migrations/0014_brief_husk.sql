@@ -1,0 +1,1 @@
+ALTER TABLE "simulation_uploaded_rows" DROP COLUMN "recommendation";

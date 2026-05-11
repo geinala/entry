@@ -22,3 +22,19 @@ export const useDeleteSimulationUploadedRowMutation = () => {
 
   return useMutation(createSimulationJobMutations.deleteSimulationUploadedRow(api, queryClient));
 };
+
+export const useUpdateSimulationJobMutation = () => {
+  const api = useAuthenticatedClient();
+  const queryClient = useQueryClient();
+
+  return useMutation(createSimulationJobMutations.updateSimulationJob(api, queryClient));
+};
+
+export const useDeleteAllSimulationUploadedErrorsAndContinueMutation = () => {
+  const api = useAuthenticatedClient();
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    createSimulationJobMutations.deleteAllSimulationUploadedErrorsAndContinue(api, queryClient),
+  );
+};
