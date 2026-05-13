@@ -107,11 +107,7 @@ export const ErrorRowsTable: React.FC<IProps> = ({
     },
   ];
 
-  return (
-    <>
-      <DataTable columns={columns} {...props} />
-    </>
-  );
+  return <DataTable columns={columns} {...props} />;
 };
 
 export default ErrorRowsTable;

@@ -218,11 +218,11 @@ export const DataValidation = () => {
           totalRows={totalRows}
           isValidated={isValidated}
           needsReview={
-            data?.fileValidationStatus === "reviewing" && errorRowsTableData.data.length > 0
+            data?.fileValidationStatus === "needed_review" && errorRowsTableData.data.length > 0
           }
         />
 
-        {data?.fileValidationStatus == "reviewing" && (
+        {data?.fileValidationStatus == "needed_review" && (
           <ErrorRowsTable
             source={errorRowsTableData}
             handleChange={handleChange}
@@ -235,11 +235,11 @@ export const DataValidation = () => {
         )}
 
         {/* Continue next step */}
-        {data?.fileValidationStatus === "reviewing" && (
+        {data?.fileValidationStatus === "needed_review" && (
           <div className="w-full mt-3 flex items-end justify-end gap-3">
             {errorRowsTableData.data.length > 0 && (
               <Button
-                variant={"destructive"}
+                variant={"outline"}
                 onClick={handleDeleteAllAndContinue}
                 disabled={isDeletingAllErrors || isUpdatingJob || isReuploading}
               >

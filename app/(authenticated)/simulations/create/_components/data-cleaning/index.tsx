@@ -17,6 +17,7 @@ import { useGetSimulationAddressErrors } from "../../_hooks/use-queries";
 import { TPaginationResponse } from "@/types/meta";
 import { TSimulationUploadedRow } from "@/types/database";
 import { TEditableRowForm } from "../../helpers";
+import { toast } from "sonner";
 
 export const DataCleaningTable = () => {
   const { handleChange, pagination } = useFilters(IndexQueryParams);
@@ -173,7 +174,15 @@ export const DataCleaningTable = () => {
 
         {/* Continue next step */}
         {data?.fileValidationStatus === "completed" && (
-          <div className="w-full mt-3 flex items-end justify-end">
+          <div className="w-full mt-3 flex items-end justify-end gap-3">
+            <Button
+              variant={"outline"}
+              onClick={() => {
+                toast.error("No errors to review. Continuing to next step.");
+              }}
+            >
+              Ignore all errors and Continue
+            </Button>
             <Button disabled={isLoading || isUpdatingJob || isReuploading} onClick={handleContinue}>
               Continue to Cleaning Data
             </Button>

@@ -1,6 +1,6 @@
 import React from "react";
 import { ColumnDef } from "@tanstack/react-table";
-import { Pencil, Trash2 } from "lucide-react";
+import { Pencil, X } from "lucide-react";
 
 import DataTable, { IDataTableProps } from "@/app/_components/data-table";
 import { Button } from "@/app/_components/ui/button";
@@ -16,6 +16,26 @@ interface IProps extends Omit<IDataTableProps<TSimulationUploadedRow>, "columns"
 export const CleaningAddressTable: React.FC<IProps> = ({ isDeletingRow, ...props }) => {
   const columns: ColumnDef<TSimulationUploadedRow>[] = [
     {
+      accessorKey: "nosi",
+      header: "No SI",
+      cell: ({ row }) => row.original.nosi || "-",
+    },
+    {
+      accessorKey: "address",
+      header: "Address",
+      cell: ({ row }) => row.original.address || "-",
+    },
+    {
+      accessorKey: "streetCandidate",
+      header: "Street Candidate",
+      cell: ({ row }) => row.original.streetCandidate || "-",
+    },
+    {
+      accessorKey: "finalAddress",
+      header: "Final Address",
+      cell: ({ row }) => row.original.finalAddress || "-",
+    },
+    {
       id: "actions",
       header: "Actions",
       cell: () => (
@@ -27,7 +47,7 @@ export const CleaningAddressTable: React.FC<IProps> = ({ isDeletingRow, ...props
               toast.error("Edit functionality is not implemented yet.");
             }}
           >
-            <Pencil className="mr-2 size-4" />
+            <Pencil />
             Edit
           </Button>
           <Button
@@ -38,41 +58,11 @@ export const CleaningAddressTable: React.FC<IProps> = ({ isDeletingRow, ...props
             }}
             disabled={isDeletingRow}
           >
-            <Trash2 className="mr-2 size-4" />
-            Delete
+            <X />
+            Ignore
           </Button>
         </div>
       ),
-    },
-    {
-      accessorKey: "nosi",
-      header: "No SI",
-      cell: ({ row }) => row.original.nosi || "-",
-    },
-    {
-      accessorKey: "address",
-      header: "Address",
-      cell: ({ row }) => row.original.address || "-",
-    },
-    {
-      accessorKey: "city",
-      header: "City",
-      cell: ({ row }) => row.original.city || "-",
-    },
-    {
-      accessorKey: "cleanedAddress",
-      header: "Cleaned Address",
-      cell: ({ row }) => row.original.cleanedAddress || "-",
-    },
-    {
-      accessorKey: "streetCandidate",
-      header: "Street Candidate",
-      cell: ({ row }) => row.original.streetCandidate || "-",
-    },
-    {
-      accessorKey: "finalAddress",
-      header: "Final Address",
-      cell: ({ row }) => row.original.finalAddress || "-",
     },
   ];
 
