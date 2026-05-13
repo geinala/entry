@@ -11,6 +11,7 @@ export const createSimulationJobRepository = async (
   userId: string,
   filePath: string,
   data: TCreateSimulationJobSchema,
+  fileTotalRows: number,
 ) => {
   const [simulationJob] = await db
     .insert(simulationJobTable)
@@ -24,8 +25,9 @@ export const createSimulationJobRepository = async (
       currentStep: 1,
       maxComputationTimeInSeconds: data.computationTimeLimit,
       startedAt: new Date(data.startDatetime),
+      fileTotalRows,
       fileValidationStatus: "uploaded",
-      validationStartedAt: new Date(),
+      fileValidationStartedAt: new Date(),
     })
     .returning();
 

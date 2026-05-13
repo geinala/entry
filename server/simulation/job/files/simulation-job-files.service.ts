@@ -4,28 +4,12 @@ import { paginationResponseMapper } from "@/lib/pagination";
 import {
   deleteAllSimulationUploadedErrorsAndContinueRepository,
   deleteSimulationUploadedRowRepository,
-  getSimulationUploadedErrorsRowsWithPaginationRepository,
+  getAllNeedReviewSimulationUploadedRowsWithPaginationRepository,
   updateSimulationUploadedRowRepository,
 } from "./simulation-job-files.repository";
 import { TUpdateSimulationUploadedRowSchema } from "@/schemas/simulations/jobs/update-simulation-uploaded-row.schema";
-import { TSimulationJobFilesIndexQueryParams } from "@/schemas/simulations/jobs/simulation-job-index-query-params";
 import { server } from "@/lib/axios";
-
-export const getSimulationUploadedErrorsRowsService = async (
-  jobId: string,
-  queryParams: TSimulationJobFilesIndexQueryParams,
-): Promise<TPaginationResponse<TSimulationUploadedRow>> => {
-  const [entries, total] = await getSimulationUploadedErrorsRowsWithPaginationRepository(
-    jobId,
-    queryParams,
-  );
-
-  return paginationResponseMapper<TSimulationUploadedRow>(entries, {
-    currentPage: queryParams.page,
-    pageSize: queryParams.pageSize,
-    totalItems: total,
-  });
-};
+import { TSimulationJobUploadedRowsIndexQueryParams } from "@/schemas/simulations/jobs/simulation-job-index-query-params";
 
 export const updateSimulationUploadedRowService = async (
   jobId: string,
@@ -48,4 +32,20 @@ export const deleteAllSimulationUploadedErrorsAndContinueService = async (jobId:
   } catch (error) {
     throw error;
   }
+};
+
+export const getAllNeedReviewSimulationUploadedRowsWithPaginationService = async (
+  jobId: string,
+  queryParams: TSimulationJobUploadedRowsIndexQueryParams,
+): Promise<TPaginationResponse<TSimulationUploadedRow>> => {
+  const [entries, total] = await getAllNeedReviewSimulationUploadedRowsWithPaginationRepository(
+    jobId,
+    queryParams,
+  );
+
+  return paginationResponseMapper<TSimulationUploadedRow>(entries, {
+    currentPage: queryParams.page,
+    pageSize: queryParams.pageSize,
+    totalItems: total,
+  });
 };

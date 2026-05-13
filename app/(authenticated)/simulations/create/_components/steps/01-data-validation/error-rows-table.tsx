@@ -8,7 +8,7 @@ import {
   formatDateTime,
   TSimulationUploadedRowWithErrors,
   TValidationErrorItem,
-} from "../../helpers";
+} from "../../../helpers";
 
 interface IProps extends Omit<IDataTableProps<TSimulationUploadedRowWithErrors>, "columns"> {
   onEditRow: (row: TSimulationUploadedRowWithErrors) => void;
@@ -29,7 +29,7 @@ export const ErrorRowsTable: React.FC<IProps> = ({
       cell: ({ row }) => (
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={() => onEditRow(row.original)}>
-            <Pencil className="mr-2 size-4" />
+            <Pencil />
             Edit
           </Button>
           <Button
@@ -38,7 +38,7 @@ export const ErrorRowsTable: React.FC<IProps> = ({
             onClick={() => void onDeleteRow(row.original)}
             disabled={isDeletingRow}
           >
-            <Trash2 className="mr-2 size-4" />
+            <Trash2 />
             Delete
           </Button>
         </div>

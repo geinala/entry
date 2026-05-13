@@ -53,12 +53,14 @@ export const simulationQueries = {
         const isFileValidationStepActive =
           state?.fileValidationStatus === "uploaded" ||
           state?.fileValidationStatus === "validating";
+        const isCleaningInProgress = state?.geocodingStatus === "in_progress";
+        const isGeocodingInProgress = state?.geocodingStatus === "in_progress";
 
-        if (!isFileValidationStepActive) {
-          return false; // Stop polling if file validation is not active
+        if (isFileValidationStepActive || isCleaningInProgress || isGeocodingInProgress) {
+          return 5000; // Stop polling if file validation is not active
         }
 
-        return 3000;
+        return false; // Stop polling in other cases (validation completed/failed, cleaning in progress, geocoding not started/in progress)
       },
       refetchIntervalInBackground: true,
     });

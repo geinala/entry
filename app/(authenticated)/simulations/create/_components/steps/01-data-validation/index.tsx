@@ -1,33 +1,30 @@
+import { useGetDraftSimulationJobQuery } from "@/app/(authenticated)/simulations/_hooks/use-queries";
 import { useFilters } from "@/app/_hooks/use-filters";
 import { IndexQueryParams } from "@/types/query-params";
-import { FormEvent, useMemo, useState } from "react";
-import { TSimulationUploadedRow } from "@/types/database";
-import { Skeleton } from "@/app/_components/ui/skeleton";
-import { ValidationStatus } from "./validation-status";
-import ErrorRowsTable from "./error-rows-table";
-import { Button } from "@/app/_components/ui/button";
-import EditRowDialog from "./edit-row-dialog";
-import { useGetDraftSimulationJobQuery } from "../../../_hooks/use-queries";
 import {
   useDeleteAllSimulationUploadedErrorsAndContinueMutation,
   useDeleteSimulationUploadedRowMutation,
   useUpdateSimulationJobMutation,
   useUpdateSimulationUploadedRowMutation,
-} from "../../_hooks/use-mutations";
-import { useGetSimulationUploadedRowsQuery } from "../../_hooks/use-queries";
+} from "../../../_hooks/use-mutations";
+import { FormEvent, useMemo, useState } from "react";
 import {
   TEditableRowForm,
   toEditableForm,
   TSimulationUploadedRowWithErrors,
   TValidationErrorItem,
-} from "../../helpers";
-import { useDeleteDraftSimulationJobMutation } from "../../../_hooks/use-mutations";
+} from "../../../helpers";
+import { TSimulationUploadedRow } from "@/types/database";
+import { Skeleton } from "@/app/_components/ui/skeleton";
+import { DataValidationLoading } from "./data-validation-loading";
+import ErrorRowsTable from "./error-rows-table";
+import { Button } from "@/app/_components/ui/button";
+import EditRowDialog from "./edit-row-dialog";
+import { useGetAllNeedReviewSimulationUploadedRows } from "../../../_hooks/use-queries";
 
 export const DataValidation = () => {
   const { handleChange, pagination } = useFilters(IndexQueryParams);
   const { data, isLoading } = useGetDraftSimulationJobQuery();
-  const { mutateAsync: deleteDraftAsync, isPending: isReuploading } =
-    useDeleteDraftSimulationJobMutation();
   const { mutateAsync, isPending: isUpdatingRow } = useUpdateSimulationUploadedRowMutation();
   const { mutateAsync: deleteRowAsync, isPending: isDeletingRow } =
     useDeleteSimulationUploadedRowMutation();
@@ -36,23 +33,14 @@ export const DataValidation = () => {
   const [formValues, setFormValues] = useState<TEditableRowForm | null>(null);
 
   const { data: uploadedRowsData, isLoading: isUploadedRowsLoading } =
-    useGetSimulationUploadedRowsQuery(
-      {
+    useGetAllNeedReviewSimulationUploadedRows({
+      queryParams: {
         ...pagination,
-        onlyAddressErrors: false,
-        onlyErrors: true,
+        currentStep: Number(data?.currentStep),
       },
-      data?.fileValidationStatus,
-      data?.id,
-    );
-
-  const isValidating =
-    data?.fileValidationStatus === "uploaded" || data?.fileValidationStatus === "validating";
-  const isValidated = data?.fileValidationStatus === "validated";
-  const isFailed = data?.fileValidationStatus === "failed";
-  const progress = Number(data?.progressPercentage ?? 0);
-  const totalRows = Number(data?.totalRows ?? 0);
-  const processedRows = Number(data?.processedRows ?? 0);
+      shouldRefetch: data?.fileValidationStatus === "needed_review",
+      id: data?.id,
+    });
 
   // Normalize error details and filter to only rows with errors
   const errorRowsTableData = useMemo(() => {
@@ -122,16 +110,6 @@ export const DataValidation = () => {
     }
   };
 
-  const handleReuploadFile = async () => {
-    const shouldReupload = window.confirm(
-      "Re-uploading will remove the current draft and let you upload a new file. Continue?",
-    );
-
-    if (!shouldReupload) return;
-
-    await deleteDraftAsync();
-  };
-
   // Update simulation job to move to next step
   const { mutateAsync: updateJobAsync, isPending: isUpdatingJob } =
     useUpdateSimulationJobMutation();
@@ -186,8 +164,6 @@ export const DataValidation = () => {
     if (!shouldDelete) return;
 
     await deleteAllErrorsAndContinueAsync(data.id);
-
-    // No need to call updateJobAsync here because the backend will handle updating the job status after deleting all errors
   };
 
   if (isLoading) {
@@ -203,35 +179,30 @@ export const DataValidation = () => {
     );
   }
 
+  if (
+    data?.fileValidationStatus === "validating" ||
+    data?.fileValidationStatus === "validated" ||
+    data?.fileValidationStatus === "uploaded"
+  ) {
+    return <DataValidationLoading data={data} />;
+  }
+
   return (
     <>
       <div className="h-full w-full">
-        <ValidationStatus
-          isFailed={isFailed}
-          errorRowsCount={errorRowsTableData.data.length}
-          data={data}
-          isReuploading={isReuploading}
-          onReupload={handleReuploadFile}
-          isValidating={isValidating}
-          progress={progress}
-          processedRows={processedRows}
-          totalRows={totalRows}
-          isValidated={isValidated}
-          needsReview={
-            data?.fileValidationStatus === "needed_review" && errorRowsTableData.data.length > 0
-          }
-        />
-
         {data?.fileValidationStatus == "needed_review" && (
-          <ErrorRowsTable
-            source={errorRowsTableData}
-            handleChange={handleChange}
-            isLoading={isUploadedRowsLoading}
-            pagination={pagination}
-            onEditRow={handleEditRow}
-            onDeleteRow={handleDeleteRow}
-            isDeletingRow={isDeletingRow}
-          />
+          <>
+            <DataValidationLoading data={data} />
+            <ErrorRowsTable
+              source={errorRowsTableData}
+              handleChange={handleChange}
+              isLoading={isUploadedRowsLoading || errorRowsTableData.data.length === 0}
+              pagination={pagination}
+              onEditRow={handleEditRow}
+              onDeleteRow={handleDeleteRow}
+              isDeletingRow={isDeletingRow}
+            />
+          </>
         )}
 
         {/* Continue next step */}
@@ -241,15 +212,13 @@ export const DataValidation = () => {
               <Button
                 variant={"outline"}
                 onClick={handleDeleteAllAndContinue}
-                disabled={isDeletingAllErrors || isUpdatingJob || isReuploading}
+                disabled={isDeletingAllErrors || isUpdatingJob}
               >
                 Delete All Errors and Continue
               </Button>
             )}
             <Button
-              disabled={
-                isLoading || errorRowsTableData.data.length > 0 || isUpdatingJob || isReuploading
-              }
+              disabled={isLoading || errorRowsTableData.data.length > 0 || isUpdatingJob}
               onClick={handleContinue}
             >
               Continue to Cleaning Data

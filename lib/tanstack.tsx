@@ -2,7 +2,7 @@
 
 import { TApiValidationErrorResponse, ValidationErrorDetail } from "@/types/response";
 import { MutationCache, QueryCache, QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { AxiosError, AxiosResponse, isAxiosError } from "axios";
+import { AxiosError, isAxiosError } from "axios";
 import { useState } from "react";
 import { JSX } from "react/jsx-dev-runtime";
 import { toast } from "sonner";
@@ -23,12 +23,6 @@ const queryClientInstance = () => {
           }
 
           return failureCount < 3;
-        },
-        select: (data: unknown) => {
-          if (data && typeof data === "object" && "data" in data) {
-            return (data as AxiosResponse).data;
-          }
-          return data;
         },
         throwOnError: (error) => {
           if (isAxiosError(error)) {

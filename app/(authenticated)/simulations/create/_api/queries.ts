@@ -1,48 +1,41 @@
-import { TSimulationJobFilesIndexQueryParams } from "@/schemas/simulations/jobs/simulation-job-index-query-params";
-import { TSimulationJobFileValidationStatusEnum, TSimulationUploadedRow } from "@/types/database";
+import { TSimulationJobUploadedRowsIndexQueryParams } from "@/schemas/simulations/jobs/simulation-job-index-query-params";
+import { TSimulationUploadedRow } from "@/types/database";
 import { TPaginationResponse } from "@/types/meta";
+import { TApiSuccessResponseWithPagination } from "@/types/response";
 import { queryOptions } from "@tanstack/react-query";
-import { AxiosInstance } from "axios";
+import { AxiosInstance, AxiosResponse } from "axios";
+
+interface IGetAllNeedReviewSimulationUploadedRowsParams {
+  api: AxiosInstance;
+  queryParams: TSimulationJobUploadedRowsIndexQueryParams;
+  id?: string;
+  shouldRefetch?: boolean;
+}
 
 export const multiStepSimulationCreationQueries = {
-  getSimulationAddressErrors: (
-    api: AxiosInstance,
-    queryParams: TSimulationJobFilesIndexQueryParams,
-    id?: string,
-  ) => {
-    return queryOptions({
-      queryKey: ["simulationAddressErrors", id, queryParams],
-      queryFn: async (): Promise<TPaginationResponse<TSimulationUploadedRow>> => {
-        return await api.get(`/simulations/jobs/${id}/files/rows`, {
-          params: queryParams,
-        });
-      },
-      enabled: !!id,
-    });
-  },
-  getSimulationUploadedRows: (
-    api: AxiosInstance,
-    queryParams: TSimulationJobFilesIndexQueryParams,
-    fileValidationStatus?: TSimulationJobFileValidationStatusEnum,
-    id?: string,
-  ) => {
+  getAllNeedReviewSimulationUploadedRows: ({
+    api,
+    queryParams,
+    shouldRefetch = true,
+    id,
+  }: IGetAllNeedReviewSimulationUploadedRowsParams) => {
     return queryOptions({
       queryKey: ["simulationUploadedRows", id, queryParams],
       queryFn: async (): Promise<TPaginationResponse<TSimulationUploadedRow>> => {
-        return await api.get(`/simulations/jobs/${id}/files/rows`, {
-          params: queryParams,
-        });
+        const response: AxiosResponse<TApiSuccessResponseWithPagination<TSimulationUploadedRow>> =
+          await api.get(`/simulations/jobs/${id}/files/rows/reviews`, {
+            params: queryParams,
+          });
+
+        return response.data.data;
       },
-      enabled: fileValidationStatus === "needed_review",
+      enabled: !!id,
       refetchInterval: (query) => {
-        const state = query.state.data;
-        // Refetch every 5 seconds if the file validation is still in progress
-        if (
-          fileValidationStatus === "uploaded" ||
-          fileValidationStatus === "validating" ||
-          (fileValidationStatus === "needed_review" && state?.data.length === 0)
-        ) {
-          return 5000; // 5 seconds
+        const data = query.state.data;
+
+        // Refetch every 3 seconds if the file validation is still in progress
+        if (shouldRefetch && data && data.data.length === 0) {
+          return 3000; // 3 seconds
         }
 
         return false; // Stop refetching if validation is completed or failed

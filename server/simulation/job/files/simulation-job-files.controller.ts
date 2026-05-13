@@ -8,49 +8,14 @@ import { TSimulationUploadedRow } from "@/types/database";
 import {
   deleteAllSimulationUploadedErrorsAndContinueService,
   deleteSimulationUploadedRowService,
-  getSimulationUploadedErrorsRowsService,
+  getAllNeedReviewSimulationUploadedRowsWithPaginationService,
   updateSimulationUploadedRowService,
 } from "./simulation-job-files.service";
 import {
   TUpdateSimulationUploadedRowSchema,
   UpdateSimulationUploadedRowSchema,
 } from "@/schemas/simulations/jobs/update-simulation-uploaded-row.schema";
-import { SimulationJobFilesIndexQueryParams } from "@/schemas/simulations/jobs/simulation-job-index-query-params";
-
-export const getSimulationUploadedErrorRowsWithPaginationController = async (
-  jobId: string,
-  req: NextRequest,
-) => {
-  try {
-    const { searchParams } = new URL(req.url);
-
-    const rawQueryParams = {
-      page: searchParams.get("page"),
-      pageSize: searchParams.get("pageSize"),
-      onlyAddressErrors: searchParams.get("onlyAddressErrors"),
-      onlyErrors: searchParams.get("onlyErrors"),
-    };
-
-    const result = parseQueryParams(SimulationJobFilesIndexQueryParams, rawQueryParams);
-
-    if (!result.success) {
-      return responseFormatter.validationError({
-        error: result.error,
-        message: "Invalid query parameters",
-      });
-    }
-
-    const { data, meta } = await getSimulationUploadedErrorsRowsService(jobId, result.data);
-
-    return responseFormatter.successWithPagination<TSimulationUploadedRow>({
-      data,
-      meta,
-      message: "Simulation job files errors retrieved successfully",
-    });
-  } catch (error) {
-    return handleException(error);
-  }
-};
+import { SimulationJobUploadedRowsIndexQueryParams } from "@/schemas/simulations/jobs/simulation-job-index-query-params";
 
 export const updateSimulationUploadedRowController = async (
   jobId: string,
@@ -117,6 +82,43 @@ export const deleteAllSimulationUploadedErrorsController = async (jobId: string)
 
     return responseFormatter.deleted({
       message: "All uploaded errors deleted successfully",
+    });
+  } catch (error) {
+    return handleException(error);
+  }
+};
+
+export const getAllNeedReviewSimulationUploadedRowsWithPaginationController = async (
+  req: NextRequest,
+  simulationJobId: string,
+) => {
+  try {
+    const { searchParams } = new URL(req.url);
+
+    const rawQueryParams = {
+      page: searchParams.get("page"),
+      pageSize: searchParams.get("pageSize"),
+      currentStep: Number(searchParams.get("currentStep")),
+    };
+
+    const result = parseQueryParams(SimulationJobUploadedRowsIndexQueryParams, rawQueryParams);
+
+    if (!result.success) {
+      return responseFormatter.validationError({
+        error: result.error,
+        message: "Invalid query parameters",
+      });
+    }
+
+    const { data, meta } = await getAllNeedReviewSimulationUploadedRowsWithPaginationService(
+      simulationJobId,
+      result.data,
+    );
+
+    return responseFormatter.successWithPagination<TSimulationUploadedRow>({
+      data,
+      meta,
+      message: "Simulation job files that need review retrieved successfully",
     });
   } catch (error) {
     return handleException(error);

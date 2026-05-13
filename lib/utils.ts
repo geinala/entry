@@ -58,3 +58,23 @@ export function formatSeconds(totalSeconds: number, format: DurationUnit[]): str
 
   return formatted || "0 seconds";
 }
+
+export const countCsvRows = async (file: File) => {
+  const content = await file.text();
+
+  // Remove BOM
+  const normalizedContent = content.replace(/^\uFEFF/, "");
+
+  const lines = normalizedContent
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+
+  // No data or only header
+  if (lines.length <= 1) {
+    return 0;
+  }
+
+  // Ignore header row
+  return lines.length - 1;
+};

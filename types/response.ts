@@ -1,4 +1,4 @@
-import type { TPaginationMeta, TPaginationResponse } from "./meta";
+import type { TPaginationResponse } from "./meta";
 
 export type TBaseApiResponse = {
   success: boolean;
@@ -18,8 +18,7 @@ export type TApiErrorResponseWithDetails<T = Record<string, string>> = TBaseApiR
 };
 
 export type TApiSuccessResponseWithPagination<T> = TBaseApiResponse & {
-  data: T[];
-  meta: TPaginationMeta;
+  data: TPaginationResponse<T>;
 };
 
 export type ValidationErrorDetail = {

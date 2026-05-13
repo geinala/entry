@@ -26,11 +26,6 @@ export const CleaningAddressTable: React.FC<IProps> = ({ isDeletingRow, ...props
       cell: ({ row }) => row.original.address || "-",
     },
     {
-      accessorKey: "streetCandidate",
-      header: "Street Candidate",
-      cell: ({ row }) => row.original.streetCandidate || "-",
-    },
-    {
       accessorKey: "finalAddress",
       header: "Final Address",
       cell: ({ row }) => row.original.finalAddress || "-",
