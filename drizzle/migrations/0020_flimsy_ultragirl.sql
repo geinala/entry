@@ -1,0 +1,1 @@
+ALTER TYPE "public"."geocoding_status_enum" ADD VALUE 'needed_review' BEFORE 'completed';

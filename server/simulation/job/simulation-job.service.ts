@@ -21,7 +21,7 @@ export const createSimulationJobService = async (
   const result = await createSimulationJobRepository(clerkUserId, minioUploadedFile.filePath, data);
 
   try {
-    await server.post(`/simulations/jobs/${result.id}/files`);
+    await server.post(`/simulations/jobs/${result.id}/preprocess`);
   } catch (error) {
     await updateSimulationJobRepository(result.id, {
       fileValidationStatus: "failed",

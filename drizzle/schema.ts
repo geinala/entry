@@ -114,6 +114,7 @@ export const simulationJobStatusEnum = pgEnum("simulation_job_status_enum", [
 export const geocodingStatusEnum = pgEnum("geocoding_status_enum", [
   "pending",
   "in_progress",
+  "needed_review",
   "completed",
   "failed",
 ]);
@@ -178,6 +179,8 @@ export const simulationJobTable = pgTable("simulation_jobs", {
   geocodingStatus: geocodingStatusEnum("geocoding_status").notNull().default("pending"),
   geocodingStartedAt: timestamp("geocoding_started_at", { withTimezone: true }), // Timestamp when geocoding starts
   geocodedAt: timestamp("geocoded_at", { withTimezone: true }), // Timestamp when geocoding is completed
+  progressGeocodingPercentage: integer("progress_geocoding_percentage").default(0),
+  estimatedCompletionTime: timestamp("estimated_completion_time", { withTimezone: true }), // Estimated completion time for the entire simulation job
 
   // Calculation tracking
   calculationStatus: calculationStatusEnum("calculation_status").notNull().default("pending"),
@@ -230,6 +233,14 @@ export const addressValidationsTable = pgTable(
   ],
 );
 
+export const resolutionStatusEnum = pgEnum("resolution_status", [
+  "pending",
+  "auto_solved",
+  "needed_review",
+  "failed",
+  "manual_override",
+]);
+
 export const simulationUploadedRows = pgTable(
   "simulation_uploaded_rows",
   {
@@ -239,14 +250,18 @@ export const simulationUploadedRows = pgTable(
     courier: varchar("courier"),
     customerName: varchar("customer_name"),
     address: varchar("address"),
-    cleanedAddress: varchar("cleaned_address"),
+    normalizedAddress: varchar("normalized_address"),
+    suggestedAddress: varchar("suggested_address"),
     finalAddress: varchar("final_address"),
-    streetCandidate: varchar("street_candidate"),
-    fallback: varchar("fallback"),
     city: varchar("city"),
     weight: real("weight"),
     latitude: doublePrecision("latitude"),
     longitude: doublePrecision("longitude"),
+    geocodeScore: doublePrecision("geocode_score"),
+    geocodeProvider: varchar("geocode_provider"), // TomTom API
+    geocodeResponse: jsonb("geocode_response"),
+    resolutionStatus: resolutionStatusEnum("resolution_status").notNull().default("pending"),
+    resolutionSource: varchar("resolution_source"), // e.g., "SYSTEM" or "USER"
     isIgnored: boolean("is_ignored").notNull().default(false), // To mark rows that should be ignored in processing
     startDatetime: timestamp("start_datetime", { withTimezone: true }),
     endDatetime: timestamp("end_datetime", { withTimezone: true }),
