@@ -33,14 +33,14 @@ export const multiStepSimulationCreationQueries = {
           params: queryParams,
         });
       },
-      enabled: fileValidationStatus === "reviewing" || fileValidationStatus === "failed",
+      enabled: fileValidationStatus === "needed_review",
       refetchInterval: (query) => {
         const state = query.state.data;
         // Refetch every 5 seconds if the file validation is still in progress
         if (
           fileValidationStatus === "uploaded" ||
           fileValidationStatus === "validating" ||
-          (fileValidationStatus === "reviewing" && state?.data.length === 0)
+          (fileValidationStatus === "needed_review" && state?.data.length === 0)
         ) {
           return 5000; // 5 seconds
         }

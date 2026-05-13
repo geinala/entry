@@ -127,8 +127,16 @@ export const calculationStatusEnum = pgEnum("calculation_status_enum", [
 
 export const simulationJobFileValidationStatusEnum = pgEnum(
   "simulation_file_validation_status_enum",
-  ["uploaded", "validating", "validated", "reviewing", "completed", "failed"],
+  ["uploaded", "validating", "validated", "needed_review", "completed", "failed"],
 );
+
+export const simulationJobCleaningStatusEnum = pgEnum("simulation_cleaning_status_enum", [
+  "pending",
+  "cleaning",
+  "completed",
+  "needed_review",
+  "failed",
+]);
 
 export const simulationJobTable = pgTable("simulation_jobs", {
   // Basic info
@@ -159,6 +167,12 @@ export const simulationJobTable = pgTable("simulation_jobs", {
   progressPercentage: integer("progress_percentage").default(0),
   validationStartedAt: timestamp("validation_started_at", { withTimezone: true }), // Timestamp when file validation starts
   validationCompletedAt: timestamp("validation_completed_at", { withTimezone: true }), // Timestamp when file validation is completed
+
+  // Cleaning tracking
+  progressCleaningPercentage: integer("progress_cleaning_percentage").default(0),
+  cleaningStatus: simulationJobCleaningStatusEnum("cleaning_status").notNull().default("pending"),
+  cleaningStartedAt: timestamp("cleaning_started_at", { withTimezone: true }), // Timestamp when cleaning starts
+  cleaningCompletedAt: timestamp("cleaning_completed_at", { withTimezone: true }), // Timestamp when cleaning is completed
 
   // Result tracking
   geocodingStatus: geocodingStatusEnum("geocoding_status").notNull().default("pending"),
