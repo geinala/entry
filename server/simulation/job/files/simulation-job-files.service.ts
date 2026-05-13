@@ -43,7 +43,7 @@ export const deleteAllSimulationUploadedErrorsAndContinueService = async (jobId:
   try {
     await Promise.all([
       deleteAllSimulationUploadedErrorsAndContinueRepository(jobId),
-      server.post(`/simulations/jobs/${jobId}/cleaning`),
+      server.post(`/simulations/jobs/${jobId}/process-addresses`),
     ]);
   } catch (error) {
     throw error;
