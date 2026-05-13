@@ -39,17 +39,6 @@ export type TUpdateSimulationJob = Partial<Omit<TSimulationJob, "id" | "createdA
 
 // Simulation Job Uploaded File Error Types
 export type TSimulationUploadedRow = InferSelectModel<typeof simulationUploadedRows>;
-export type TSimulationAddressUploadedRow = Pick<
-  TSimulationUploadedRow,
-  | "customerName"
-  | "cleanedAddress"
-  | "finalAddress"
-  | "streetCandidate"
-  | "fallback"
-  | "nosi"
-  | "address"
-  | "city"
->;
 
 // Simulation Types
 export type TSimulation = InferSelectModel<typeof simulationTable>;

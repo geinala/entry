@@ -133,7 +133,7 @@ export const simulationJobFileValidationStatusEnum = pgEnum(
 
 export const simulationJobCleaningStatusEnum = pgEnum("simulation_cleaning_status_enum", [
   "pending",
-  "cleaning",
+  "in_progress",
   "completed",
   "needed_review",
   "failed",
@@ -161,26 +161,32 @@ export const simulationJobTable = pgTable("simulation_jobs", {
   fileValidationStatus: simulationJobFileValidationStatusEnum("file_validation_status")
     .notNull()
     .default("uploaded"),
-  totalRows: integer("total_rows"),
-  validRows: integer("valid_rows").notNull().default(0),
-  invalidRows: integer("invalid_rows").notNull().default(0),
-  processedRows: integer("processed_rows"),
-  progressPercentage: integer("progress_percentage").default(0),
-  validationStartedAt: timestamp("validation_started_at", { withTimezone: true }), // Timestamp when file validation starts
-  validationCompletedAt: timestamp("validation_completed_at", { withTimezone: true }), // Timestamp when file validation is completed
+  fileTotalRows: integer("file_total_rows"),
+  fileValidRows: integer("file_valid_rows").notNull().default(0),
+  fileInvalidRows: integer("file_invalid_rows").notNull().default(0),
+  fileProcessedRows: integer("file_processed_rows"),
+  fileProgressPercentage: integer("file_progress_percentage").default(0),
+  fileValidationStartedAt: timestamp("file_validation_started_at", { withTimezone: true }), // Timestamp when file validation starts
+  fileValidationCompletedAt: timestamp("file_validation_completed_at", { withTimezone: true }), // Timestamp when file validation is completed
 
   // Cleaning tracking
-  progressCleaningPercentage: integer("progress_cleaning_percentage").default(0),
+  cleaningTotalRows: integer("cleaning_total_rows").default(0),
+  cleaningProcessedRows: integer("cleaning_processed_rows").default(0),
+  cleaningProgressPercentage: integer("cleaning_progress_percentage").default(0),
   cleaningStatus: simulationJobCleaningStatusEnum("cleaning_status").notNull().default("pending"),
   cleaningStartedAt: timestamp("cleaning_started_at", { withTimezone: true }), // Timestamp when cleaning starts
   cleaningCompletedAt: timestamp("cleaning_completed_at", { withTimezone: true }), // Timestamp when cleaning is completed
 
   // Result tracking
+  geocodingTotalRows: integer("geocoding_total_rows").default(0),
+  geocodingProcessedRows: integer("geocoding_processed_rows").default(0),
+  geocodingProgressPercentage: integer("geocoding_progress_percentage").default(0),
+  geocodingEstimatedCompletionTime: timestamp("geocoding_estimated_completion_time", {
+    withTimezone: true,
+  }),
   geocodingStatus: geocodingStatusEnum("geocoding_status").notNull().default("pending"),
   geocodingStartedAt: timestamp("geocoding_started_at", { withTimezone: true }), // Timestamp when geocoding starts
   geocodedAt: timestamp("geocoded_at", { withTimezone: true }), // Timestamp when geocoding is completed
-  progressGeocodingPercentage: integer("progress_geocoding_percentage").default(0),
-  estimatedCompletionTime: timestamp("estimated_completion_time", { withTimezone: true }), // Estimated completion time for the entire simulation job
 
   // Calculation tracking
   calculationStatus: calculationStatusEnum("calculation_status").notNull().default("pending"),

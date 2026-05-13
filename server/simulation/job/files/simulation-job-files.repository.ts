@@ -3,53 +3,7 @@ import { and, eq, isNull, SQL, sql } from "drizzle-orm";
 import { simulationJobTable, simulationUploadedRows } from "@/drizzle/schema";
 import { TUpdateSimulationUploadedRowSchema } from "@/schemas/simulations/jobs/update-simulation-uploaded-row.schema";
 import { db } from "@/lib/db";
-import { TSimulationJobFilesIndexQueryParams } from "@/schemas/simulations/jobs/simulation-job-index-query-params";
-
-const SIMULATION_UPLOADED_ROWS_COLUMNS: TColumnsDefinition<typeof simulationUploadedRows> = {};
-
-const buildSimulationUploadedRowsBaseConditions = (
-  jobId: string,
-  queryParams: TSimulationJobFilesIndexQueryParams,
-): Array<SQL | undefined> => {
-  const { onlyAddressErrors, onlyErrors } = queryParams;
-  const baseConditions: Array<SQL | undefined> = [
-    eq(simulationUploadedRows.simulationJobId, jobId),
-  ];
-
-  if (onlyAddressErrors) {
-    baseConditions.push(
-      and(isNull(simulationUploadedRows.streetCandidate), isNull(simulationUploadedRows.deletedAt)),
-    );
-  } else if (onlyErrors) {
-    baseConditions.push(
-      sql`jsonb_typeof(${simulationUploadedRows.errorDetails}) = 'array'`,
-      sql`jsonb_array_length(${simulationUploadedRows.errorDetails}) > 0`,
-      isNull(simulationUploadedRows.deletedAt),
-    );
-  }
-
-  return baseConditions;
-};
-
-export const getSimulationUploadedErrorsRowsWithPaginationRepository = async (
-  jobId: string,
-  queryParams: TSimulationJobFilesIndexQueryParams,
-) => {
-  return await Promise.all([
-    await buildPaginatedQuery({
-      table: simulationUploadedRows,
-      columns: SIMULATION_UPLOADED_ROWS_COLUMNS,
-      queryParams,
-      baseConditions: buildSimulationUploadedRowsBaseConditions(jobId, queryParams),
-    }),
-    await buildCountQuery({
-      table: simulationUploadedRows,
-      columns: SIMULATION_UPLOADED_ROWS_COLUMNS,
-      queryParams,
-      baseConditions: buildSimulationUploadedRowsBaseConditions(jobId, queryParams),
-    }),
-  ]);
-};
+import { TSimulationJobUploadedRowsIndexQueryParams } from "@/schemas/simulations/jobs/simulation-job-index-query-params";
 
 export const updateSimulationUploadedRowRepository = async (
   jobId: string,
@@ -114,4 +68,56 @@ export const deleteAllSimulationUploadedErrorsAndContinueRepository = async (job
       })
       .where(eq(simulationJobTable.id, jobId));
   });
+};
+
+const buildSimulationUploadedRowsBaseConditions = (
+  jobId: string,
+  queryParams: TSimulationJobUploadedRowsIndexQueryParams,
+): Array<SQL | undefined> => {
+  const { currentStep } = queryParams;
+  const baseConditions: Array<SQL | undefined> = [
+    eq(simulationUploadedRows.simulationJobId, jobId),
+  ];
+
+  switch (currentStep) {
+    case 1:
+      baseConditions.push(
+        sql`jsonb_typeof(${simulationUploadedRows.errorDetails}) = 'array'`,
+        sql`jsonb_array_length(${simulationUploadedRows.errorDetails}) > 0`,
+        isNull(simulationUploadedRows.deletedAt),
+      );
+      break;
+    case 3:
+      baseConditions.push(
+        eq(simulationUploadedRows.resolutionStatus, "needed_review"),
+        isNull(simulationUploadedRows.deletedAt),
+      );
+      break;
+    default:
+      break;
+  }
+
+  return baseConditions;
+};
+
+const SIMULATION_UPLOADED_ROWS_COLUMNS: TColumnsDefinition<typeof simulationUploadedRows> = {};
+
+export const getAllNeedReviewSimulationUploadedRowsWithPaginationRepository = async (
+  simulationJobId: string,
+  queryParams: TSimulationJobUploadedRowsIndexQueryParams,
+) => {
+  return await Promise.all([
+    await buildPaginatedQuery({
+      table: simulationUploadedRows,
+      columns: SIMULATION_UPLOADED_ROWS_COLUMNS,
+      queryParams,
+      baseConditions: buildSimulationUploadedRowsBaseConditions(simulationJobId, queryParams),
+    }),
+    await buildCountQuery({
+      table: simulationUploadedRows,
+      columns: SIMULATION_UPLOADED_ROWS_COLUMNS,
+      queryParams,
+      baseConditions: buildSimulationUploadedRowsBaseConditions(simulationJobId, queryParams),
+    }),
+  ]);
 };

@@ -11,14 +11,21 @@ import {
 import { server } from "@/lib/axios";
 import { TSimulationJobStatusSchema } from "@/schemas/simulations/jobs/job-status.schema";
 import { TUpdateSimulationJobSchema } from "@/schemas/simulations/jobs/update-simulation-job.schema";
+import { countCsvRows } from "@/lib/utils";
 
 export const createSimulationJobService = async (
   clerkUserId: string,
   data: TCreateSimulationJobSchema,
 ) => {
+  const fileTotalRows = await countCsvRows(data.customersFile);
   const minioUploadedFile = await uploadFileService(data.customersFile, `dataset/raw`);
 
-  const result = await createSimulationJobRepository(clerkUserId, minioUploadedFile.filePath, data);
+  const result = await createSimulationJobRepository(
+    clerkUserId,
+    minioUploadedFile.filePath,
+    data,
+    fileTotalRows,
+  );
 
   try {
     await server.post(`/simulations/jobs/${result.id}/preprocess`);
@@ -26,7 +33,7 @@ export const createSimulationJobService = async (
     await updateSimulationJobRepository(result.id, {
       fileValidationStatus: "failed",
       filePath: null,
-      validationCompletedAt: new Date(),
+      fileValidationCompletedAt: new Date(),
     });
 
     throw error;

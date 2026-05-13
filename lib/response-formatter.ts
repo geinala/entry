@@ -80,8 +80,10 @@ export const responseFormatter = {
     const body: TApiSuccessResponseWithPagination<T> = {
       success: true,
       message: message || "Request successful",
-      data,
-      meta,
+      data: {
+        data,
+        meta,
+      },
       ...rest,
     };
 
