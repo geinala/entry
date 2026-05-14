@@ -9,7 +9,7 @@ import { useGetDraftSimulationJobQuery } from "../_hooks/use-queries";
 import { Card, CardContent } from "@/app/_components/ui/card";
 import { GeocodingLoading } from "./_components/steps/geocoding-loading";
 import ValidationStatus from "./_components/validation-status";
-import { DataValidation } from "./_components/steps/01-data-validation";
+import { DataValidation } from "./_components/steps/01-data-validation/main";
 import { DataCleaningLoading } from "./_components/steps/data-cleaning-loading";
 import { ManualCorrection } from "./_components/steps/04-manual-correction";
 

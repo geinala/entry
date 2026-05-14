@@ -1,4 +1,5 @@
 import { TCreateSimulationJobSchema } from "@/schemas/simulations/create-simulation.schema";
+import { TDeleteErrorRowsSchema } from "@/schemas/simulations/delete-error-rows.schema";
 import { TUpdateSimulationJobSchema } from "@/schemas/simulations/jobs/update-simulation-job.schema";
 import { TUpdateSimulationUploadedRowSchema } from "@/schemas/simulations/jobs/update-simulation-uploaded-row.schema";
 import { TSimulationJob, TSimulationUploadedRow } from "@/types/database";
@@ -103,7 +104,7 @@ export const createSimulationJobMutations = {
   },
   deleteAllSimulationUploadedErrorsAndContinue: (api: AxiosInstance, queryClient: QueryClient) => {
     return mutationOptions({
-      mutationFn: async (jobId: string): Promise<TBaseApiResponse> => {
+      mutationFn: async (jobId: string) => {
         const response: AxiosResponse<TBaseApiResponse> = await api.delete(
           `/simulations/jobs/${jobId}/files/validates`,
         );
@@ -114,6 +115,28 @@ export const createSimulationJobMutations = {
         toast.success(data.message);
 
         queryClient.invalidateQueries({ queryKey: ["simulationUploadedRows", jobId] });
+        queryClient.invalidateQueries({ queryKey: ["simulations", "draft-job"] as const });
+      },
+    });
+  },
+  bulkDeleteSelectedErrorRows: (api: AxiosInstance, queryClient: QueryClient) => {
+    return mutationOptions({
+      mutationFn: async ({ jobId, schema }: { jobId: string; schema: TDeleteErrorRowsSchema }) => {
+        const response: AxiosResponse<TBaseApiResponse> = await api.delete(
+          `/simulations/jobs/${jobId}/files/rows/bulk`,
+          {
+            data: {
+              rowIds: schema.rowIds,
+            },
+          },
+        );
+
+        return response.data;
+      },
+      onSuccess: (data, variables) => {
+        toast.success(data.message);
+
+        queryClient.invalidateQueries({ queryKey: ["simulationUploadedRows", variables.jobId] });
         queryClient.invalidateQueries({ queryKey: ["simulations", "draft-job"] as const });
       },
     });

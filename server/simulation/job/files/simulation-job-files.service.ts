@@ -4,6 +4,7 @@ import { paginationResponseMapper } from "@/lib/pagination";
 import {
   deleteAllSimulationUploadedErrorsAndContinueRepository,
   deleteSimulationUploadedRowRepository,
+  deleteSimulationUploadedRowsWithErrorsBulkRepository,
   getAllNeedReviewSimulationUploadedRowsWithPaginationRepository,
   updateSimulationUploadedRowRepository,
 } from "./simulation-job-files.repository";
@@ -48,4 +49,8 @@ export const getAllNeedReviewSimulationUploadedRowsWithPaginationService = async
     pageSize: queryParams.pageSize,
     totalItems: total,
   });
+};
+
+export const deleteSimulationUploadedRowsBulkService = async (jobId: string, rowIds: number[]) => {
+  await deleteSimulationUploadedRowsWithErrorsBulkRepository(jobId, rowIds);
 };
