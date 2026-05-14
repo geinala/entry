@@ -1,5 +1,5 @@
 import { buildCountQuery, buildPaginatedQuery, TColumnsDefinition } from "@/lib/query-builder";
-import { and, eq, isNull, SQL, sql } from "drizzle-orm";
+import { and, eq, inArray, isNull, SQL, sql } from "drizzle-orm";
 import { simulationJobTable, simulationUploadedRows } from "@/drizzle/schema";
 import { TUpdateSimulationUploadedRowSchema } from "@/schemas/simulations/jobs/update-simulation-uploaded-row.schema";
 import { db } from "@/lib/db";
@@ -120,4 +120,21 @@ export const getAllNeedReviewSimulationUploadedRowsWithPaginationRepository = as
       baseConditions: buildSimulationUploadedRowsBaseConditions(simulationJobId, queryParams),
     }),
   ]);
+};
+
+export const deleteSimulationUploadedRowsWithErrorsBulkRepository = async (
+  simulationJobId: string,
+  rowIds: number[],
+) => {
+  return await db
+    .update(simulationUploadedRows)
+    .set({
+      deletedAt: new Date(),
+    })
+    .where(
+      and(
+        eq(simulationUploadedRows.simulationJobId, simulationJobId),
+        inArray(simulationUploadedRows.id, rowIds),
+      ),
+    );
 };

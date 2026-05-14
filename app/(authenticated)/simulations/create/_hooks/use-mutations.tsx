@@ -38,3 +38,10 @@ export const useDeleteAllSimulationUploadedErrorsAndContinueMutation = () => {
     createSimulationJobMutations.deleteAllSimulationUploadedErrorsAndContinue(api, queryClient),
   );
 };
+
+export const useBulkDeleteSelectedErrorRowsMutation = () => {
+  const api = useAuthenticatedClient();
+  const queryClient = useQueryClient();
+
+  return useMutation(createSimulationJobMutations.bulkDeleteSelectedErrorRows(api, queryClient));
+};

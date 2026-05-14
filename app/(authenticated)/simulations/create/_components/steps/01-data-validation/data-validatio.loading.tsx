@@ -3,9 +3,10 @@ import ValidationStatus from "../../validation-status";
 
 interface DataValidationLoadingProps {
   data?: TSimulationJob | null;
+  errorRowsCount?: number;
 }
 
-export const DataValidationLoading = ({ data }: DataValidationLoadingProps) => {
+export const DataValidationLoading = ({ data, errorRowsCount }: DataValidationLoadingProps) => {
   const isProcessing =
     data?.fileValidationStatus === "validating" || data?.fileValidationStatus === "uploaded";
   const isProcessed = data?.fileValidationStatus === "completed";
@@ -21,7 +22,7 @@ export const DataValidationLoading = ({ data }: DataValidationLoadingProps) => {
         processedRows={Number(data?.fileProcessedRows)}
         totalRows={Number(data?.fileTotalRows)}
         isProcessed={isProcessed}
-        needsReview={needsReview}
+        needsReview={needsReview && errorRowsCount !== undefined ? errorRowsCount > 0 : false}
       />
     </div>
   );

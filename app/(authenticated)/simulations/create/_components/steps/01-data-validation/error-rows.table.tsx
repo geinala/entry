@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { ColumnDef } from "@tanstack/react-table";
 import { Pencil, Trash2 } from "lucide-react";
 
@@ -9,20 +9,67 @@ import {
   TSimulationUploadedRowWithErrors,
   TValidationErrorItem,
 } from "../../../helpers";
+import { Checkbox } from "@/app/_components/ui/checkbox";
+import { BulkDeleteErrorRowsButton } from "./actions/bulk-delete.button";
 
 interface IProps extends Omit<IDataTableProps<TSimulationUploadedRowWithErrors>, "columns"> {
+  jobId: string;
   onEditRow: (row: TSimulationUploadedRowWithErrors) => void;
   onDeleteRow: (row: TSimulationUploadedRowWithErrors) => void;
   isDeletingRow: boolean;
 }
 
 export const ErrorRowsTable: React.FC<IProps> = ({
+  jobId,
   onEditRow,
   onDeleteRow,
   isDeletingRow,
   ...props
 }) => {
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+
+  const handleSelectRow = (id: number, isSelected: boolean) => {
+    setSelectedIds((prevSelected) => {
+      if (isSelected) {
+        return [...prevSelected, id];
+      } else {
+        return prevSelected.filter((selectedId) => selectedId !== id);
+      }
+    });
+  };
+
   const columns: ColumnDef<TSimulationUploadedRowWithErrors>[] = [
+    {
+      id: "select",
+      header: ({ table }) => (
+        <Checkbox
+          checked={
+            table.getRowModel().rows.length > 0 &&
+            selectedIds.length === table.getRowModel().rows.length
+          }
+          onCheckedChange={(value) => {
+            table.toggleAllPageRowsSelected(!!value);
+            if (value) {
+              const allIds = table.getRowModel().rows.map((row) => row.original.id);
+              setSelectedIds(allIds);
+            } else {
+              setSelectedIds([]);
+            }
+          }}
+          aria-label="Select all"
+        />
+      ),
+      cell: ({ row }) => (
+        <Checkbox
+          checked={selectedIds.includes(row.original.id)}
+          onCheckedChange={(value) => {
+            row.toggleSelected(!!value);
+            handleSelectRow(row.original.id, !!value);
+          }}
+          aria-label="Select row"
+        />
+      ),
+    },
     {
       id: "actions",
       header: "Actions",
@@ -107,7 +154,14 @@ export const ErrorRowsTable: React.FC<IProps> = ({
     },
   ];
 
-  return <DataTable columns={columns} {...props} />;
+  return (
+    <div className="w-full flex flex-col gap-3">
+      <div className="flex items-center justify-end">
+        <BulkDeleteErrorRowsButton jobId={jobId} selectedRowIds={selectedIds} />
+      </div>
+      <DataTable columns={columns} {...props} />
+    </div>
+  );
 };
 
 export default ErrorRowsTable;

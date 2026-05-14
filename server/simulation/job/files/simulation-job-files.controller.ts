@@ -7,6 +7,7 @@ import { NextRequest } from "next/server";
 import { TSimulationUploadedRow } from "@/types/database";
 import {
   deleteAllSimulationUploadedErrorsAndContinueService,
+  deleteSimulationUploadedRowsBulkService,
   deleteSimulationUploadedRowService,
   getAllNeedReviewSimulationUploadedRowsWithPaginationService,
   updateSimulationUploadedRowService,
@@ -16,6 +17,10 @@ import {
   UpdateSimulationUploadedRowSchema,
 } from "@/schemas/simulations/jobs/update-simulation-uploaded-row.schema";
 import { SimulationJobUploadedRowsIndexQueryParams } from "@/schemas/simulations/jobs/simulation-job-index-query-params";
+import {
+  DeleteErrorRowsSchema,
+  TDeleteErrorRowsSchema,
+} from "@/schemas/simulations/delete-error-rows.schema";
 
 export const updateSimulationUploadedRowController = async (
   jobId: string,
@@ -119,6 +124,25 @@ export const getAllNeedReviewSimulationUploadedRowsWithPaginationController = as
       data,
       meta,
       message: "Simulation job files that need review retrieved successfully",
+    });
+  } catch (error) {
+    return handleException(error);
+  }
+};
+
+export const deleteSimulationUploadedRowsBulkController = async (
+  request: NextRequest,
+  jobId: string,
+) => {
+  try {
+    const body = await request.json();
+
+    const { data } = validateSchema<TDeleteErrorRowsSchema>(DeleteErrorRowsSchema, body);
+
+    await deleteSimulationUploadedRowsBulkService(jobId, data.rowIds);
+
+    return responseFormatter.deleted({
+      message: "Selected error rows deleted successfully",
     });
   } catch (error) {
     return handleException(error);

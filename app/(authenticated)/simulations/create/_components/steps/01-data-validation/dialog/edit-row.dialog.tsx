@@ -13,7 +13,7 @@ import {
 } from "@/app/_components/ui/dialog";
 
 import { Textarea } from "@/app/_components/ui/textarea";
-import { TEditableRowForm, TSimulationUploadedRowWithErrors } from "../../../helpers";
+import { TEditableRowForm, TSimulationUploadedRowWithErrors } from "../../../../helpers";
 
 type Props = {
   open: boolean;

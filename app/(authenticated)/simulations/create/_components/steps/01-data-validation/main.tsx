@@ -2,9 +2,7 @@ import { useGetDraftSimulationJobQuery } from "@/app/(authenticated)/simulations
 import { useFilters } from "@/app/_hooks/use-filters";
 import { IndexQueryParams } from "@/types/query-params";
 import {
-  useDeleteAllSimulationUploadedErrorsAndContinueMutation,
   useDeleteSimulationUploadedRowMutation,
-  useUpdateSimulationJobMutation,
   useUpdateSimulationUploadedRowMutation,
 } from "../../../_hooks/use-mutations";
 import { FormEvent, useMemo, useState } from "react";
@@ -16,11 +14,13 @@ import {
 } from "../../../helpers";
 import { TSimulationUploadedRow } from "@/types/database";
 import { Skeleton } from "@/app/_components/ui/skeleton";
-import { DataValidationLoading } from "./data-validation-loading";
-import ErrorRowsTable from "./error-rows-table";
-import { Button } from "@/app/_components/ui/button";
-import EditRowDialog from "./edit-row-dialog";
+import { DataValidationLoading } from "./data-validatio.loading";
+import ErrorRowsTable from "./error-rows.table";
+import EditRowDialog from "./dialog/edit-row.dialog";
 import { useGetAllNeedReviewSimulationUploadedRows } from "../../../_hooks/use-queries";
+import { DeleteAllAndContinueButton } from "./actions/delete-all-and-continue.button";
+import { ContinueToCleaningDataButton } from "./actions/continue-to-cleaning-data.button";
+import { DeleteConfirmationDialog } from "./dialog/delete-confirmation.dialog";
 
 export const DataValidation = () => {
   const { handleChange, pagination } = useFilters(IndexQueryParams);
@@ -31,6 +31,7 @@ export const DataValidation = () => {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [selectedRow, setSelectedRow] = useState<TSimulationUploadedRowWithErrors | null>(null);
   const [formValues, setFormValues] = useState<TEditableRowForm | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   const { data: uploadedRowsData, isLoading: isUploadedRowsLoading } =
     useGetAllNeedReviewSimulationUploadedRows({
@@ -92,39 +93,8 @@ export const DataValidation = () => {
   };
 
   const handleDeleteRow = async (row: TSimulationUploadedRowWithErrors) => {
-    if (!data?.id) return;
-
-    const shouldDelete = window.confirm(
-      `Delete uploaded row ${row.id}${row.nosi ? ` (${row.nosi})` : ""}? This cannot be undone.`,
-    );
-
-    if (!shouldDelete) return;
-
-    await deleteRowAsync({
-      jobId: data.id,
-      rowId: row.id,
-    });
-
-    if (selectedRow?.id === row.id) {
-      handleCloseDialog();
-    }
-  };
-
-  // Update simulation job to move to next step
-  const { mutateAsync: updateJobAsync, isPending: isUpdatingJob } =
-    useUpdateSimulationJobMutation();
-
-  const handleContinue = async () => {
-    if (!data?.id) return;
-
-    // Ask for confirmation before moving to next step
-    const shouldContinue = window.confirm("Continue to next step? This will advance the workflow.");
-    if (!shouldContinue) return;
-
-    await updateJobAsync({
-      simulationJobId: data.id,
-      payload: { currentStep: Number(data.currentStep) + 1, fileValidationStatus: "completed" },
-    });
+    setSelectedRow(row);
+    setIsDeleteDialogOpen(true);
   };
 
   const handleSubmitEdit = async (event: FormEvent<HTMLFormElement>) => {
@@ -148,22 +118,6 @@ export const DataValidation = () => {
     });
 
     handleCloseDialog();
-  };
-
-  // handle delete all error rows and continue
-  const { mutateAsync: deleteAllErrorsAndContinueAsync, isPending: isDeletingAllErrors } =
-    useDeleteAllSimulationUploadedErrorsAndContinueMutation();
-
-  const handleDeleteAllAndContinue = async () => {
-    if (!data?.id) return;
-
-    const shouldDelete = window.confirm(
-      "This will delete all error rows and continue to the next step. This action cannot be undone. Continue?",
-    );
-
-    if (!shouldDelete) return;
-
-    await deleteAllErrorsAndContinueAsync(data.id);
   };
 
   if (isLoading) {
@@ -192,40 +146,46 @@ export const DataValidation = () => {
       <div className="h-full w-full">
         {data?.fileValidationStatus == "needed_review" && (
           <>
-            <DataValidationLoading data={data} />
+            <DataValidationLoading data={data} errorRowsCount={errorRowsTableData.data.length} />
             <ErrorRowsTable
+              jobId={data.id}
               source={errorRowsTableData}
               handleChange={handleChange}
-              isLoading={isUploadedRowsLoading || errorRowsTableData.data.length === 0}
+              isLoading={isUploadedRowsLoading}
               pagination={pagination}
               onEditRow={handleEditRow}
               onDeleteRow={handleDeleteRow}
               isDeletingRow={isDeletingRow}
+              selectable
             />
+
+            <div className="w-full flex items-end justify-end gap-3 mt-3">
+              <DeleteAllAndContinueButton
+                jobId={data.id}
+                disabled={uploadedRowsData?.data.length === 0}
+              />
+              <ContinueToCleaningDataButton
+                jobId={data.id}
+                currentStep={Number(data.currentStep)}
+                disabled={errorRowsTableData.data.length > 0 || isLoading}
+              />
+            </div>
           </>
         )}
-
-        {/* Continue next step */}
-        {data?.fileValidationStatus === "needed_review" && (
-          <div className="w-full mt-3 flex items-end justify-end gap-3">
-            {errorRowsTableData.data.length > 0 && (
-              <Button
-                variant={"outline"}
-                onClick={handleDeleteAllAndContinue}
-                disabled={isDeletingAllErrors || isUpdatingJob}
-              >
-                Delete All Errors and Continue
-              </Button>
-            )}
-            <Button
-              disabled={isLoading || errorRowsTableData.data.length > 0 || isUpdatingJob}
-              onClick={handleContinue}
-            >
-              Continue to Cleaning Data
-            </Button>
-          </div>
-        )}
       </div>
+
+      <DeleteConfirmationDialog
+        open={isDeleteDialogOpen}
+        onOpenChange={setIsDeleteDialogOpen}
+        onConfirm={async () => {
+          await deleteRowAsync({ jobId: data!.id, rowId: selectedRow!.id });
+          setIsDeleteDialogOpen(false);
+        }}
+        isLoading={isDeletingRow}
+        title="Delete Row"
+        description="Are you sure you want to delete this row? This action cannot be undone."
+        confirmButtonText="Delete"
+      />
 
       <EditRowDialog
         open={isEditDialogOpen}
