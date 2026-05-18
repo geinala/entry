@@ -18,9 +18,12 @@ export const updateSimulationUploadedRowRepository = async (
       customerName: payload.customerName,
       address: payload.address,
       city: payload.city,
+      finalAddress: payload.finalAddress,
       weight: payload.weight,
       startDatetime: new Date(payload.startDatetime),
       endDatetime: new Date(payload.endDatetime),
+      resolutionStatus: payload.resolutionStatus,
+      resolutionSource: payload.finalAddress?.trim() ? "USER" : null,
       errorDetails: null,
     })
     .where(
@@ -130,6 +133,23 @@ export const deleteSimulationUploadedRowsWithErrorsBulkRepository = async (
     .update(simulationUploadedRows)
     .set({
       deletedAt: new Date(),
+    })
+    .where(
+      and(
+        eq(simulationUploadedRows.simulationJobId, simulationJobId),
+        inArray(simulationUploadedRows.id, rowIds),
+      ),
+    );
+};
+
+export const ignoreSimulationUploadedRowsWithErrorsBulkRepository = async (
+  simulationJobId: string,
+  rowIds: number[],
+) => {
+  return await db
+    .update(simulationUploadedRows)
+    .set({
+      isIgnored: true,
     })
     .where(
       and(

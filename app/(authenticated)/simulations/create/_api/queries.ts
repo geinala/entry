@@ -1,7 +1,7 @@
 import { TSimulationJobUploadedRowsIndexQueryParams } from "@/schemas/simulations/jobs/simulation-job-index-query-params";
-import { TSimulationUploadedRow } from "@/types/database";
+import { TSimulationJobSummary, TSimulationUploadedRow } from "@/types/database";
 import { TPaginationResponse } from "@/types/meta";
-import { TApiSuccessResponseWithPagination } from "@/types/response";
+import { TApiSuccessResponseWithData, TApiSuccessResponseWithPagination } from "@/types/response";
 import { queryOptions } from "@tanstack/react-query";
 import { AxiosInstance, AxiosResponse } from "axios";
 
@@ -40,6 +40,18 @@ export const multiStepSimulationCreationQueries = {
 
         return false; // Stop refetching if validation is completed or failed
       },
+    });
+  },
+  getSimulationJobSummary: (api: AxiosInstance, id?: string) => {
+    return queryOptions({
+      queryKey: ["simulationJobSummary", id],
+      queryFn: async (): Promise<TSimulationJobSummary> => {
+        const response: AxiosResponse<TApiSuccessResponseWithData<TSimulationJobSummary>> =
+          await api.get(`/simulations/jobs/${id}/summary`);
+
+        return response.data.data;
+      },
+      enabled: !!id,
     });
   },
 };

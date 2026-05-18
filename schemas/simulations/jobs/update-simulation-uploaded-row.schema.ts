@@ -1,3 +1,4 @@
+import { resolutionStatusEnum } from "@/drizzle/schema";
 import z from "zod";
 
 const requiredString = (label: string) =>
@@ -22,6 +23,7 @@ export const UpdateSimulationUploadedRowSchema = z
         message: "Weight must be a number",
       })
       .positive("Weight must be greater than 0"),
+    finalAddress: requiredString("Final address"),
     startDatetime: z
       .string({
         required_error: "Start datetime is required",
@@ -34,6 +36,7 @@ export const UpdateSimulationUploadedRowSchema = z
         message: "End datetime must be a string",
       })
       .refine((value) => !Number.isNaN(new Date(value).getTime()), "Invalid end datetime"),
+    resolutionStatus: z.enum(resolutionStatusEnum.enumValues),
   })
   .refine(
     (value) => new Date(value.endDatetime).getTime() >= new Date(value.startDatetime).getTime(),
@@ -43,6 +46,4 @@ export const UpdateSimulationUploadedRowSchema = z
     },
   );
 
-export type TUpdateSimulationUploadedRowSchema = z.infer<
-  typeof UpdateSimulationUploadedRowSchema
->;
+export type TUpdateSimulationUploadedRowSchema = z.infer<typeof UpdateSimulationUploadedRowSchema>;

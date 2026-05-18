@@ -3,9 +3,10 @@
 import { useQuery } from "@tanstack/react-query";
 import useAuthenticatedClient from "./use-authenticated-client";
 import { TUserWithRoleAndPermissionNames } from "@/types/database";
-import { isAxiosError } from "axios";
+import { AxiosResponse, isAxiosError } from "axios";
 import { useClerk } from "@clerk/nextjs";
 import { toast } from "sonner";
+import { TApiSuccessResponseWithData } from "@/types/response";
 
 export default function useGetUser() {
   const api = useAuthenticatedClient();
@@ -15,7 +16,11 @@ export default function useGetUser() {
     queryKey: ["current-user"],
     queryFn: async (): Promise<TUserWithRoleAndPermissionNames | null> => {
       try {
-        return await api.get("/users/me");
+        const response: AxiosResponse<
+          TApiSuccessResponseWithData<TUserWithRoleAndPermissionNames>
+        > = await api.get("/users/me");
+
+        return response.data.data;
       } catch (error) {
         if (isAxiosError(error) && error.status === 401) {
           toast.error("Session expired. Please sign in again.");

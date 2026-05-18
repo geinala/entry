@@ -6,6 +6,7 @@ import {
   deleteSimulationUploadedRowRepository,
   deleteSimulationUploadedRowsWithErrorsBulkRepository,
   getAllNeedReviewSimulationUploadedRowsWithPaginationRepository,
+  ignoreSimulationUploadedRowsWithErrorsBulkRepository,
   updateSimulationUploadedRowRepository,
 } from "./simulation-job-files.repository";
 import { TUpdateSimulationUploadedRowSchema } from "@/schemas/simulations/jobs/update-simulation-uploaded-row.schema";
@@ -53,4 +54,8 @@ export const getAllNeedReviewSimulationUploadedRowsWithPaginationService = async
 
 export const deleteSimulationUploadedRowsBulkService = async (jobId: string, rowIds: number[]) => {
   await deleteSimulationUploadedRowsWithErrorsBulkRepository(jobId, rowIds);
+};
+
+export const ignoreSimulationUploadedRowsBulkService = async (jobId: string, rowIds: number[]) => {
+  await ignoreSimulationUploadedRowsWithErrorsBulkRepository(jobId, rowIds);
 };

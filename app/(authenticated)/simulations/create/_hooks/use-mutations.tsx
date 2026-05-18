@@ -45,3 +45,26 @@ export const useBulkDeleteSelectedErrorRowsMutation = () => {
 
   return useMutation(createSimulationJobMutations.bulkDeleteSelectedErrorRows(api, queryClient));
 };
+
+export const useBulkIgnoreSelectedErrorRowsMutation = () => {
+  const api = useAuthenticatedClient();
+  const queryClient = useQueryClient();
+
+  return useMutation(createSimulationJobMutations.bulkIgnoreSelectedErrorRows(api, queryClient));
+};
+
+export const useIgnoreAllErrorsAddressAndContinueMutation = () => {
+  const api = useAuthenticatedClient();
+  const queryClient = useQueryClient();
+
+  return useMutation(
+    createSimulationJobMutations.ignoreAllErrorsAddressAndContinue(api, queryClient),
+  );
+};
+
+export const useIgnoreAddressErrorRowMutation = () => {
+  const api = useAuthenticatedClient();
+  const queryClient = useQueryClient();
+
+  return useMutation(createSimulationJobMutations.ignoreAddressErrorRow(api, queryClient));
+};
