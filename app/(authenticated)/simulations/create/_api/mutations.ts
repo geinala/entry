@@ -1,5 +1,5 @@
+import { TBulkErrorRowsSchema } from "@/schemas/simulations/jobs/bulk-error-rows.schema";
 import { TCreateSimulationJobSchema } from "@/schemas/simulations/create-simulation.schema";
-import { TDeleteErrorRowsSchema } from "@/schemas/simulations/delete-error-rows.schema";
 import { TUpdateSimulationJobSchema } from "@/schemas/simulations/jobs/update-simulation-job.schema";
 import { TUpdateSimulationUploadedRowSchema } from "@/schemas/simulations/jobs/update-simulation-uploaded-row.schema";
 import { TSimulationJob, TSimulationUploadedRow } from "@/types/database";
@@ -121,14 +121,74 @@ export const createSimulationJobMutations = {
   },
   bulkDeleteSelectedErrorRows: (api: AxiosInstance, queryClient: QueryClient) => {
     return mutationOptions({
-      mutationFn: async ({ jobId, schema }: { jobId: string; schema: TDeleteErrorRowsSchema }) => {
+      mutationFn: async ({ jobId, schema }: { jobId: string; schema: TBulkErrorRowsSchema }) => {
         const response: AxiosResponse<TBaseApiResponse> = await api.delete(
-          `/simulations/jobs/${jobId}/files/rows/bulk`,
+          `/simulations/jobs/${jobId}/files/rows/delete/bulk`,
           {
             data: {
               rowIds: schema.rowIds,
             },
           },
+        );
+
+        return response.data;
+      },
+      onSuccess: (data, variables) => {
+        toast.success(data.message);
+
+        queryClient.invalidateQueries({ queryKey: ["simulationUploadedRows", variables.jobId] });
+        queryClient.invalidateQueries({ queryKey: ["simulations", "draft-job"] as const });
+      },
+    });
+  },
+  bulkIgnoreSelectedErrorRows: (api: AxiosInstance, queryClient: QueryClient) => {
+    return mutationOptions({
+      mutationFn: async ({ jobId, schema }: { jobId: string; schema: TBulkErrorRowsSchema }) => {
+        const response: AxiosResponse<TBaseApiResponse> = await api.post(
+          `/simulations/jobs/${jobId}/files/rows/ignore/bulk`,
+          {
+            rowIds: schema.rowIds,
+          },
+        );
+
+        return response.data;
+      },
+      onSuccess: (data, variables) => {
+        toast.success(data.message);
+
+        queryClient.invalidateQueries({ queryKey: ["simulationUploadedRows", variables.jobId] });
+        queryClient.invalidateQueries({ queryKey: ["simulations", "draft-job"] as const });
+      },
+    });
+  },
+  ignoreAllErrorsAddressAndContinue: (api: AxiosInstance, queryClient: QueryClient) => {
+    return mutationOptions({
+      mutationFn: async (jobId: string) => {
+        const response: AxiosResponse<TBaseApiResponse> = await api.post(
+          `/simulations/jobs/${jobId}/files/rows/ignore`,
+        );
+
+        return response.data;
+      },
+      onSuccess: (data, jobId) => {
+        toast.success(data.message);
+
+        queryClient.invalidateQueries({ queryKey: ["simulationUploadedRows", jobId] });
+        queryClient.invalidateQueries({ queryKey: ["simulations", "draft-job"] as const });
+      },
+    });
+  },
+  ignoreAddressErrorRow: (api: AxiosInstance, queryClient: QueryClient) => {
+    return mutationOptions({
+      mutationFn: async ({
+        jobId,
+        rowId,
+      }: {
+        jobId: string;
+        rowId: number;
+      }): Promise<TBaseApiResponse> => {
+        const response: AxiosResponse<TBaseApiResponse> = await api.post(
+          `/simulations/jobs/${jobId}/files/rows/${rowId}/ignore`,
         );
 
         return response.data;

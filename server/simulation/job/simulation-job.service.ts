@@ -68,5 +68,20 @@ export const updateSimulationJobService = async (
     }),
   };
 
-  return await updateSimulationJobStatusRepository(simulationJobId, updatePayload);
+  const updatedJob = await updateSimulationJobRepository(simulationJobId, updatePayload);
+
+  if (
+    payload.fileValidationStatus === "completed" &&
+    updatedJob.filePath &&
+    updatedJob.validationCompletedAt
+  ) {
+    try {
+      await server.post(`/simulations/jobs/${simulationJobId}/process`);
+    } catch (error) {
+      await updateSimulationJobStatusRepository(simulationJobId, "failed");
+      throw error;
+    }
+  }
+
+  return updatedJob;
 };

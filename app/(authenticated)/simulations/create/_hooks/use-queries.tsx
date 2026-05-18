@@ -25,3 +25,9 @@ export const useGetAllNeedReviewSimulationUploadedRows = ({
     }),
   );
 };
+
+export const useGetSimulationJobSummary = (id?: string) => {
+  const api = useAuthenticatedClient();
+
+  return useQuery(multiStepSimulationCreationQueries.getSimulationJobSummary(api, id));
+};

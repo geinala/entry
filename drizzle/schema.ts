@@ -193,51 +193,9 @@ export const simulationJobTable = pgTable("simulation_jobs", {
   calculationStartedAt: timestamp("calculation_started_at", { withTimezone: true }), // Timestamp when calculation starts
   calculatedAt: timestamp("calculated_at", { withTimezone: true }), // Timestamp when calculation is completed
 
-  // Summary results
-  totalVehicles: integer("total_vehicles").notNull().default(0),
-  totalNodes: integer("total_nodes").notNull().default(0),
-
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
 });
-
-export const addressTypeEnum = pgEnum("address_type_enum", ["street", "residential", "unknown"]);
-export const addressValidationSourceEnum = pgEnum("address_validation_source_enum", [
-  "manual_correction",
-  "recommendation",
-  "original",
-  "skipped",
-]);
-
-export const addressValidationsTable = pgTable(
-  "address_validations",
-  {
-    id: serial().primaryKey(),
-    simulationJobId: uuid("simulation_job_id").references(() => simulationJobTable.id),
-    nosi: varchar("nosi").notNull(),
-    rowNumber: integer("row_number").notNull(),
-    originalAddress: varchar("original_address").notNull(),
-    cleanedAddress: varchar("cleaned_address").notNull(),
-    streetCandidate: varchar("street_candidate"),
-    fallbackCandidate: varchar("fallback_candidate").notNull(),
-    processedAddress: varchar("processed_address").notNull(),
-    addressType: addressTypeEnum("address_type").notNull().default("unknown"),
-    nearbyRecommendedAddress: varchar("nearby_recommended_address"),
-    chosenSource: addressValidationSourceEnum("validation_source").notNull().default("original"),
-    correctedAt: timestamp("corrected_at", { withTimezone: true }),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-  },
-  (table) => [
-    foreignKey({
-      columns: [table.simulationJobId],
-      foreignColumns: [simulationJobTable.id],
-      name: "address_validations_simulation_job_id_simulation_jobs_id_fk",
-    }),
-    index("address_validations_simulation_job_id_idx").on(table.simulationJobId),
-    index("address_validations_nosi_idx").on(table.nosi),
-  ],
-);
 
 export const resolutionStatusEnum = pgEnum("resolution_status", [
   "pending",

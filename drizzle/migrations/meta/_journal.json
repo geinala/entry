@@ -155,6 +155,20 @@
       "when": 1778667252645,
       "tag": "0021_noisy_the_enforcers",
       "breakpoints": true
+    },
+    {
+      "idx": 22,
+      "version": "7",
+      "when": 1778896144743,
+      "tag": "0022_white_shotgun",
+      "breakpoints": true
+    },
+    {
+      "idx": 23,
+      "version": "7",
+      "when": 1778970347899,
+      "tag": "0023_melted_joystick",
+      "breakpoints": true
     }
   ]
 }

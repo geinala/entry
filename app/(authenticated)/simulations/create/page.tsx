@@ -11,7 +11,8 @@ import { GeocodingLoading } from "./_components/steps/geocoding-loading";
 import ValidationStatus from "./_components/validation-status";
 import { DataValidation } from "./_components/steps/01-data-validation/main";
 import { DataCleaningLoading } from "./_components/steps/data-cleaning-loading";
-import { ManualCorrection } from "./_components/steps/04-manual-correction";
+import { ManualCorrection } from "./_components/steps/04-manual-correction/main";
+import PreRouteOptimizationStep from "./_components/steps/05-pre-route-optimization/main";
 
 export default function CreateSimulationPage() {
   const { data } = useGetDraftSimulationJobQuery();
@@ -51,7 +52,7 @@ export default function CreateSimulationPage() {
           { id: "step2", label: "Data Validation" },
           { id: "step3", label: "Geocoding & Auto Resolution" },
           { id: "step4", label: "Manual Review & Correction" },
-          { id: "step5", label: "Calculate Best Routes" },
+          { id: "step5", label: "Route Optimization" },
         ]}
         currentStep={`step${!data ? 1 : data.currentStep + 1}`}
         orientation="horizontal"
@@ -73,7 +74,7 @@ export default function CreateSimulationPage() {
           {/* Step 4: Manual Review & Correction */}
           {data && data.currentStep === 3 && <ManualCorrection />}
           {/* Step 5: Calculate Best Routes */}
-          {data && data.currentStep === 4 && <div>Calculate Best Routes</div>}{" "}
+          {data && data.currentStep === 4 && <PreRouteOptimizationStep simulationJobId={data.id} />}
         </CardContent>
       </Card>
     </Page>

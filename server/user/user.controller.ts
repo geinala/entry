@@ -11,6 +11,8 @@ import { parseQueryParams } from "@/lib/validation";
 import { parseSortParams } from "@/lib/query-param";
 import { GetUsersQueryParams } from "@/schemas/user.schema";
 import { handleException } from "@/common/exception/helper";
+import { UnauthorizedException } from "@/common/exception/unauthorized.exception";
+import { responseFormatter } from "@/lib/response-formatter";
 
 export const onBoardingUserController = async (clerkUserId: string): Promise<NextResponse> => {
   try {
@@ -38,10 +40,15 @@ export const getUserDetailsController = async (
     if (!user) {
       await clerkService.revokeSession(sessionId);
 
-      return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+      throw new UnauthorizedException(
+        "User not found. Please contact support if you believe this is an error.",
+      );
     }
 
-    return NextResponse.json(user, { status: 200 });
+    return responseFormatter.successWithData({
+      data: user,
+      message: "User details retrieved successfully",
+    });
   } catch (error) {
     return handleException(error);
   }

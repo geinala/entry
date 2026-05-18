@@ -97,3 +97,55 @@ export type TLatestRouteBySimulationRow = {
 
 export type TSimulationJobFileValidationStatusEnum =
   (typeof simulationJobFileValidationStatusEnum.enumValues)[number];
+
+// Simulation Job Summary Types
+export type TSimulationJobDatasetSummary = {
+  totalOrders: number;
+  validOrders: number;
+  ignoredOrders: number;
+  courierCount: number;
+  depotName: string;
+  estimatedTotalWeightKg: number;
+};
+
+export type TSimulationJobGeocodingSummary = {
+  autoResolved: number;
+  manuallyCorrected: number;
+  ignored: number;
+};
+
+export type TSimulationJobAreaDistributionItem = {
+  areaName: string;
+  totalOrders: number;
+};
+
+export type TSimulationJobSummary = {
+  datasetSummary: TSimulationJobDatasetSummary;
+  geocodingSummary: TSimulationJobGeocodingSummary;
+  areaDistribution: TSimulationJobAreaDistributionItem[];
+};
+
+// Simulation Job Summary Row Types (Internal)
+export type TSimulationJobSummaryBaseRow = {
+  id: string;
+  depotLocationAddress: string;
+  fileTotalRows: number | null;
+};
+
+export type TSimulationJobDatasetSummaryRow = {
+  validOrders: number;
+  ignoredOrders: number;
+  courierCount: number;
+  estimatedTotalWeightKg: number;
+};
+
+export type TSimulationJobGeocodingSummaryRow = {
+  autoResolved: number;
+  manuallyCorrected: number;
+  ignored: number;
+};
+
+export type TSimulationJobAreaDistributionRow = {
+  areaName: string;
+  totalOrders: number;
+};
