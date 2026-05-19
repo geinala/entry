@@ -1,5 +1,5 @@
 import { handleAuthenticatedRequest } from "@/lib/request";
-import { deleteAllSimulationUploadedErrorsController } from "@/server/simulation/job/files/simulation-job-files.controller";
+import { deleteAllSimulationUploadedErrorsController } from "@/server/simulation/job/files/files.controller";
 import { NextRequest } from "next/server";
 
 // DELETE /simulations/jobs/:id/files/validates/rows

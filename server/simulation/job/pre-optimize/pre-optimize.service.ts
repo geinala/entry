@@ -16,10 +16,6 @@ import {
   getSimulationJobSummaryBaseRepository,
 } from "./pre-optimize.repository";
 
-// ---------------------------------------------------------------------------
-// Helpers
-// ---------------------------------------------------------------------------
-
 const deriveDepotName = (address: string): string => {
   const segments = address
     .split(",")
@@ -71,7 +67,7 @@ const buildAddressMap = (rows: TSimulationUploadedRow[]): Map<string, AddressEnt
       entry.details.push(detail);
     } else {
       map.set(key, {
-        matrixIndex: map.size, // replaces the manual `idx` counter
+        matrixIndex: map.size + 1,
         latitude: typeof row.latitude === "number" ? row.latitude : null,
         longitude: typeof row.longitude === "number" ? row.longitude : null,
         demand: weight,
@@ -83,15 +79,10 @@ const buildAddressMap = (rows: TSimulationUploadedRow[]): Map<string, AddressEnt
   return map;
 };
 
-// ---------------------------------------------------------------------------
-// Service
-// ---------------------------------------------------------------------------
-
 export const preOptimizeService = async (
   userId: string,
   jobId: string,
 ): Promise<TSimulationJobSummary | null> => {
-  // Fail fast — validate the job belongs to this user before doing any work.
   const job = await getSimulationJobSummaryBaseRepository(userId, jobId);
   if (!job) return null;
 
@@ -114,15 +105,23 @@ export const preOptimizeService = async (
   const addressMap = buildAddressMap(uploadedRows);
   const entries = Array.from(addressMap.values());
 
-  const nodes: TNewNode[] = entries.map((v) => ({
-    simulationId,
-    matrixIndex: v.matrixIndex,
-    latitude: v.latitude ?? 0,
-    longitude: v.longitude ?? 0,
-    demand: v.demand,
-  }));
+  const nodes: TNewNode[] = [
+    {
+      simulationId,
+      matrixIndex: 0,
+      latitude: job.depotLocationLatitude,
+      longitude: job.depotLocationLongitude,
+      demand: 0,
+    },
+    ...entries.map((v) => ({
+      simulationId,
+      matrixIndex: v.matrixIndex,
+      latitude: v.latitude ?? 0,
+      longitude: v.longitude ?? 0,
+      demand: v.demand,
+    })),
+  ];
 
-  // ── Persist in parallel where there are no dependencies ───────────────────
   const [, insertedNodeRows] = await Promise.all([
     couriers.length ? insertAllCouriersFromUploadedRowsRepository(couriers) : Promise.resolve(),
     nodes.length ? insertAllNodesFromUploadedRowsRepository(nodes) : Promise.resolve([]),
@@ -148,7 +147,6 @@ export const preOptimizeService = async (
     }
   }
 
-  // ── Summary queries — two queries instead of three ────────────────────────
   const [combinedSummary, areaDistribution] = await Promise.all([
     getSimulationJobCombinedSummaryRepository(jobId),
     getSimulationJobAreaDistributionRepository(jobId),

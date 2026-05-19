@@ -1,6 +1,7 @@
 import useAuthenticatedClient from "@/app/_hooks/use-authenticated-client";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { createSimulationJobMutations } from "../_api/mutations";
+import { useRouter } from "next/navigation";
 
 export const useCreateSimulationJobMutations = () => {
   const api = useAuthenticatedClient();
@@ -67,4 +68,16 @@ export const useIgnoreAddressErrorRowMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation(createSimulationJobMutations.ignoreAddressErrorRow(api, queryClient));
+};
+
+export const useStartOptimizationProcessMutation = () => {
+  const api = useAuthenticatedClient();
+  const queryClient = useQueryClient();
+  const router = useRouter();
+
+  return useMutation(
+    createSimulationJobMutations.startOptimizationProcess(api, queryClient, (redirectUrl) => {
+      router.push(redirectUrl);
+    }),
+  );
 };

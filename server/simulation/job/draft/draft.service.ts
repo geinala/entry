@@ -2,7 +2,7 @@ import "server-only";
 import {
   deleteDraftSimulationJobRepository,
   getDraftSimulationJobRepository,
-} from "./simulation-job-draft.repository";
+} from "./draft.repository";
 
 export const deleteDraftSimulationJobService = async (userId: string) => {
   return await deleteDraftSimulationJobRepository(userId);

@@ -38,6 +38,7 @@ export const createSimulationFromJobRepository = async (jobId: string) => {
   const [created] = await db
     .insert(simulationTable)
     .values({
+      simulationJobId: jobId,
       userId: simulationJob.userId,
       title: simulationJob.title,
       depotLocationAddress: simulationJob.depotLocationAddress,
@@ -69,6 +70,8 @@ export const getSimulationJobSummaryBaseRepository = async (
     .select({
       id: simulationJobTable.id,
       depotLocationAddress: simulationJobTable.depotLocationAddress,
+      depotLocationLatitude: simulationJobTable.depotLocationLatitude,
+      depotLocationLongitude: simulationJobTable.depotLocationLongitude,
       fileTotalRows: simulationJobTable.fileTotalRows,
     })
     .from(simulationJobTable)

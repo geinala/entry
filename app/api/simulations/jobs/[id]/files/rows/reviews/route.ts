@@ -1,5 +1,5 @@
 import { handleAuthenticatedRequest } from "@/lib/request";
-import { getAllNeedReviewSimulationUploadedRowsWithPaginationController } from "@/server/simulation/job/files/simulation-job-files.controller";
+import { getAllNeedReviewSimulationUploadedRowsWithPaginationController } from "@/server/simulation/job/files/files.controller";
 import { NextRequest } from "next/server";
 
 // GET /simulations/jobs/:id/files/rows/reviews

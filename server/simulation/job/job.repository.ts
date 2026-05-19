@@ -1,6 +1,6 @@
 import "server-only";
 
-import { simulationJobTable } from "@/drizzle/schema";
+import { simulationJobTable, simulationTable } from "@/drizzle/schema";
 import { db } from "@/lib/db";
 import { TCreateSimulationJobSchema } from "@/schemas/simulations/create-simulation.schema";
 import { TUpdateSimulationJob } from "@/types/database";
@@ -78,4 +78,13 @@ export const updateSimulationJobStatusRepository = async (
     .returning();
 
   return updatedSimulationJob;
+};
+
+export const getSimulationBySimulationJobIdRepository = async (simulationJobId: string) => {
+  const [simulation] = await db
+    .select()
+    .from(simulationTable)
+    .where(eq(simulationTable.simulationJobId, simulationJobId));
+
+  return simulation;
 };

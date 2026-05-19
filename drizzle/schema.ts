@@ -260,6 +260,9 @@ export const simulationTable = pgTable(
     userId: varchar("user_id")
       .references(() => userTable.userId)
       .notNull(),
+    simulationJobId: uuid("simulation_job_id")
+      .references(() => simulationJobTable.id)
+      .notNull(),
     title: varchar("title", { length: 300 }).notNull(),
     status: simulationStatusEnum("status").notNull().default("optimizing"),
     startedAt: timestamp("started_at", { withTimezone: true }),
@@ -285,6 +288,11 @@ export const simulationTable = pgTable(
       columns: [table.userId],
       foreignColumns: [userTable.userId],
       name: "simulations_user_id_users_user_id_fk",
+    }),
+    foreignKey({
+      columns: [table.simulationJobId],
+      foreignColumns: [simulationJobTable.id],
+      name: "simulations_simulation_job_id_simulation_jobs_id_fk",
     }),
     index("simulations_user_id_idx").on(table.userId),
     index("simulations_status_idx").on(table.status),

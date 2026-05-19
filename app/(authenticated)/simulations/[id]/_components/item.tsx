@@ -10,8 +10,7 @@ interface ISimulationStatusItemProps {
 }
 
 const SIMULATION_STATUS_COLOR_MAP = {
-  pending: { color: "yellow", label: "Pending" },
-  processing: { color: "yellow", label: "Processing" },
+  optimizing: { color: "yellow", label: "Optimizing" },
   running: { color: "blue", label: "Running" },
   completed: { color: "green", label: "Completed" },
   failed: { color: "red", label: "Failed" },

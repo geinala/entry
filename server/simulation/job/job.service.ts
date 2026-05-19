@@ -4,14 +4,16 @@ import { TCreateSimulationJobSchema } from "@/schemas/simulations/create-simulat
 import { uploadFileService } from "@/server/files/file.service";
 import {
   createSimulationJobRepository,
+  getSimulationBySimulationJobIdRepository,
   getSimulationJobsByUserIdAndStatusRepository,
   updateSimulationJobRepository,
   updateSimulationJobStatusRepository,
-} from "./simulation-job.repository";
+} from "./job.repository";
 import { server } from "@/lib/axios";
 import { TSimulationJobStatusSchema } from "@/schemas/simulations/jobs/job-status.schema";
 import { TUpdateSimulationJobSchema } from "@/schemas/simulations/jobs/update-simulation-job.schema";
 import { countCsvRows } from "@/lib/utils";
+import { InternalServerErrorException } from "@/common/exception/internal_server_error.exception";
 
 export const createSimulationJobService = async (
   clerkUserId: string,
@@ -86,4 +88,33 @@ export const updateSimulationJobService = async (
   }
 
   return updatedJob;
+};
+
+export const startOptimizationProcessService = async (clerkUserId: string) => {
+  const simulationJob = await getSimulationJobsByUserIdAndStatusRepository(clerkUserId);
+
+  if (!simulationJob) {
+    throw new InternalServerErrorException("Simulation job not found");
+  }
+
+  const simulation = await getSimulationBySimulationJobIdRepository(simulationJob.id);
+
+  if (!simulation) {
+    throw new InternalServerErrorException("Associated simulation not found");
+  }
+
+  try {
+    await server.post(`/optimizations/${simulation.id}`);
+  } catch {
+    await updateSimulationJobRepository(simulationJob.id, {
+      status: "failed",
+    });
+    throw new InternalServerErrorException("Failed to start optimization process");
+  }
+
+  await updateSimulationJobRepository(simulationJob.id, {
+    status: "completed",
+  });
+
+  return simulation.id;
 };

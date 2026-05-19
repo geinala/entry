@@ -49,11 +49,11 @@ export const CreateSimulationConstraintsSchema = z.object({
     .max(600, "Computation time limit must be less than 10 minutes (600 seconds)"),
 });
 
-export const VehicleIdParamWithSimulationIdParamSchema = SimulationIdParamSchema.extend({
-  vehicleId: z.coerce.number().int("Invalid vehicle ID format").positive().optional(),
+export const CourierIdParamWithSimulationIdParamSchema = SimulationIdParamSchema.extend({
+  courierId: z.coerce.number().int("Invalid courier ID format").positive().optional(),
 });
 
-export type TVehicleIdParamWithSimulationIdParamSchema = z.infer<
-  typeof VehicleIdParamWithSimulationIdParamSchema
+export type TCourierIdParamWithSimulationIdParamSchema = z.infer<
+  typeof CourierIdParamWithSimulationIdParamSchema
 >;
 export type TCreateSimulationConstraintsSchema = z.infer<typeof CreateSimulationConstraintsSchema>;

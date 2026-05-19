@@ -9,8 +9,9 @@ import { NextRequest } from "next/server";
 import {
   createSimulationJobService,
   getSimulationJobsByUserIdAndStatusService,
+  startOptimizationProcessService,
   updateSimulationJobService,
-} from "./simulation-job.service";
+} from "./job.service";
 import { responseFormatter } from "@/lib/response-formatter";
 import { handleException } from "@/common/exception/helper";
 import {
@@ -104,6 +105,19 @@ export const updateSimulationJobController = async (
     return responseFormatter.successWithData({
       data: result,
       message: "Simulation job updated successfully",
+    });
+  } catch (error) {
+    return handleException(error);
+  }
+};
+
+export const startOptimizationProcessController = async (clerkUserId: string) => {
+  try {
+    const result = await startOptimizationProcessService(clerkUserId);
+
+    return responseFormatter.successWithRedirect({
+      message: "Route optimization process started successfully",
+      redirectUrl: `/simulations/${result}`,
     });
   } catch (error) {
     return handleException(error);

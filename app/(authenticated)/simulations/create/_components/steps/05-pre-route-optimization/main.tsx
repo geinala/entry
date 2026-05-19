@@ -2,6 +2,7 @@ import { useGetSimulationJobSummary } from "../../../_hooks/use-queries";
 import { AreaDistributionSummary } from "./area-distribution-summary";
 import { DatasetSummary } from "./dataset-summary";
 import { GeocodingSummary } from "./geocoding-summary";
+import { ProcessToOptimizationButton } from "./actions/process-to-optimization.button";
 
 interface IProps {
   simulationJobId: string;
@@ -15,6 +16,10 @@ const PreRouteOptimizationStep = ({ simulationJobId }: IProps) => {
       <DatasetSummary data={data?.datasetSummary} />
       <GeocodingSummary data={data?.geocodingSummary} />
       <AreaDistributionSummary data={data?.areaDistribution} />
+
+      <div className="ml-auto mt-3">
+        <ProcessToOptimizationButton />
+      </div>
     </div>
   );
 };

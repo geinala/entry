@@ -3,7 +3,7 @@
 import { useBreadcrumb } from "@/app/_contexts/breadcrumb.context";
 import { useEffect, useState } from "react";
 import {
-  TotalActiveVehiclesCard,
+  TotalActiveCouriersCard,
   TotalCompletedNodesCard,
   TotalDistanceCard,
   TotalTimeTravelCard,
@@ -86,14 +86,14 @@ export default function HistoryPage() {
                 <TotalDistanceCard
                   content={
                     <Paragraph className="font-medium text-2xl">
-                      {metersToKm(data.data.totalDistanceInMeters)} km
+                      {metersToKm(data.totalDistanceInMeters)} km
                     </Paragraph>
                   }
                   footer={
                     <>
                       <Clock className="text-muted-foreground w-3 h-3 mr-1" />
                       <Paragraph className="text-muted-foreground">
-                        Updated {formatDistanceToNow(data.data.updatedAt, { addSuffix: true })}
+                        Updated {formatDistanceToNow(data.updatedAt, { addSuffix: true })}
                       </Paragraph>
                     </>
                   }
@@ -101,29 +101,29 @@ export default function HistoryPage() {
                 <TotalTimeTravelCard
                   content={
                     <Paragraph className="font-medium text-2xl">
-                      {formatSeconds(data.data.totalDurationInSeconds, ["hours", "minutes"])}
+                      {formatSeconds(data.totalDurationInSeconds, ["hours", "minutes"])}
                     </Paragraph>
                   }
                   footer={
                     <>
                       <Clock className="text-muted-foreground w-3 h-3 mr-1" />
                       <Paragraph className="text-muted-foreground">
-                        Updated {formatDistanceToNow(data.data.updatedAt, { addSuffix: true })}
+                        Updated {formatDistanceToNow(data.updatedAt, { addSuffix: true })}
                       </Paragraph>
                     </>
                   }
                 />
-                <TotalActiveVehiclesCard
+                <TotalActiveCouriersCard
                   content={
                     <Paragraph className="font-medium text-2xl">
-                      {data.data.totalActiveVehicles} vehicles
+                      {data.totalActiveCouriers} couriers
                     </Paragraph>
                   }
                   footer={
                     <>
                       <Clock className="w-3 h-3 mr-1 text-muted-foreground" />
                       <Paragraph className="text-muted-foreground">
-                        Updated {formatDistanceToNow(data.data.updatedAt, { addSuffix: true })}
+                        Updated {formatDistanceToNow(data.updatedAt, { addSuffix: true })}
                       </Paragraph>
                     </>
                   }
@@ -131,14 +131,14 @@ export default function HistoryPage() {
                 <TotalCompletedNodesCard
                   content={
                     <Paragraph className="font-medium text-2xl">
-                      {data.data.totalCompletedNodes} nodes
+                      {data.totalCompletedNodes} nodes
                     </Paragraph>
                   }
                   footer={
                     <>
                       <Clock className="w-3 h-3 mr-1 text-muted-foreground" />
                       <Paragraph className="text-muted-foreground">
-                        Updated {formatDistanceToNow(data.data.updatedAt, { addSuffix: true })}
+                        Updated {formatDistanceToNow(data.updatedAt, { addSuffix: true })}
                       </Paragraph>
                     </>
                   }

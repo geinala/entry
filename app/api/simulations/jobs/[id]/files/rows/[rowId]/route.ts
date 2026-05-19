@@ -2,7 +2,7 @@ import { handleAuthenticatedRequest } from "@/lib/request";
 import {
   deleteSimulationUploadedRowController,
   updateSimulationUploadedRowController,
-} from "@/server/simulation/job/files/simulation-job-files.controller";
+} from "@/server/simulation/job/files/files.controller";
 import { NextRequest } from "next/server";
 
 // PATCH /simulations/jobs/:id/files/rows/:rowId

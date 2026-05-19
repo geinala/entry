@@ -2,7 +2,7 @@ import "server-only";
 import {
   deleteDraftSimulationJobRepository,
   getDraftSimulationJobRepository,
-} from "./simulation-job-draft.repository";
+} from "./draft.repository";
 import { handleException } from "@/common/exception/helper";
 import { responseFormatter } from "@/lib/response-formatter";
 

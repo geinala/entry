@@ -15,11 +15,11 @@ import { NotFoundException } from "@/common/exception/not-found.exception";
 export const findCurrentUserByClerkUserIdService = async (clerkUserId: string) => {
   const user = await findCurrentUserByClerkUserIdRepository(clerkUserId);
 
-  if (!user || user.length === 0) {
+  if (!user) {
     throw new NotFoundException("User not found");
   }
 
-  return user[0];
+  return user;
 };
 
 export const findUserWithRoleAndPermissionsService = async (

@@ -1,8 +1,8 @@
 import { handleException } from "@/common/exception/helper";
 import { validateSchema } from "@/lib/validation";
 import {
-  TVehicleIdParamWithSimulationIdParamSchema,
-  VehicleIdParamWithSimulationIdParamSchema,
+  CourierIdParamWithSimulationIdParamSchema,
+  TCourierIdParamWithSimulationIdParamSchema,
 } from "@/schemas/simulation.schema";
 import { responseFormatter } from "@/lib/response-formatter";
 import { getLatestRouteBySimulationIdService } from "./route.service";
@@ -16,17 +16,17 @@ export const getLatestRouteBySimulationIdController = async (
     const { searchParams } = new URL(req.url);
 
     const rawQueryParams = {
-      vehicleId: searchParams.get("vehicleId") || undefined,
+      courierId: searchParams.get("courierId") || undefined,
     };
 
-    const parsed = validateSchema<TVehicleIdParamWithSimulationIdParamSchema>(
-      VehicleIdParamWithSimulationIdParamSchema,
+    const parsed = validateSchema<TCourierIdParamWithSimulationIdParamSchema>(
+      CourierIdParamWithSimulationIdParamSchema,
       { simulationId, ...rawQueryParams },
     );
 
     const result = await getLatestRouteBySimulationIdService(
       parsed.data.simulationId,
-      parsed.data.vehicleId,
+      parsed.data.courierId,
     );
 
     return responseFormatter.successWithData({

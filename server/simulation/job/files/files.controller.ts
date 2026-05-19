@@ -12,7 +12,7 @@ import {
   getAllNeedReviewSimulationUploadedRowsWithPaginationService,
   ignoreSimulationUploadedRowsBulkService,
   updateSimulationUploadedRowService,
-} from "./simulation-job-files.service";
+} from "./files.service";
 import {
   TUpdateSimulationUploadedRowSchema,
   UpdateSimulationUploadedRowSchema,

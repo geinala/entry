@@ -4,18 +4,10 @@ import useAuthenticatedClient from "@/app/_hooks/use-authenticated-client";
 import { useQuery } from "@tanstack/react-query";
 import { simulationDetailQueries } from "../_api/queries";
 
-export const useGetFileWithSimulationIdQuery = (simulationId: string, hasUploadedCSV: boolean) => {
+export const useGetAllActiveCouriersQuery = (simulationId?: string) => {
   const api = useAuthenticatedClient();
 
-  return useQuery(
-    simulationDetailQueries.findFileWithSimulationId(api, simulationId, hasUploadedCSV),
-  );
-};
-
-export const useGetAllActiveVehiclesQuery = (simulationId?: string) => {
-  const api = useAuthenticatedClient();
-
-  return useQuery(simulationDetailQueries.getAllActiveVehicles(api, simulationId));
+  return useQuery(simulationDetailQueries.getAllActiveCouriers(api, simulationId));
 };
 
 export const useGetFinalRoutesQuery = (simulationId?: string, vehicleId?: number) => {
