@@ -247,8 +247,7 @@ export const simulationUploadedRows = pgTable(
 // Old table
 
 export const simulationStatusEnum = pgEnum("simulation_status_enum", [
-  "pending",
-  "processing",
+  "optimizing",
   "running",
   "completed",
   "failed",
@@ -262,20 +261,22 @@ export const simulationTable = pgTable(
       .references(() => userTable.userId)
       .notNull(),
     title: varchar("title", { length: 300 }).notNull(),
-    status: simulationStatusEnum("status").notNull().default("pending"),
+    status: simulationStatusEnum("status").notNull().default("optimizing"),
     startedAt: timestamp("started_at", { withTimezone: true }),
     completedAt: timestamp("completed_at", { withTimezone: true }),
     computationTimeLimitInSeconds: integer("computation_time_limit_in_seconds")
       .notNull()
       .default(600), // in seconds
+    depotLocationAddress: varchar("depot_location_address").notNull(),
+    depotLocationLatitude: doublePrecision("depot_location_latitude").notNull(),
+    depotLocationLongitude: doublePrecision("depot_location_longitude").notNull(),
     totalDemandInKilograms: real("total_demand_in_kilograms").notNull().default(0),
     totalDistanceInMeters: integer("total_distance_in_meters").notNull().default(0),
-    totalVehicles: integer("total_vehicles").notNull().default(0),
+    totalCouriers: integer("total_couriers").notNull().default(0),
     totalDurationInSeconds: integer("total_duration_in_seconds").notNull().default(0),
-    totalActiveVehicles: integer("total_active_vehicles").notNull().default(0),
+    totalActiveCouriers: integer("total_active_couriers").notNull().default(0),
     totalCompletedNodes: integer("total_completed_nodes").notNull().default(0),
     totalNodes: integer("total_nodes").notNull().default(0),
-    uploadId: integer("upload_id").references(() => simulationUploadedFileTable.id),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
@@ -285,50 +286,8 @@ export const simulationTable = pgTable(
       foreignColumns: [userTable.userId],
       name: "simulations_user_id_users_user_id_fk",
     }),
-    foreignKey({
-      columns: [table.uploadId],
-      foreignColumns: [simulationUploadedFileTable.id],
-      name: "simulations_upload_id_simulation_uploaded_files_id_fk",
-    }),
     index("simulations_user_id_idx").on(table.userId),
     index("simulations_status_idx").on(table.status),
-  ],
-);
-
-export const simulationUploadStatusEnum = pgEnum("simulation_upload_status_enum", [
-  "uploaded",
-  "validating",
-  "validated",
-  "processing",
-  "failed",
-  "ready",
-]);
-
-export const simulationUploadedFileTable = pgTable(
-  "simulation_uploaded_files",
-  {
-    id: serial().primaryKey(),
-    userId: varchar("user_id")
-      .references(() => userTable.userId)
-      .notNull(),
-    fileName: varchar("file_name").notNull(),
-    filePath: varchar("file_path").notNull(),
-    totalRows: integer("total_rows"),
-    invalidRows: integer("invalid_rows"),
-    processedRows: integer("processed_rows"),
-    progressPercentage: integer("progress_percentage").default(0),
-    status: simulationUploadStatusEnum("status").notNull().default("uploaded"),
-    validatedAt: timestamp("validated_at", { withTimezone: true }),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-  },
-  (table) => [
-    foreignKey({
-      columns: [table.userId],
-      foreignColumns: [userTable.userId],
-      name: "simulation_uploaded_files_user_id_users_user_id_fk",
-    }),
-    index("simulation_uploaded_files_user_id_idx").on(table.userId),
   ],
 );
 
@@ -341,7 +300,6 @@ export const nodeTable = pgTable(
     latitude: doublePrecision("latitude").notNull(),
     longitude: doublePrecision("longitude").notNull(),
     demand: real("demand").notNull(),
-    isDepot: integer("is_depot").notNull().default(0),
   },
   (table) => [
     foreignKey({
@@ -361,7 +319,6 @@ export const nodeDetailTable = pgTable(
     name: varchar("name").notNull(),
     address: varchar("address").notNull(),
     city: varchar("city").notNull(),
-    district: varchar("district").notNull(),
     weight: real("weight").notNull(),
   },
   (table) => [
@@ -435,22 +392,21 @@ export const matrixResultTable = pgTable(
   ],
 );
 
-export const vehicleTable = pgTable(
-  "vehicles",
+export const courierTable = pgTable(
+  "couriers",
   {
     id: serial().primaryKey(),
     simulationId: uuid("simulation_id").references(() => simulationTable.id),
     name: varchar("name").notNull(),
-    maxCapacity: real("max_capacity").notNull(),
     isActive: boolean("is_active").notNull().default(true),
   },
   (table) => [
     foreignKey({
       columns: [table.simulationId],
       foreignColumns: [simulationTable.id],
-      name: "vehicles_simulation_id_simulations_id_fk",
+      name: "couriers_simulation_id_simulations_id_fk",
     }),
-    index("vehicles_simulation_id_idx").on(table.simulationId),
+    index("couriers_simulation_id_idx").on(table.simulationId),
   ],
 );
 
@@ -459,7 +415,7 @@ export const solutionTable = pgTable(
   {
     id: serial().primaryKey(),
     simulationId: uuid("simulation_id").references(() => simulationTable.id),
-    vehicleId: integer("vehicle_id").references(() => vehicleTable.id),
+    courierId: integer("courier_id").references(() => courierTable.id),
     routes: jsonb("routes").notNull(), // Array of node indices representing the route
     demandInKilograms: real("demand_in_kilograms").notNull(), // Total demand served by this vehicle
     timeInSeconds: integer("time_in_seconds").notNull(), // Total time for this route
@@ -471,21 +427,21 @@ export const solutionTable = pgTable(
       name: "solutions_simulation_id_simulations_id_fk",
     }),
     foreignKey({
-      columns: [table.vehicleId],
-      foreignColumns: [vehicleTable.id],
-      name: "solutions_vehicle_id_vehicles_id_fk",
+      columns: [table.courierId],
+      foreignColumns: [courierTable.id],
+      name: "solutions_courier_id_couriers_id_fk",
     }),
     index("solutions_simulation_id_idx").on(table.simulationId),
-    index("solutions_vehicle_id_idx").on(table.vehicleId),
+    index("solutions_courier_id_idx").on(table.courierId),
   ],
 );
 
-export const vehicleRouteTable = pgTable(
-  "vehicle_routes",
+export const courierRouteTable = pgTable(
+  "courier_routes",
   {
     id: serial().primaryKey(),
     solutionId: integer("solution_id").references(() => solutionTable.id),
-    vehicleId: integer("vehicle_id").references(() => vehicleTable.id),
+    courierId: integer("courier_id").references(() => courierTable.id),
     routeVersion: integer("route_version").notNull().default(1), // To track changes in routes over time
     isActive: boolean("is_active").notNull().default(true), // To indicate if this route is currently active
     totalDistanceInMeters: integer("total_distance_in_meters").notNull(), // Total distance for this route
@@ -499,20 +455,20 @@ export const vehicleRouteTable = pgTable(
     foreignKey({
       columns: [table.solutionId],
       foreignColumns: [solutionTable.id],
-      name: "vehicle_routes_solution_id_solutions_id_fk",
+      name: "courier_routes_solution_id_solutions_id_fk",
     }),
     foreignKey({
-      columns: [table.vehicleId],
-      foreignColumns: [vehicleTable.id],
-      name: "vehicle_routes_vehicle_id_vehicles_id_fk",
+      columns: [table.courierId],
+      foreignColumns: [courierTable.id],
+      name: "courier_routes_courier_id_couriers_id_fk",
     }),
     foreignKey({
       columns: [table.reoptimizedFromRouteId],
       foreignColumns: [table.id],
-      name: "vehicle_routes_reoptimized_from_route_id_vehicle_routes_id_fk",
+      name: "courier_routes_reoptimized_from_route_id_courier_routes_id_fk",
     }),
-    index("vehicle_routes_solution_id_idx").on(table.solutionId),
-    index("vehicle_routes_vehicle_id_idx").on(table.vehicleId),
+    index("courier_routes_solution_id_idx").on(table.solutionId),
+    index("courier_routes_courier_id_idx").on(table.courierId),
   ],
 );
 
@@ -527,7 +483,7 @@ export const routeLegTable = pgTable(
   "route_legs",
   {
     id: serial().primaryKey(),
-    vehicleRouteId: integer("vehicle_route_id").references(() => vehicleRouteTable.id),
+    courierRouteId: integer("courier_route_id").references(() => courierRouteTable.id),
     originLatitude: doublePrecision("origin_latitude").notNull(),
     originLongitude: doublePrecision("origin_longitude").notNull(),
     destinationLatitude: doublePrecision("destination_latitude").notNull(),
@@ -553,18 +509,18 @@ export const routeLegTable = pgTable(
   },
   (table) => [
     foreignKey({
-      columns: [table.vehicleRouteId],
-      foreignColumns: [vehicleRouteTable.id],
-      name: "route_legs_vehicle_route_id_vehicle_routes_id_fk",
+      columns: [table.courierRouteId],
+      foreignColumns: [courierRouteTable.id],
+      name: "route_legs_courier_route_id_courier_routes_id_fk",
     }),
-    index("route_legs_vehicle_route_id_idx").on(table.vehicleRouteId),
+    index("route_legs_courier_route_id_idx").on(table.courierRouteId),
     index("route_legs_origin_coordinates_idx").on(table.originLatitude, table.originLongitude),
     index("route_legs_destination_coordinates_idx").on(
       table.destinationLatitude,
       table.destinationLongitude,
     ),
-    uniqueIndex("route_legs_vehicle_route_sequence_unique").on(
-      table.vehicleRouteId,
+    uniqueIndex("route_legs_courier_route_sequence_unique").on(
+      table.courierRouteId,
       table.sequence,
     ),
     index("route_legs_sequence_idx").on(table.sequence),

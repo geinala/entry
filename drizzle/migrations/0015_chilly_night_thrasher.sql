@@ -1,1 +1,0 @@
-ALTER TABLE "simulation_uploaded_rows" ADD COLUMN "street_candidate" varchar;

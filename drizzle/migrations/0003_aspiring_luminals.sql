@@ -1,1 +1,0 @@
-ALTER TABLE "simulation_jobs" ADD COLUMN "validated_at" timestamp with time zone;
