@@ -2,11 +2,11 @@ import "server-only";
 
 import { handleException } from "@/common/exception/helper";
 import { responseFormatter } from "@/lib/response-formatter";
-import { getSimulationJobSummaryService } from "./simulation-job-summary.service";
+import { preOptimizeService } from "./pre-optimize.service";
 
-export const getSimulationJobSummaryController = async (userId: string, jobId: string) => {
+export const preOptimizeController = async (userId: string, jobId: string) => {
   try {
-    const summary = await getSimulationJobSummaryService(userId, jobId);
+    const summary = await preOptimizeService(userId, jobId);
 
     if (!summary) {
       return responseFormatter.notFound("Simulation job not found");

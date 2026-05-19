@@ -73,12 +73,14 @@ export const updateSimulationJobService = async (
   if (
     payload.fileValidationStatus === "completed" &&
     updatedJob.filePath &&
-    updatedJob.validationCompletedAt
+    updatedJob.fileValidationCompletedAt
   ) {
     try {
       await server.post(`/simulations/jobs/${simulationJobId}/process`);
     } catch (error) {
-      await updateSimulationJobStatusRepository(simulationJobId, "failed");
+      await updateSimulationJobStatusRepository(simulationJobId, {
+        status: "failed",
+      });
       throw error;
     }
   }

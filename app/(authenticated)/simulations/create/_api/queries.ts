@@ -47,7 +47,7 @@ export const multiStepSimulationCreationQueries = {
       queryKey: ["simulationJobSummary", id],
       queryFn: async (): Promise<TSimulationJobSummary> => {
         const response: AxiosResponse<TApiSuccessResponseWithData<TSimulationJobSummary>> =
-          await api.get(`/simulations/jobs/${id}/summary`);
+          await api.get(`/simulations/jobs/${id}/pre-optimize`);
 
         return response.data.data;
       },
