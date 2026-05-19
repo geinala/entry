@@ -5,12 +5,10 @@ import {
   waitlistStatusEnum,
   roleTable,
   simulationTable,
-  simulationUploadedFileTable,
-  simulationStatusEnum,
   nodeTable,
-  vehicleTable,
+  courierTable,
   routeLegTable,
-  vehicleRouteTable,
+  courierRouteTable,
   simulationJobTable,
   simulationJobFileValidationStatusEnum,
   simulationUploadedRows,
@@ -47,35 +45,29 @@ export type TSimulationWithDepot = TSimulation & {
 };
 export type TUpdateSimulation = Partial<Omit<TSimulation, "id" | "createdAt" | "updatedAt">>;
 export type TSimulationWithUploadedFile = TSimulation & {
-  uploadedFile: TSimulationUploadedFile | null;
   totalDemand: number;
 };
-
-// Simulation Uploaded File Types
-export type TSimulationUploadedFile = InferSelectModel<typeof simulationUploadedFileTable>;
-export type TNewSimulationUploadedFile = InferInsertModel<typeof simulationUploadedFileTable>;
-export type TSimulationStatus = (typeof simulationStatusEnum.enumValues)[number];
 
 // Node Types
 export type TNode = InferSelectModel<typeof nodeTable>;
 
-// Vehicle Types
-export type TVehicle = InferSelectModel<typeof vehicleTable>;
-export type TNewVehicle = InferInsertModel<typeof vehicleTable>;
+// Courier Types
+export type TCourier = InferSelectModel<typeof courierTable>;
+export type TNewCourier = InferInsertModel<typeof courierTable>;
 
 // Route Types
-export type TVehicleRoute = InferSelectModel<typeof vehicleRouteTable>;
+export type TCourierRoute = InferSelectModel<typeof courierRouteTable>;
 export type TRouteLeg = InferSelectModel<typeof routeLegTable>;
 
-export type TRouteVehicleSummary = {
-  id: TVehicle["id"];
-  name: TVehicle["name"];
+export type TRouteCourierSummary = {
+  id: TCourier["id"];
+  name: TCourier["name"];
 };
 
 export type TLatestRouteBySimulationRow = {
   id: TRouteLeg["id"];
-  vehicle: TRouteVehicleSummary;
-  is_active: TVehicleRoute["isActive"];
+  vehicle: TRouteCourierSummary;
+  is_active: TCourierRoute["isActive"];
   origin_latitude: TNode["latitude"];
   origin_longitude: TNode["longitude"];
   destination_latitude: TNode["latitude"];

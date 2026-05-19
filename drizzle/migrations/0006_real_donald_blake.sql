@@ -1,1 +1,0 @@
-ALTER TABLE "simulation_job_uploaded_file_errors" ADD COLUMN "nosi" varchar NOT NULL;

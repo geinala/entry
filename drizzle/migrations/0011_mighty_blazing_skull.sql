@@ -1,1 +1,0 @@
-ALTER TABLE "simulation_jobs" DROP COLUMN "file_validation_error_path";
