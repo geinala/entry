@@ -2,7 +2,7 @@ import { handleAuthenticatedRequest } from "@/lib/request";
 import {
   createSimulationJobController,
   getSimulationJobsByUserIdAndStatusController,
-} from "@/server/simulation/job/simulation-job.controller";
+} from "@/server/simulation/job/job.controller";
 import { NextRequest } from "next/server";
 
 // simulations/jobs

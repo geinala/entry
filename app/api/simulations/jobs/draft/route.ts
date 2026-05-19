@@ -2,7 +2,7 @@ import { handleAuthenticatedRequest } from "@/lib/request";
 import {
   deleteDraftSimulationJobController,
   getDraftSimulationJobController,
-} from "@/server/simulation/job/draft/simulation-job-draft.controller";
+} from "@/server/simulation/job/draft/draft.controller";
 import { NextRequest } from "next/server";
 
 // GET /simulations/jobs/draft

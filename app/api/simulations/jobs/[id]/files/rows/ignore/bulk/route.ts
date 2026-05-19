@@ -1,5 +1,5 @@
 import { handleAuthenticatedRequest } from "@/lib/request";
-import { ignoreSimulationUploadedRowsBulkController } from "@/server/simulation/job/files/simulation-job-files.controller";
+import { ignoreSimulationUploadedRowsBulkController } from "@/server/simulation/job/files/files.controller";
 import { NextRequest } from "next/server";
 
 /**

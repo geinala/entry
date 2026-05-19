@@ -11,7 +11,7 @@ import {
   toEditableForm,
   TSimulationUploadedRowWithErrors,
   TValidationErrorItem,
-} from "../../../helpers";
+} from "../../../_utils/helpers";
 import { TSimulationUploadedRow } from "@/types/database";
 import { Skeleton } from "@/app/_components/ui/skeleton";
 import { DataValidationLoading } from "./data-validatio.loading";
@@ -114,6 +114,7 @@ export const DataValidation = () => {
         weight: Number(formValues.weight),
         startDatetime: formValues.startDatetime,
         endDatetime: formValues.endDatetime,
+        finalAddress: "",
       },
     });
 

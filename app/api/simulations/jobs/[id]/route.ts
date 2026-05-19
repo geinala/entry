@@ -1,7 +1,7 @@
 import "server-only";
 
 import { handleAuthenticatedRequest } from "@/lib/request";
-import { updateSimulationJobController } from "@/server/simulation/job/simulation-job.controller";
+import { updateSimulationJobController } from "@/server/simulation/job/job.controller";
 import { NextRequest } from "next/server";
 
 // PATCH simulations/jobs/:id

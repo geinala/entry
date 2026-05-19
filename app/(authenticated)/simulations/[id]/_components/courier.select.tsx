@@ -10,27 +10,27 @@ import {
   SelectValue,
 } from "@/app/_components/ui/select";
 import { usePathname, useParams, useRouter, useSearchParams } from "next/navigation";
-import { useGetAllActiveVehiclesQuery } from "../_hooks/use-queries";
+import { useGetAllActiveCouriersQuery } from "../_hooks/use-queries";
 
 interface Props {
-  totalActiveVehicles?: number;
+  totalActiveCouriers?: number;
 }
 
-export const VehicleSelect = ({ totalActiveVehicles }: Props) => {
+export const CourierSelect = ({ totalActiveCouriers }: Props) => {
   const { id } = useParams<{ id: string }>();
   const searchParams = useSearchParams();
   const pathname = usePathname();
   const router = useRouter();
 
-  const { data, isLoading } = useGetAllActiveVehiclesQuery(id);
+  const { data, isLoading } = useGetAllActiveCouriersQuery(id);
 
-  const selectedVehicleId = searchParams.get("vehicleId") ?? "all";
+  const selectedCourierId = searchParams.get("courierId") ?? "all";
 
   const isDisabledSelect = isLoading || !Array.isArray(data?.data) || data.data.length === 0;
 
-  const handleVehicleChange = (vehicleId: string) => {
+  const handleCourierChange = (courierId: string) => {
     updateQueryParam(searchParams, pathname, router, {
-      vehicleId: vehicleId === "all" ? null : vehicleId,
+      courierId: courierId === "all" ? null : courierId,
       page: null,
     });
   };
@@ -38,29 +38,29 @@ export const VehicleSelect = ({ totalActiveVehicles }: Props) => {
   return (
     <div className="pt-3 px-3 flex flex-col gap-2">
       <div className="flex justify-between items-center">
-        <Title level={6}>Vehicles</Title>
+        <Title level={6}>Couriers</Title>
         <Paragraph className="text-sm text-muted-foreground">
-          {totalActiveVehicles ?? 0} total
+          {totalActiveCouriers ?? 0} total
         </Paragraph>
       </div>
       <Paragraph className="text-sm text-muted-foreground">
-        Select a vehicle to see detailed information. (default: all vehicles)
+        Select a courier to see detailed information. (default: all couriers)
       </Paragraph>
       <Select
         disabled={isDisabledSelect}
-        value={selectedVehicleId}
-        onValueChange={handleVehicleChange}
+        value={selectedCourierId}
+        onValueChange={handleCourierChange}
       >
         <SelectTrigger className="w-full" disabled={isDisabledSelect}>
-          <SelectValue placeholder="Select a vehicle" />
+          <SelectValue placeholder="Select a courier" />
         </SelectTrigger>
         <SelectContent position="popper">
-          <SelectItem value="all">All vehicles</SelectItem>
+          <SelectItem value="all">All couriers</SelectItem>
           {data?.data &&
             data.data.length > 0 &&
-            data.data.map((vehicle) => (
-              <SelectItem key={vehicle.id} value={vehicle.id.toString()}>
-                {vehicle.name}
+            data.data.map((courier) => (
+              <SelectItem key={courier.id} value={courier.id.toString()}>
+                {courier.name}
               </SelectItem>
             ))}
         </SelectContent>

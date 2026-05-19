@@ -48,6 +48,7 @@ export type TUpdateSimulation = Partial<Omit<TSimulation, "id" | "createdAt" | "
 export type TSimulationWithUploadedFile = TSimulation & {
   totalDemand: number;
 };
+export type TSimulationStatus = TSimulation["status"];
 
 // Node Types
 export type TNode = InferSelectModel<typeof nodeTable>;
@@ -124,6 +125,8 @@ export type TSimulationJobSummary = {
 export type TSimulationJobSummaryBaseRow = {
   id: string;
   depotLocationAddress: string;
+  depotLocationLatitude: number;
+  depotLocationLongitude: number;
   fileTotalRows: number | null;
 };
 

@@ -36,7 +36,7 @@ export const UpdateSimulationUploadedRowSchema = z
         message: "End datetime must be a string",
       })
       .refine((value) => !Number.isNaN(new Date(value).getTime()), "Invalid end datetime"),
-    resolutionStatus: z.enum(resolutionStatusEnum.enumValues),
+    resolutionStatus: z.enum(resolutionStatusEnum.enumValues).optional(),
   })
   .refine(
     (value) => new Date(value.endDatetime).getTime() >= new Date(value.startDatetime).getTime(),

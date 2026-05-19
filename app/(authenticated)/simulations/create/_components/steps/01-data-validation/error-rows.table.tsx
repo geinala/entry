@@ -8,7 +8,7 @@ import {
   formatDateTime,
   TSimulationUploadedRowWithErrors,
   TValidationErrorItem,
-} from "../../../helpers";
+} from "../../../_utils/helpers";
 import { Checkbox } from "@/app/_components/ui/checkbox";
 import { BulkDeleteErrorRowsButton } from "./actions/bulk-delete.button";
 

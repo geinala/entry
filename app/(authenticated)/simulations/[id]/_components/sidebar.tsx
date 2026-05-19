@@ -6,48 +6,20 @@ import {
   SidebarHeader,
   SidebarSeparator,
 } from "@/app/_components/ui/sidebar";
-// import CSVInput from "./input";
-import { Separator } from "@/app/_components/ui/separator";
 import { ChartNoAxesCombined } from "lucide-react";
 import { Paragraph, Title } from "@/app/_components/typography";
 import { SimulationStatusItem, StatisticsItem } from "./item";
-import { SimulationFileUploadedItem } from "./file-status.item";
-import { useGetFileWithSimulationIdQuery } from "../_hooks/use-queries";
-import { useParams } from "next/navigation";
-import { StartButton } from "./button";
 import { TSimulation, TSimulationStatus } from "@/types/database";
-import { VehicleSelect } from "./vehicle.select";
 import { formatSeconds, metersToKm } from "@/lib/utils";
 
 interface SimulationDetailSidebarLeftProps {
-  hasUploadedCSV: boolean;
   status?: TSimulationStatus;
 }
 
-export const SimulationDetailLeftSidebar = ({
-  hasUploadedCSV,
-  status,
-}: SimulationDetailSidebarLeftProps) => {
-  const { id } = useParams<{ id: string }>();
-  const { data, isLoading } = useGetFileWithSimulationIdQuery(id, hasUploadedCSV);
-  const isDisabledStartButton =
-    data?.data?.uploadedFile?.status !== "ready" ||
-    (status !== "pending" && status !== "processing");
-
+export const SimulationDetailLeftSidebar = ({ status }: SimulationDetailSidebarLeftProps) => {
   return (
     <Sidebar containerClassName="relative h-full" className="h-full relative w-full" side="left">
       <SidebarContent className="p-4">
-        {!hasUploadedCSV ? (
-          <>
-            {/* <CSVInput /> */}
-            <Separator />
-          </>
-        ) : (
-          <>
-            <SimulationFileUploadedItem data={data?.data} isLoading={isLoading} />
-            {!isDisabledStartButton && <StartButton />}
-          </>
-        )}
         <SimulationStatusItem status={status} />
       </SidebarContent>
     </Sidebar>
@@ -67,7 +39,7 @@ export const SimulationDetailRightSidebar = ({ data }: RightSidebarProps) => {
       </SidebarHeader>
       <SidebarSeparator className="m-0" />
       <SidebarContent>
-        <VehicleSelect totalActiveVehicles={data?.totalActiveVehicles} />
+        {/* <VehicleSelect totalActiveVehicles={data?.totalActiveVehicles} /> */}
         <div className="flex flex-col px-3 gap-2 pt-2">
           <Title level={6}>Overall Statistics</Title>
           <div className="grid grid-cols-2 gap-2">
@@ -93,7 +65,7 @@ export const SimulationDetailRightSidebar = ({ data }: RightSidebarProps) => {
                 title="Total Demand"
                 content={
                   <Paragraph className="text-xl font-medium">
-                    {data?.totalDemandInKilograms.toFixed(2) ?? 0}
+                    {/* {data?.totalDemandInKilograms.toFixed(2) ?? 0} */}
                     <span className="text-sm">kg</span>
                   </Paragraph>
                 }

@@ -8,7 +8,7 @@ import {
   getAllNeedReviewSimulationUploadedRowsWithPaginationRepository,
   ignoreSimulationUploadedRowsWithErrorsBulkRepository,
   updateSimulationUploadedRowRepository,
-} from "./simulation-job-files.repository";
+} from "./files.repository";
 import { TUpdateSimulationUploadedRowSchema } from "@/schemas/simulations/jobs/update-simulation-uploaded-row.schema";
 import { server } from "@/lib/axios";
 import { TSimulationJobUploadedRowsIndexQueryParams } from "@/schemas/simulations/jobs/simulation-job-index-query-params";

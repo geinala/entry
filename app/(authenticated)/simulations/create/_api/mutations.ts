@@ -3,7 +3,11 @@ import { TCreateSimulationJobSchema } from "@/schemas/simulations/create-simulat
 import { TUpdateSimulationJobSchema } from "@/schemas/simulations/jobs/update-simulation-job.schema";
 import { TUpdateSimulationUploadedRowSchema } from "@/schemas/simulations/jobs/update-simulation-uploaded-row.schema";
 import { TSimulationJob, TSimulationUploadedRow } from "@/types/database";
-import { TApiSuccessResponseWithData, TBaseApiResponse } from "@/types/response";
+import {
+  TApiResponseWithRedirect,
+  TApiSuccessResponseWithData,
+  TBaseApiResponse,
+} from "@/types/response";
 import { mutationOptions, QueryClient } from "@tanstack/react-query";
 import { AxiosInstance, AxiosResponse } from "axios";
 import { toast } from "sonner";
@@ -197,6 +201,28 @@ export const createSimulationJobMutations = {
         toast.success(data.message);
 
         queryClient.invalidateQueries({ queryKey: ["simulationUploadedRows", variables.jobId] });
+        queryClient.invalidateQueries({ queryKey: ["simulations", "draft-job"] as const });
+      },
+    });
+  },
+  startOptimizationProcess: (
+    api: AxiosInstance,
+    queryClient: QueryClient,
+    redirectOnSuccess: (url: string) => void,
+  ) => {
+    return mutationOptions({
+      mutationFn: async (): Promise<TApiResponseWithRedirect> => {
+        const response: AxiosResponse<TApiResponseWithRedirect> = await api.post(
+          `/simulations/jobs/optimization`,
+        );
+
+        return response.data;
+      },
+      onSuccess: (data) => {
+        toast.success(data.message);
+
+        redirectOnSuccess(data.redirectUrl);
+
         queryClient.invalidateQueries({ queryKey: ["simulations", "draft-job"] as const });
       },
     });

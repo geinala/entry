@@ -1,5 +1,5 @@
 import { handleAuthenticatedRequest } from "@/lib/request";
-import { getAllActiveVehiclesController } from "@/server/vehicle/vehicle.controller";
+import { getAllActiveCouriersController } from "@/server/courier/courier.controller";
 import { NextRequest } from "next/server";
 
 export const GET = async (request: NextRequest, context: { params: Promise<{ id: string }> }) => {
@@ -8,7 +8,7 @@ export const GET = async (request: NextRequest, context: { params: Promise<{ id:
   return await handleAuthenticatedRequest({
     request,
     callback: async () => {
-      return await getAllActiveVehiclesController(id);
+      return await getAllActiveCouriersController(id);
     },
   });
 };

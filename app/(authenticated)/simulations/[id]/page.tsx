@@ -4,7 +4,7 @@ import SimulationsLayoutShell from "../_components/layout-shell";
 import { SimulationDetailLeftSidebar, SimulationDetailRightSidebar } from "./_components/sidebar";
 import { useBreadcrumb } from "@/app/_contexts/breadcrumb.context";
 import { useEffect } from "react";
-import { notFound, useParams, useSearchParams } from "next/navigation";
+import { notFound, useParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import Loading from "@/app/_components/loading";
 import { Route } from "next";
@@ -20,7 +20,7 @@ import {
   shouldHandleSimulationEvent,
 } from "@/lib/events";
 import { useQueryClient } from "@tanstack/react-query";
-import { useGetFinalRoutesQuery } from "./_hooks/use-queries";
+// import { useGetFinalRoutesQuery } from "./_hooks/use-queries";
 
 const Map = dynamic(() => import("./_components/map"), {
   loading: () => <Loading />,
@@ -29,11 +29,11 @@ const Map = dynamic(() => import("./_components/map"), {
 
 export default function SimulationDetailPage() {
   const { id: simulationId } = useParams<{ id: string }>();
-  const searchParams = useSearchParams();
-  const selectedVehicleId = searchParams.get("vehicleId") ?? undefined;
+  // const searchParams = useSearchParams();
+  // const selectedCourierId = searchParams.get("courierId") ?? undefined;
   const { setBreadcrumbs } = useBreadcrumb();
   const { data, isLoading, error } = useGetSimulationByIdQuery(simulationId);
-  const { data: finalRoutesData } = useGetFinalRoutesQuery(simulationId, Number(selectedVehicleId));
+  // const { data: finalRoutesData } = useGetFinalRoutesQuery(simulationId, Number(selectedCourierId));
   const queryClient = useQueryClient();
 
   if (isNotFoundError(error)) {
@@ -79,18 +79,17 @@ export default function SimulationDetailPage() {
     ]);
   }, [setBreadcrumbs, simulationId]);
 
-  const isShowEmptyState = !isLoading && data?.data.status === "failed";
+  const isShowEmptyState = !isLoading && data?.status === "failed";
+
+  useEffect(() => {
+    console.log("Simulation data:", data);
+  }, [data]);
 
   return (
     <Dialog>
       <SimulationsLayoutShell
-        leftSidebar={
-          <SimulationDetailLeftSidebar
-            hasUploadedCSV={!!data?.data.uploadId}
-            status={data?.data.status}
-          />
-        }
-        rightSidebar={<SimulationDetailRightSidebar data={data?.data} />}
+        leftSidebar={<SimulationDetailLeftSidebar status={data?.status} />}
+        rightSidebar={<SimulationDetailRightSidebar data={data} />}
         isLoading={isLoading}
       >
         {isShowEmptyState && (
@@ -102,12 +101,8 @@ export default function SimulationDetailPage() {
             </EmptyContent>
           </Empty>
         )}
-        {!isShowEmptyState && data?.data.depot && (
-          <Map
-            center={[data.data.depot.longitude, data.data.depot.latitude]}
-            zoom={18}
-            routes={finalRoutesData?.data}
-          />
+        {!isShowEmptyState && data?.depot && (
+          <Map center={[data.depot.longitude, data.depot.latitude]} zoom={18} />
         )}
       </SimulationsLayoutShell>
 

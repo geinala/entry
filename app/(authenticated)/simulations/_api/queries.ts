@@ -33,8 +33,11 @@ export const simulationQueries = {
   findById: (api: AxiosInstance, id?: string) => {
     return queryOptions({
       queryKey: SIMULATIONS_QUERY_KEYS.findById(id || ""),
-      queryFn: async (): Promise<TApiSuccessResponseWithData<TSimulationWithDepot>> => {
-        return await api.get(`/simulations/${id}`);
+      queryFn: async (): Promise<TSimulationWithDepot> => {
+        const response: AxiosResponse<TApiSuccessResponseWithData<TSimulationWithDepot>> =
+          await api.get(`/simulations/${id}`);
+
+        return response.data.data;
       },
       enabled: !!id,
     });

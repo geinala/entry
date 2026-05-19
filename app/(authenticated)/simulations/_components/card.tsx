@@ -72,7 +72,7 @@ const TotalTimeTravelCard = ({ content, footer }: DynamicCardProps) => (
   <StatisticsCard {...CARD_CONFIG.time} content={content} footer={footer} />
 );
 
-const TotalActiveVehiclesCard = ({ content, footer }: DynamicCardProps) => (
+const TotalActiveCouriersCard = ({ content, footer }: DynamicCardProps) => (
   <StatisticsCard {...CARD_CONFIG.vehicles} content={content} footer={footer} />
 );
 
@@ -80,4 +80,4 @@ const TotalCompletedNodesCard = ({ content, footer }: DynamicCardProps) => (
   <StatisticsCard {...CARD_CONFIG.nodes} content={content} footer={footer} />
 );
 
-export { TotalDistanceCard, TotalTimeTravelCard, TotalActiveVehiclesCard, TotalCompletedNodesCard };
+export { TotalDistanceCard, TotalTimeTravelCard, TotalActiveCouriersCard, TotalCompletedNodesCard };

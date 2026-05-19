@@ -1,18 +1,18 @@
-import { routeLegTable, solutionTable, vehicleRouteTable, vehicleTable } from "@/drizzle/schema";
+import { courierRouteTable, courierTable, routeLegTable, solutionTable } from "@/drizzle/schema";
 import { db } from "@/lib/db";
 import { sql } from "drizzle-orm";
 import { TLatestRouteBySimulationRow } from "@/types/database";
 
 export const getLatestRouteBySimulationIdRepository = async (
   simulationId: string,
-  vehicleId?: number,
+  courierId?: number,
 ): Promise<TLatestRouteBySimulationRow[]> => {
-  const vehicleFilter = vehicleId ? sql`AND vr.vehicle_id = ${vehicleId}` : sql``;
+  const courierFilter = courierId ? sql`AND vr.courier_id = ${courierId}` : sql``;
 
   const result = await db.execute(sql<TLatestRouteBySimulationRow>`
     SELECT 
       rl.id,
-      json_build_object('id', v.id, 'name', v.name) AS vehicle,
+      json_build_object('id', v.id, 'name', v.name) AS courier,
       vr.is_active,
       rl.origin_latitude,
       rl.origin_longitude,
@@ -33,14 +33,14 @@ export const getLatestRouteBySimulationIdRepository = async (
       rl.route_status
     FROM ${solutionTable} s
     JOIN (
-      SELECT DISTINCT ON (vr.solution_id, vr.vehicle_id) *
-      FROM ${vehicleRouteTable} vr
+      SELECT DISTINCT ON (vr.solution_id, vr.courier_id) *
+      FROM ${courierRouteTable} vr
       WHERE true
-      ${vehicleFilter}
-      ORDER BY vr.solution_id, vr.vehicle_id, vr.route_version DESC
+      ${courierFilter}
+      ORDER BY vr.solution_id, vr.courier_id, vr.route_version DESC
     ) vr ON s.id = vr.solution_id
-    JOIN ${vehicleTable} v ON vr.vehicle_id = v.id
-    JOIN ${routeLegTable} rl ON vr.id = rl.vehicle_route_id
+    JOIN ${courierTable} v ON vr.courier_id = v.id
+    JOIN ${routeLegTable} rl ON vr.id = rl.courier_route_id
     WHERE s.simulation_id = ${simulationId}
   `);
 

@@ -16,7 +16,7 @@ interface UseStepNavigationOptions {
 export function useStepNavigation(
   steps: StepItem[],
   initialStep?: string,
-  options?: UseStepNavigationOptions
+  options?: UseStepNavigationOptions,
 ) {
   // Jika persistKey ada, coba load dari localStorage
   const getInitialStep = (): string => {
@@ -40,12 +40,11 @@ export function useStepNavigation(
     (stepId: string) => {
       if (steps.some((s) => s.id === stepId)) {
         setCurrentStep(stepId);
-        options?.persistKey &&
-          localStorage.setItem(options.persistKey, stepId);
+        options?.persistKey && localStorage.setItem(options.persistKey, stepId);
         options?.onStepChange?.(stepId);
       }
     },
-    [steps, options]
+    [steps, options],
   );
 
   const goToNext = useCallback(() => {
@@ -67,7 +66,7 @@ export function useStepNavigation(
         updateStep(stepId);
       }
     },
-    [steps, updateStep]
+    [steps, updateStep],
   );
 
   const jumpToStep = useCallback(
@@ -76,7 +75,7 @@ export function useStepNavigation(
         updateStep(steps[stepIndex].id);
       }
     },
-    [steps, updateStep]
+    [steps, updateStep],
   );
 
   const reset = useCallback(() => {
@@ -123,7 +122,7 @@ interface UseStepWizardOptions extends UseStepNavigationOptions {
 export function useStepWizard(
   steps: StepItem[],
   initialStep?: string,
-  options?: UseStepWizardOptions
+  options?: UseStepWizardOptions,
 ) {
   const navigation = useStepNavigation(steps, initialStep, options);
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -155,15 +154,14 @@ export function useStepWizard(
         return true;
       } catch (error) {
         setErrors({
-          [navigation.currentStep]:
-            error instanceof Error ? error.message : "Validation failed",
+          [navigation.currentStep]: error instanceof Error ? error.message : "Validation failed",
         });
         return false;
       } finally {
         setIsValidating(false);
       }
     },
-    [navigation, options, isValidating, steps]
+    [navigation, options, isValidating, steps],
   );
 
   const safeGoToNext = useCallback(async () => {
@@ -183,12 +181,7 @@ export function useStepWizard(
     if (nextStepId) {
       await validateAndMove(nextStepId);
     }
-  }, [
-    navigation,
-    steps,
-    validateAndMove,
-    options,
-  ]);
+  }, [navigation, steps, validateAndMove, options]);
 
   const safeGoToPrevious = useCallback(() => {
     navigation.goToPrevious();
@@ -220,27 +213,27 @@ export function useStepWizard(
 /**
  * Hook untuk multi-step form dengan data persistence
  */
-export function useStepForm<T extends Record<string, any>>(
+export function useStepForm<T extends Record<string, unknown>>(
   steps: StepItem[],
   initialData?: Partial<T>,
-  persistKey?: string
+  persistKey?: string,
 ) {
   const navigation = useStepNavigation(steps, undefined, { persistKey });
   const [formData, setFormData] = useState<Partial<T>>(initialData || {});
 
-  const updateFormData = useCallback((data: Partial<T>) => {
-    setFormData((prev) => ({
-      ...prev,
-      ...data,
-    }));
+  const updateFormData = useCallback(
+    (data: Partial<T>) => {
+      setFormData((prev) => ({
+        ...prev,
+        ...data,
+      }));
 
-    if (persistKey) {
-      localStorage.setItem(
-        `${persistKey}-data`,
-        JSON.stringify({ ...formData, ...data })
-      );
-    }
-  }, [formData, persistKey]);
+      if (persistKey) {
+        localStorage.setItem(`${persistKey}-data`, JSON.stringify({ ...formData, ...data }));
+      }
+    },
+    [formData, persistKey],
+  );
 
   const resetForm = useCallback(() => {
     setFormData(initialData || {});

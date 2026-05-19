@@ -9,7 +9,13 @@ import { calculateOffset } from "@/lib/pagination";
 import { TGetUsersQueryParams } from "@/schemas/user.schema";
 
 export const findCurrentUserByClerkUserIdRepository = async (clerkUserId: string) => {
-  return await db.select().from(userTable).where(eq(userTable.userId, clerkUserId)).limit(1);
+  const [user] = await db
+    .select()
+    .from(userTable)
+    .where(eq(userTable.userId, clerkUserId))
+    .limit(1);
+
+  return user;
 };
 
 export const findUserWithRoleAndPermissionsRepository = async (clerkUserId: string) => {
