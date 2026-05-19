@@ -12,6 +12,7 @@ import {
   simulationJobTable,
   simulationJobFileValidationStatusEnum,
   simulationUploadedRows,
+  nodeDetailTable,
 } from "@/drizzle/schema";
 
 // User Types
@@ -50,6 +51,8 @@ export type TSimulationWithUploadedFile = TSimulation & {
 
 // Node Types
 export type TNode = InferSelectModel<typeof nodeTable>;
+export type TNewNode = InferInsertModel<typeof nodeTable>;
+export type TNewNodeDetail = InferInsertModel<typeof nodeDetailTable>;
 
 // Courier Types
 export type TCourier = InferSelectModel<typeof courierTable>;
@@ -132,6 +135,16 @@ export type TSimulationJobDatasetSummaryRow = {
 };
 
 export type TSimulationJobGeocodingSummaryRow = {
+  autoResolved: number;
+  manuallyCorrected: number;
+  ignored: number;
+};
+
+export type TSimulationJobCombinedSummaryRow = {
+  validOrders: number;
+  ignoredOrders: number;
+  courierCount: number;
+  estimatedTotalWeightKg: number;
   autoResolved: number;
   manuallyCorrected: number;
   ignored: number;
