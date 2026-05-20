@@ -13,6 +13,7 @@ import {
   simulationJobFileValidationStatusEnum,
   simulationUploadedRows,
   nodeDetailTable,
+  simulationLogTable,
 } from "@/drizzle/schema";
 
 // User Types
@@ -157,3 +158,6 @@ export type TSimulationJobAreaDistributionRow = {
   areaName: string;
   totalOrders: number;
 };
+
+export type TSimulationLog = InferSelectModel<typeof simulationLogTable>;
+export type TNewSimulationLog = InferInsertModel<typeof simulationLogTable>;
