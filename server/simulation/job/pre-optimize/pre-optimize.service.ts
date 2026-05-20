@@ -56,9 +56,14 @@ const buildAddressMap = (
     if (!address) continue;
 
     const courierName = row.courier?.toString().trim() ?? "";
-    const courierId = courierName ? courierNameToId.get(courierName) ?? null : null;
+    const courierId = courierName ? (courierNameToId.get(courierName) ?? null) : null;
 
-    const key = `${courierId ?? "null"}|||${address}|||${row.latitude ?? ""}|||${row.longitude ?? ""}`;
+    const lat = typeof row.latitude === "number" ? row.latitude : null;
+    const lon = typeof row.longitude === "number" ? row.longitude : null;
+    const key =
+      lat != null && lon != null
+        ? `${lat}|||${lon}|||${courierId ?? ""}`
+        : `${address}|||${courierId ?? ""}`;
     const weight = toNumber(row.weight);
     const detail = {
       name: row.customerName ?? "",
@@ -68,9 +73,13 @@ const buildAddressMap = (
     };
 
     const entry = map.get(key);
+
     if (entry) {
       entry.demand += weight;
       entry.details.push(detail);
+      if (entry.courierId !== courierId) {
+        entry.courierId = null;
+      }
     } else {
       map.set(key, {
         matrixIndex: map.size + 1,
@@ -111,7 +120,7 @@ export const preOptimizeService = async (
 
   // insert couriers first so we can map courier name -> id
   const insertedCouriers = couriers.length
-    ? (await insertAllCouriersFromUploadedRowsRepository(couriers))
+    ? await insertAllCouriersFromUploadedRowsRepository(couriers)
     : [];
 
   const courierNameToId = new Map<string, number>();
@@ -141,7 +150,9 @@ export const preOptimizeService = async (
     })),
   ];
 
-  const insertedNodeRows = nodes.length ? await insertAllNodesFromUploadedRowsRepository(nodes) : [];
+  const insertedNodeRows = nodes.length
+    ? await insertAllNodesFromUploadedRowsRepository(nodes)
+    : [];
 
   if (insertedNodeRows?.length) {
     const indexToNodeId = new Map<number, number>(
