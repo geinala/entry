@@ -65,12 +65,13 @@ const Map = ({ center, zoom, routes = [] }: MapProps) => {
           opacity={0.9}
         />
       ))}
-      {routeNodes.map((node, idx) => {
-        const isDepot = isNodeAtDepot(node, center);
-        const nodeStyle = getRouteNodeStyle(node.visitState);
+      {(() => {
+        const visibleNodes = routeNodes.filter((n) => !isNodeAtDepot(n, center));
 
-        return (
-          !isDepot && (
+        return visibleNodes.map((node, idx) => {
+          const nodeStyle = getRouteNodeStyle(node.visitState);
+
+          return (
             <Marker
               key={`node-${idx}`}
               lng={node.lng}
@@ -93,9 +94,9 @@ const Map = ({ center, zoom, routes = [] }: MapProps) => {
                 boxShadow: "0 2px 6px rgba(0, 0, 0, 0.25)",
               }}
             />
-          )
-        );
-      })}
+          );
+        });
+      })()}
     </TomTomMap>
   );
 };

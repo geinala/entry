@@ -2,7 +2,6 @@
 
 import { GuardComponent } from "@/app/_components/guard";
 import { Button } from "@/app/_components/ui/button";
-import { DialogTrigger } from "@/app/_components/ui/dialog";
 import {
   Sidebar,
   SidebarContent,
@@ -17,24 +16,44 @@ import { Search } from "@/app/_components/data-table/search";
 import { FilterTable } from "@/app/_components/data-table/filter";
 import { TFilterItem } from "@/app/_components/data-table/filter-collections/factory";
 import { simulationStatusEnum } from "@/drizzle/schema";
-import { toTitleCase } from "@/lib/utils";
-import { useGetDraftSimulationJobQuery } from "../_hooks/use-queries";
+import { convertUtcToLocalTime, toTitleCase, truncateText } from "@/lib/utils";
+import {
+  useGetDraftSimulationJobQuery,
+  useGetInfiniteSimulationsQuery,
+} from "../_hooks/use-queries";
 import Link from "next/link";
+import { InfinityScroll } from "@/app/_components/infinity-scroll";
+import { Paragraph } from "@/app/_components/typography";
+import { TSimulation, TSimulationStatus } from "@/types/database";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardTitle,
+} from "@/app/_components/ui/card";
+import { Badge } from "@/app/_components/ui/badge";
+import { Calendar } from "@/app/_components/ui/calendar";
+import { useEffect } from "react";
 
 interface ISimulationHistorySidebar {
   onSelectSimulation: (simulationId: string) => void;
 }
 
 export const SimulationHistorySidebar = ({ onSelectSimulation }: ISimulationHistorySidebar) => {
-  const { data, isLoading } = useGetDraftSimulationJobQuery();
   const { pagination, filters, search, handleChange } = useFilters(IndexSimulationQueryParams);
 
-  // const { data, hasNextPage, isFetchingNextPage, fetchNextPage } = useGetInfiniteSimulationsQuery({
-  //   ...pagination,
-  //   search: filters.search,
-  //   sort: filters.sort,
-  //   status: filters.status,
-  // });
+  const {
+    data: simulationsData,
+    hasNextPage,
+    isFetchingNextPage,
+    fetchNextPage,
+  } = useGetInfiniteSimulationsQuery({
+    ...pagination,
+    search: filters.search,
+    sort: filters.sort,
+    status: filters.status,
+  });
 
   const filterComponents: TFilterItem[] = [
     {
@@ -73,13 +92,13 @@ export const SimulationHistorySidebar = ({ onSelectSimulation }: ISimulationHist
         </div>
       </SidebarHeader>
       <SidebarContent className="px-3 flex-1 min-h-0 overflow-hidden">
-        {/* {data?.length === 0 ? (
+        {simulationsData?.length === 0 ? (
           <div className="flex justify-center items-center h-full">
             <Paragraph className="text-muted-foreground">No simulations found</Paragraph>
           </div>
         ) : (
           <div className="overflow-y-auto h-full space-y-4 scrollbar-thin">
-            {data?.map((page) => (
+            {simulationsData?.map((page) => (
               <SimulationCard {...page} key={page.id} onSelectSimulation={onSelectSimulation} />
             ))}
             <InfinityScroll
@@ -88,7 +107,7 @@ export const SimulationHistorySidebar = ({ onSelectSimulation }: ISimulationHist
               hasMore={hasNextPage}
             />
           </div>
-        )} */}
+        )}
       </SidebarContent>
       <SidebarFooter>
         <GuardComponent requirePermission={PERMISSIONS.CREATE_SIMULATION}>
@@ -103,42 +122,41 @@ export const SimulationHistorySidebar = ({ onSelectSimulation }: ISimulationHist
   );
 };
 
-// const STATUS_CONFIG = {
-//   pending: { color: "bg-amber-100 text-amber-800", label: "Pending" },
-//   processing: { color: "bg-yellow-100 text-yellow-800", label: "Processing" },
-//   running: { color: "bg-blue-100 text-blue-800", label: "Running" },
-//   completed: { color: "bg-green-100 text-green-800", label: "Completed" },
-//   failed: { color: "bg-red-100 text-red-800", label: "Failed" },
-// } as const satisfies Record<TSimulationStatus, { color: string; label: string }>;
+const STATUS_CONFIG = {
+  optimizing: { color: "bg-yellow-100 text-yellow-800", label: "Optimizing" },
+  running: { color: "bg-blue-100 text-blue-800", label: "Running" },
+  completed: { color: "bg-green-100 text-green-800", label: "Completed" },
+  failed: { color: "bg-red-100 text-red-800", label: "Failed" },
+} as const satisfies Record<TSimulationStatus, { color: string; label: string }>;
 
-// const SimulationCard = (
-//   data: TSimulation & { onSelectSimulation: (simulationId: string) => void },
-// ) => {
-//   return (
-//     <Card
-//       className="gap-3 shadow-none relative overflow-hidden cursor-pointer active:scale-[0.98] transition-transform select-none hover:brightness-95"
-//       onClick={() => data.onSelectSimulation(data.id)}
-//     >
-//       <div className="h-fit w-full flex justify-center items-center absolute top-0 left-0">
-//         <div className="bg-primary w-full h-[2.8px] rounded-full" />
-//       </div>
-//       <CardContent className="px-4">
-//         <div className="w-full flex justify-between items-center">
-//           <CardTitle className="text-primary text-md">{truncateText(data.id, 15)}</CardTitle>
-//           <Badge variant={"success"} className={STATUS_CONFIG[data.status].color}>
-//             {STATUS_CONFIG[data.status].label}
-//           </Badge>
-//         </div>
-//         <CardTitle>{truncateText(data.title, 30)}</CardTitle>
-//       </CardContent>
-//       <CardFooter className="px-4">
-//         <CardDescription className="flex gap-2 justify-center items-center">
-//           <Calendar className="w-4 h-4 bg-slate-100" />{" "}
-//           <Paragraph>
-//             {`${convertUtcToLocalTime({ utcDateStr: data.createdAt.toString(), format: "PPpp" })}`}
-//           </Paragraph>
-//         </CardDescription>
-//       </CardFooter>
-//     </Card>
-//   );
-// };
+const SimulationCard = (
+  data: TSimulation & { onSelectSimulation: (simulationId: string) => void },
+) => {
+  return (
+    <Card
+      className="gap-3 shadow-none relative overflow-hidden cursor-pointer active:scale-[0.98] transition-transform select-none hover:brightness-95"
+      onClick={() => data.onSelectSimulation(data.id)}
+    >
+      <div className="h-fit w-full flex justify-center items-center absolute top-0 left-0">
+        <div className="bg-primary w-full h-[2.8px] rounded-full" />
+      </div>
+      <CardContent className="px-4">
+        <div className="w-full flex justify-between items-center">
+          <CardTitle className="text-primary text-md">{truncateText(data.id, 15)}</CardTitle>
+          <Badge variant={"success"} className={STATUS_CONFIG[data.status].color}>
+            {STATUS_CONFIG[data.status].label}
+          </Badge>
+        </div>
+        <CardTitle>{truncateText(data.title, 30)}</CardTitle>
+      </CardContent>
+      <CardFooter className="px-4">
+        <CardDescription className="flex gap-2 justify-center items-center">
+          <Calendar className="w-4 h-4 bg-slate-100" />{" "}
+          <Paragraph>
+            {`${convertUtcToLocalTime({ utcDateStr: data.createdAt.toString(), format: "PPpp" })}`}
+          </Paragraph>
+        </CardDescription>
+      </CardFooter>
+    </Card>
+  );
+};

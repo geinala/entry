@@ -26,7 +26,7 @@ export const CourierSelect = ({ totalActiveCouriers }: Props) => {
 
   const selectedCourierId = searchParams.get("courierId") ?? "all";
 
-  const isDisabledSelect = isLoading || !Array.isArray(data?.data) || data.data.length === 0;
+  const isDisabledSelect = isLoading || !Array.isArray(data) || data.length === 0;
 
   const handleCourierChange = (courierId: string) => {
     updateQueryParam(searchParams, pathname, router, {
@@ -56,9 +56,9 @@ export const CourierSelect = ({ totalActiveCouriers }: Props) => {
         </SelectTrigger>
         <SelectContent position="popper">
           <SelectItem value="all">All couriers</SelectItem>
-          {data?.data &&
-            data.data.length > 0 &&
-            data.data.map((courier) => (
+          {data &&
+            data.length > 0 &&
+            data.map((courier) => (
               <SelectItem key={courier.id} value={courier.id.toString()}>
                 {courier.name}
               </SelectItem>

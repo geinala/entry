@@ -33,10 +33,13 @@ type AddressEntry = {
   latitude: number | null;
   longitude: number | null;
   demand: number;
+  courierId: number | null;
   details: { name: string; address: string; city: string; weight: number }[];
 };
-
-const buildAddressMap = (rows: TSimulationUploadedRow[]): Map<string, AddressEntry> => {
+const buildAddressMap = (
+  rows: TSimulationUploadedRow[],
+  courierNameToId: Map<string, number>,
+): Map<string, AddressEntry> => {
   const map = new Map<string, AddressEntry>();
 
   for (const row of rows) {
@@ -52,7 +55,10 @@ const buildAddressMap = (rows: TSimulationUploadedRow[]): Map<string, AddressEnt
 
     if (!address) continue;
 
-    const key = `${address}|||${row.latitude ?? ""}|||${row.longitude ?? ""}`;
+    const courierName = row.courier?.toString().trim() ?? "";
+    const courierId = courierName ? courierNameToId.get(courierName) ?? null : null;
+
+    const key = `${courierId ?? "null"}|||${address}|||${row.latitude ?? ""}|||${row.longitude ?? ""}`;
     const weight = toNumber(row.weight);
     const detail = {
       name: row.customerName ?? "",
@@ -71,6 +77,7 @@ const buildAddressMap = (rows: TSimulationUploadedRow[]): Map<string, AddressEnt
         latitude: typeof row.latitude === "number" ? row.latitude : null,
         longitude: typeof row.longitude === "number" ? row.longitude : null,
         demand: weight,
+        courierId,
         details: [detail],
       });
     }
@@ -102,13 +109,24 @@ export const preOptimizeService = async (
     isActive: true,
   }));
 
-  const addressMap = buildAddressMap(uploadedRows);
+  // insert couriers first so we can map courier name -> id
+  const insertedCouriers = couriers.length
+    ? (await insertAllCouriersFromUploadedRowsRepository(couriers))
+    : [];
+
+  const courierNameToId = new Map<string, number>();
+  for (const c of insertedCouriers as { id: number; name: string }[]) {
+    courierNameToId.set(c.name.toString().trim(), c.id);
+  }
+
+  const addressMap = buildAddressMap(uploadedRows, courierNameToId);
   const entries = Array.from(addressMap.values());
 
   const nodes: TNewNode[] = [
     {
       simulationId,
       matrixIndex: 0,
+      courierId: null,
       latitude: job.depotLocationLatitude,
       longitude: job.depotLocationLongitude,
       demand: 0,
@@ -116,16 +134,14 @@ export const preOptimizeService = async (
     ...entries.map((v) => ({
       simulationId,
       matrixIndex: v.matrixIndex,
+      courierId: v.courierId ?? null,
       latitude: v.latitude ?? 0,
       longitude: v.longitude ?? 0,
       demand: v.demand,
     })),
   ];
 
-  const [, insertedNodeRows] = await Promise.all([
-    couriers.length ? insertAllCouriersFromUploadedRowsRepository(couriers) : Promise.resolve(),
-    nodes.length ? insertAllNodesFromUploadedRowsRepository(nodes) : Promise.resolve([]),
-  ]);
+  const insertedNodeRows = nodes.length ? await insertAllNodesFromUploadedRowsRepository(nodes) : [];
 
   if (insertedNodeRows?.length) {
     const indexToNodeId = new Map<number, number>(

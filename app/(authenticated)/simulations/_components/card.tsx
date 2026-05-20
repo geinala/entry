@@ -46,13 +46,13 @@ const CARD_CONFIG = {
     ),
     title: "Total Time Travel",
   },
-  vehicles: {
+  couriers: {
     icon: (
       <ItemMedia variant={"icon"} className="bg-purple-100 border-0">
         <Truck className="text-purple-500" />
       </ItemMedia>
     ),
-    title: "Total Active Vehicles",
+    title: "Total Active Couriers",
   },
   nodes: {
     icon: (
@@ -73,7 +73,7 @@ const TotalTimeTravelCard = ({ content, footer }: DynamicCardProps) => (
 );
 
 const TotalActiveCouriersCard = ({ content, footer }: DynamicCardProps) => (
-  <StatisticsCard {...CARD_CONFIG.vehicles} content={content} footer={footer} />
+  <StatisticsCard {...CARD_CONFIG.couriers} content={content} footer={footer} />
 );
 
 const TotalCompletedNodesCard = ({ content, footer }: DynamicCardProps) => (

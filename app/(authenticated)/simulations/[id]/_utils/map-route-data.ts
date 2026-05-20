@@ -4,15 +4,15 @@ import { MapCoordinate } from "./map-animation";
 
 export type DecodedRoute = {
   id: string;
-  vehicleId: string;
+  courierId: string;
   sequence: number;
   travelTimeMs: number;
   routeStatus: TLatestRouteBySimulationRow["route_status"];
   coordinates: MapCoordinate[];
 };
 
-export type VehicleTrack = {
-  vehicleId: string;
+export type CourierTrack = {
+  courierId: string;
   legs: DecodedRoute[];
 };
 
@@ -89,7 +89,7 @@ export const decodeRoutes = (routes: TLatestRouteBySimulationRow[]): DecodedRout
 
       return {
         id: String(route.id),
-        vehicleId: String(route.vehicle.id),
+        courierId: String(route.courier.id),
         sequence: route.sequence,
         travelTimeMs: route.travel_time_in_seconds * 1000,
         routeStatus: route.route_status,
@@ -126,22 +126,22 @@ export const sortRoutesByDisplayPriority = (routes: DecodedRoute[]): DecodedRout
   });
 };
 
-export const buildVehicleTracks = (decodedRoutes: DecodedRoute[]): VehicleTrack[] => {
+export const buildCourierTracks = (decodedRoutes: DecodedRoute[]): CourierTrack[] => {
   const groupedTracks = new globalThis.Map<string, DecodedRoute[]>();
 
   decodedRoutes.forEach((route) => {
-    const track = groupedTracks.get(route.vehicleId);
+    const track = groupedTracks.get(route.courierId);
 
     if (track) {
       track.push(route);
       return;
     }
 
-    groupedTracks.set(route.vehicleId, [route]);
+    groupedTracks.set(route.courierId, [route]);
   });
 
-  return Array.from(groupedTracks.entries()).map(([vehicleId, legs]) => ({
-    vehicleId,
+  return Array.from(groupedTracks.entries()).map(([courierId, legs]) => ({
+    courierId,
     legs: legs.sort((left, right) => left.sequence - right.sequence),
   }));
 };
@@ -194,28 +194,69 @@ export const buildRouteNodes = (routes: TLatestRouteBySimulationRow[]): RouteNod
     });
   };
 
-  routes.forEach((route) => {
-    const originKey = `${route.origin_latitude},${route.origin_longitude}`;
-    const destinationKey = `${route.destination_latitude},${route.destination_longitude}`;
+  const groupedByCourier = new globalThis.Map<number, TLatestRouteBySimulationRow[]>();
 
-    upsertNode({
-      key: originKey,
-      lat: route.origin_latitude,
-      lng: route.origin_longitude,
-      sequence: route.sequence,
-      isOrigin: true,
-      isDestination: false,
-      visitState: getNodeVisitState(route.route_status, true),
-    });
+  routes.forEach((r) => {
+    const cid = r.courier?.id ?? 0;
+    const arr = groupedByCourier.get(cid) ?? [];
+    arr.push(r);
+    groupedByCourier.set(cid, arr);
+  });
 
-    upsertNode({
-      key: destinationKey,
-      lat: route.destination_latitude,
-      lng: route.destination_longitude,
-      sequence: route.sequence + 1,
-      isOrigin: false,
-      isDestination: true,
-      visitState: getNodeVisitState(route.route_status, false),
+  groupedByCourier.forEach((legs) => {
+    legs.sort((a, b) => (a.sequence ?? 0) - (b.sequence ?? 0));
+
+    legs.forEach((route) => {
+      const originKey = `${route.origin_latitude},${route.origin_longitude}`;
+      const destinationKey = `${route.destination_latitude},${route.destination_longitude}`;
+
+      // Use DB-provided sequence values (origin => route.sequence, destination => route.sequence + 1)
+      const originSeq = route.sequence ?? 0;
+      const destinationSeq = (route.sequence ?? 0) + 1;
+
+      if (!nodesByKey.has(originKey)) {
+        upsertNode({
+          key: originKey,
+          lat: route.origin_latitude,
+          lng: route.origin_longitude,
+          sequence: originSeq,
+          isOrigin: true,
+          isDestination: false,
+          visitState: getNodeVisitState(route.route_status, true),
+        });
+      } else {
+        upsertNode({
+          key: originKey,
+          lat: route.origin_latitude,
+          lng: route.origin_longitude,
+          sequence: nodesByKey.get(originKey)!.sequence,
+          isOrigin: true,
+          isDestination: false,
+          visitState: getNodeVisitState(route.route_status, true),
+        });
+      }
+
+      if (!nodesByKey.has(destinationKey)) {
+        upsertNode({
+          key: destinationKey,
+          lat: route.destination_latitude,
+          lng: route.destination_longitude,
+          sequence: destinationSeq,
+          isOrigin: false,
+          isDestination: true,
+          visitState: getNodeVisitState(route.route_status, false),
+        });
+      } else {
+        upsertNode({
+          key: destinationKey,
+          lat: route.destination_latitude,
+          lng: route.destination_longitude,
+          sequence: nodesByKey.get(destinationKey)!.sequence,
+          isOrigin: false,
+          isDestination: true,
+          visitState: getNodeVisitState(route.route_status, false),
+        });
+      }
     });
   });
 

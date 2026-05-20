@@ -1,9 +1,8 @@
-import { AxiosResponse } from "axios";
+import { TSimulation } from "@/types/database";
+import { TPaginationResponse } from "@/types/meta";
 
-export const getNextPage = <T extends AxiosResponse>(lastPage: T) => {
-  const data = lastPage.data;
-
-  const { meta } = data;
+export const getNextPage = <T extends TPaginationResponse<TSimulation>>(lastPage: T) => {
+  const { meta } = lastPage;
 
   if (!meta) return undefined;
 

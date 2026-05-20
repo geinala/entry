@@ -2,8 +2,9 @@
 
 import { getNextPage } from "@/lib/infinite-scroll";
 import { TIndexSimulationQueryParams } from "@/schemas/simulation.schema";
-import { TSimulationJob, TSimulationWithDepot } from "@/types/database";
-import { TApiSuccessResponseWithData } from "@/types/response";
+import { TSimulation, TSimulationJob, TSimulationWithDepot } from "@/types/database";
+import { TPaginationResponse } from "@/types/meta";
+import { TApiSuccessResponseWithData, TApiSuccessResponseWithPagination } from "@/types/response";
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import { AxiosInstance, AxiosResponse } from "axios";
 
@@ -16,18 +17,21 @@ export const simulationQueries = {
   list: (api: AxiosInstance, queryParams: TIndexSimulationQueryParams) => {
     return infiniteQueryOptions({
       queryKey: [...SIMULATIONS_QUERY_KEYS.all, queryParams],
-      queryFn: async ({ pageParam }) => {
+      queryFn: async ({ pageParam }): Promise<TPaginationResponse<TSimulation>> => {
         const params = {
           ...queryParams,
           page: pageParam?.page || queryParams.page,
           pageSize: pageParam?.pageSize || queryParams.pageSize,
         };
 
-        return await api.get("/simulations", { params });
+        const response: AxiosResponse<TApiSuccessResponseWithPagination<TSimulation>> =
+          await api.get("/simulations", { params });
+
+        return response.data.data;
       },
       initialPageParam: { page: queryParams.page, pageSize: queryParams.pageSize },
       getNextPageParam: (lastPage) => getNextPage(lastPage),
-      select: (data) => data.pages.flatMap((page) => page.data.data),
+      select: (data) => data.pages.flatMap((page) => page.data),
     });
   },
   findById: (api: AxiosInstance, id?: string) => {
