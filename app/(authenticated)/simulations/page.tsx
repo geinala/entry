@@ -75,7 +75,7 @@ export default function HistoryPage() {
             </div>
           }
         >
-          <main className="flex flex-col gap-4">
+          <main className="flex flex-col gap-4 w-full h-full">
             <section className="flex gap-3 w-full">
               <TotalDistanceCard
                 content={
@@ -138,8 +138,8 @@ export default function HistoryPage() {
                 }
               />
             </section>
-            <section>
-              <LogTable />
+            <section className="w-full h-full overflow-x-auto">
+              <LogTable simulationId={selectedSimulationId} />
             </section>
           </main>
         </Page>

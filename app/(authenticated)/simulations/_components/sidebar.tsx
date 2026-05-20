@@ -9,7 +9,7 @@ import {
   SidebarHeader,
 } from "@/app/_components/ui/sidebar";
 import { PERMISSIONS } from "@/common/constants/permissions/permissions";
-import { ListFilter, Plus } from "lucide-react";
+import { Calendar, ListFilter, Plus } from "lucide-react";
 import { useFilters } from "@/app/_hooks/use-filters";
 import { IndexSimulationQueryParams } from "@/schemas/simulation.schema";
 import { Search } from "@/app/_components/data-table/search";
@@ -17,10 +17,7 @@ import { FilterTable } from "@/app/_components/data-table/filter";
 import { TFilterItem } from "@/app/_components/data-table/filter-collections/factory";
 import { simulationStatusEnum } from "@/drizzle/schema";
 import { convertUtcToLocalTime, toTitleCase, truncateText } from "@/lib/utils";
-import {
-  useGetDraftSimulationJobQuery,
-  useGetInfiniteSimulationsQuery,
-} from "../_hooks/use-queries";
+import { useGetInfiniteSimulationsQuery } from "../_hooks/use-queries";
 import Link from "next/link";
 import { InfinityScroll } from "@/app/_components/infinity-scroll";
 import { Paragraph } from "@/app/_components/typography";
@@ -33,8 +30,6 @@ import {
   CardTitle,
 } from "@/app/_components/ui/card";
 import { Badge } from "@/app/_components/ui/badge";
-import { Calendar } from "@/app/_components/ui/calendar";
-import { useEffect } from "react";
 
 interface ISimulationHistorySidebar {
   onSelectSimulation: (simulationId: string) => void;
@@ -151,7 +146,7 @@ const SimulationCard = (
       </CardContent>
       <CardFooter className="px-4">
         <CardDescription className="flex gap-2 justify-center items-center">
-          <Calendar className="w-4 h-4 bg-slate-100" />{" "}
+          <Calendar className="w-4 h-4 bg-slate-100" />
           <Paragraph>
             {`${convertUtcToLocalTime({ utcDateStr: data.createdAt.toString(), format: "PPpp" })}`}
           </Paragraph>

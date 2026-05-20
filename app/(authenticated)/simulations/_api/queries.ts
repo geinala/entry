@@ -2,8 +2,14 @@
 
 import { getNextPage } from "@/lib/infinite-scroll";
 import { TIndexSimulationQueryParams } from "@/schemas/simulation.schema";
-import { TSimulation, TSimulationJob, TSimulationWithDepot } from "@/types/database";
+import {
+  TSimulation,
+  TSimulationJob,
+  TSimulationLog,
+  TSimulationWithDepot,
+} from "@/types/database";
 import { TPaginationResponse } from "@/types/meta";
+import { TIndexQueryParams } from "@/types/query-params";
 import { TApiSuccessResponseWithData, TApiSuccessResponseWithPagination } from "@/types/response";
 import { infiniteQueryOptions, queryOptions } from "@tanstack/react-query";
 import { AxiosInstance, AxiosResponse } from "axios";
@@ -70,6 +76,18 @@ export const simulationQueries = {
         return false; // Stop polling in other cases (validation completed/failed, cleaning in progress, geocoding not started/in progress)
       },
       refetchIntervalInBackground: true,
+    });
+  },
+  getLogs: (api: AxiosInstance, simulationId?: string, queryParams?: TIndexQueryParams) => {
+    return queryOptions({
+      queryKey: ["simulations", simulationId, "logs", queryParams] as const,
+      queryFn: async (): Promise<TPaginationResponse<TSimulationLog>> => {
+        const response: AxiosResponse<TApiSuccessResponseWithPagination<TSimulationLog>> =
+          await api.get(`/simulations/${simulationId}/logs`, { params: queryParams });
+
+        return response.data.data;
+      },
+      enabled: !!simulationId,
     });
   },
 };
