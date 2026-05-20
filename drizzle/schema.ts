@@ -304,6 +304,7 @@ export const nodeTable = pgTable(
   {
     id: serial().primaryKey(),
     simulationId: uuid("simulation_id").references(() => simulationTable.id),
+    courierId: integer("courier_id").references(() => courierTable.id),
     matrixIndex: integer("matrix_index").notNull(),
     latitude: doublePrecision("latitude").notNull(),
     longitude: doublePrecision("longitude").notNull(),
@@ -314,6 +315,11 @@ export const nodeTable = pgTable(
       columns: [table.simulationId],
       foreignColumns: [simulationTable.id],
       name: "nodes_simulation_id_simulations_id_fk",
+    }),
+    foreignKey({
+      columns: [table.courierId],
+      foreignColumns: [courierTable.id],
+      name: "nodes_courier_id_couriers_id_fk",
     }),
     index("nodes_simulation_id_idx").on(table.simulationId),
   ],

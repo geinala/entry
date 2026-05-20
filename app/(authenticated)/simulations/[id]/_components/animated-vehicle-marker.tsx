@@ -3,11 +3,11 @@
 import { useEffect } from "react";
 import maplibregl from "maplibre-gl";
 import { useMap } from "@/app/_components/map/context";
-import { VehicleTrack } from "../_utils/map-route-data";
+import { CourierTrack } from "../_utils/map-route-data";
 import { interpolatePath } from "../_utils/map-animation";
 
 interface AnimatedVehicleMarkerProps {
-  track: VehicleTrack;
+  track: CourierTrack;
 }
 
 const VEHICLE_MARKER_SIZE = "36px";

@@ -1,6 +1,6 @@
 import { QueryClient } from "@tanstack/react-query";
-import { SIMULATION_DETAIL_QUERY_KEYS } from "@/app/(authenticated)/simulations/[id]/_api/queries";
 import { SIMULATIONS_QUERY_KEYS } from "@/app/(authenticated)/simulations/_api/queries";
+import { SIMULATION_DETAIL_QUERY_KEYS } from "@/app/(authenticated)/simulations/[id]/_api/queries";
 
 type TEventPayload = Record<string, unknown> | string | null;
 
@@ -8,16 +8,11 @@ const isSimulationEventPayload = (
   payload: TEventPayload,
 ): payload is Record<string, unknown> & { simulationId: string } => {
   return (
-    typeof payload === "object" &&
-    payload !== null &&
-    typeof payload.simulationId === "string"
+    typeof payload === "object" && payload !== null && typeof payload.simulationId === "string"
   );
 };
 
-export const shouldHandleSimulationEvent = (
-  payload: TEventPayload,
-  simulationId: string,
-) => {
+export const shouldHandleSimulationEvent = (payload: TEventPayload, simulationId: string) => {
   if (!isSimulationEventPayload(payload)) {
     return false;
   }

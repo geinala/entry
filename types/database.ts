@@ -70,7 +70,7 @@ export type TRouteCourierSummary = {
 
 export type TLatestRouteBySimulationRow = {
   id: TRouteLeg["id"];
-  vehicle: TRouteCourierSummary;
+  courier: TRouteCourierSummary;
   is_active: TCourierRoute["isActive"];
   origin_latitude: TNode["latitude"];
   origin_longitude: TNode["longitude"];

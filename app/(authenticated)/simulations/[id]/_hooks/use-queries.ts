@@ -10,8 +10,8 @@ export const useGetAllActiveCouriersQuery = (simulationId?: string) => {
   return useQuery(simulationDetailQueries.getAllActiveCouriers(api, simulationId));
 };
 
-export const useGetFinalRoutesQuery = (simulationId?: string, vehicleId?: number) => {
+export const useGetFinalRoutesQuery = (simulationId?: string, courierId?: number) => {
   const api = useAuthenticatedClient();
 
-  return useQuery(simulationDetailQueries.getFinalRoutes(api, simulationId, vehicleId));
+  return useQuery(simulationDetailQueries.getFinalRoutes(api, simulationId, courierId));
 };

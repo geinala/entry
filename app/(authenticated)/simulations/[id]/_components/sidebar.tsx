@@ -11,6 +11,7 @@ import { Paragraph, Title } from "@/app/_components/typography";
 import { SimulationStatusItem, StatisticsItem } from "./item";
 import { TSimulation, TSimulationStatus } from "@/types/database";
 import { formatSeconds, metersToKm } from "@/lib/utils";
+import { CourierSelect } from "./courier.select";
 
 interface SimulationDetailSidebarLeftProps {
   status?: TSimulationStatus;
@@ -39,7 +40,7 @@ export const SimulationDetailRightSidebar = ({ data }: RightSidebarProps) => {
       </SidebarHeader>
       <SidebarSeparator className="m-0" />
       <SidebarContent>
-        {/* <VehicleSelect totalActiveVehicles={data?.totalActiveVehicles} /> */}
+        <CourierSelect totalActiveCouriers={data?.totalActiveCouriers} />
         <div className="flex flex-col px-3 gap-2 pt-2">
           <Title level={6}>Overall Statistics</Title>
           <div className="grid grid-cols-2 gap-2">

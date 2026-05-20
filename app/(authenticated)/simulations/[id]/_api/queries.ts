@@ -3,7 +3,7 @@
 import { TCourier, TLatestRouteBySimulationRow } from "@/types/database";
 import { TApiSuccessResponseWithData } from "@/types/response";
 import { queryOptions } from "@tanstack/react-query";
-import { AxiosInstance } from "axios";
+import { AxiosInstance, AxiosResponse } from "axios";
 
 export const SIMULATION_DETAIL_QUERY_KEYS = {
   findFileWithSimulationId: (simulationId: string) => ["simulation-file", simulationId] as const,
@@ -16,19 +16,26 @@ export const simulationDetailQueries = {
   getAllActiveCouriers: (api: AxiosInstance, simulationId?: string) => {
     return queryOptions({
       queryKey: SIMULATION_DETAIL_QUERY_KEYS.getAllActiveVehicles(simulationId),
-      queryFn: async (): Promise<TApiSuccessResponseWithData<TCourier[]>> => {
-        return await api.get(`/simulations/${simulationId}/couriers`);
+      queryFn: async (): Promise<TCourier[]> => {
+        const response: AxiosResponse<TApiSuccessResponseWithData<TCourier[]>> = await api.get(
+          `/simulations/${simulationId}/couriers`,
+        );
+
+        return response.data.data;
       },
       enabled: !!simulationId,
     });
   },
-  getFinalRoutes: (api: AxiosInstance, simulationId?: string, vehicleId?: number) => {
+  getFinalRoutes: (api: AxiosInstance, simulationId?: string, courierId?: number) => {
     return queryOptions({
-      queryKey: SIMULATION_DETAIL_QUERY_KEYS.getFinalRoutes(simulationId, vehicleId),
-      queryFn: async (): Promise<TApiSuccessResponseWithData<TLatestRouteBySimulationRow[]>> => {
-        return await api.get(`/simulations/${simulationId}/routes`, {
-          params: vehicleId ? { vehicleId } : undefined,
-        });
+      queryKey: SIMULATION_DETAIL_QUERY_KEYS.getFinalRoutes(simulationId, courierId),
+      queryFn: async (): Promise<TLatestRouteBySimulationRow[]> => {
+        const response: AxiosResponse<TApiSuccessResponseWithData<TLatestRouteBySimulationRow[]>> =
+          await api.get(`/simulations/${simulationId}/routes`, {
+            params: courierId ? { courierId } : undefined,
+          });
+
+        return response.data.data;
       },
       enabled: !!simulationId,
     });

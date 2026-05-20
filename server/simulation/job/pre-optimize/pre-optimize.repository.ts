@@ -18,7 +18,7 @@ import {
 import { and, eq, sql } from "drizzle-orm";
 
 export const insertAllCouriersFromUploadedRowsRepository = async (couriers: TNewCourier[]) => {
-  return await db.insert(courierTable).values(couriers);
+  return await db.insert(courierTable).values(couriers).returning();
 };
 
 export const getAllUploadedRowsRepository = async (jobId: string) => {
