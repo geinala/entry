@@ -540,3 +540,75 @@ export const routeLegTable = pgTable(
     index("route_legs_sequence_idx").on(table.sequence),
   ],
 );
+
+export const optimizationRunTable = pgTable(
+  "optimization_runs",
+  {
+    id: serial().primaryKey(),
+    simulationId: uuid("simulation_id").references(() => simulationTable.id),
+    courierRouteId: integer("courier_route_id").references(() => courierRouteTable.id),
+    runType: varchar("run_type").notNull(), // e.g., "initial", "reoptimization", etc.
+    algorithm: varchar("algorithm").notNull(), // e.g., "OR-Tools", "Genetic Algorithm", etc.
+    triggerType: varchar("trigger_type").notNull(), // e.g., "initial", "periodic", "traffic_update", etc.
+    totalDistanceInMeters: integer("total_distance_in_meters").notNull(),
+    totalTravelTimeInSeconds: integer("total_travel_time_in_seconds").notNull(),
+    computationTimeInMs: real("computation_time_in_ms").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.simulationId],
+      foreignColumns: [simulationTable.id],
+      name: "optimization_runs_simulation_id_simulations_id_fk",
+    }),
+    foreignKey({
+      columns: [table.courierRouteId],
+      foreignColumns: [courierRouteTable.id],
+      name: "optimization_runs_courier_route_id_courier_routes_id_fk",
+    }),
+    index("optimization_runs_simulation_id_idx").on(table.simulationId),
+    index("optimization_runs_courier_route_id_idx").on(table.courierRouteId),
+  ],
+);
+
+export const simulationLogTable = pgTable(
+  "simulation_logs",
+  {
+    id: serial().primaryKey(),
+    simulationId: uuid("simulation_id").references(() => simulationTable.id),
+    courierRouteId: integer("courier_route_id").references(() => courierRouteTable.id),
+    courierId: integer("courier_id").references(() => courierTable.id),
+    logLevel: varchar("log_level").notNull(),
+    eventType: varchar("event_type").notNull(),
+    title: varchar("title").notNull(),
+    description: text("description"),
+    latitude: doublePrecision("latitude"),
+    longitude: doublePrecision("longitude"),
+    metadata: jsonb("metadata"),
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+    })
+      .notNull()
+      .defaultNow(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.simulationId],
+      foreignColumns: [simulationTable.id],
+      name: "simulation_logs_simulation_id_simulations_id_fk",
+    }),
+    foreignKey({
+      columns: [table.courierRouteId],
+      foreignColumns: [courierRouteTable.id],
+      name: "simulation_logs_courier_route_id_courier_routes_id_fk",
+    }),
+    foreignKey({
+      columns: [table.courierId],
+      foreignColumns: [courierTable.id],
+      name: "simulation_logs_courier_id_couriers_id_fk",
+    }),
+    index("simulation_logs_simulation_id_idx").on(table.simulationId),
+    index("simulation_logs_courier_route_id_idx").on(table.courierRouteId),
+    index("simulation_logs_courier_id_idx").on(table.courierId),
+  ],
+);
