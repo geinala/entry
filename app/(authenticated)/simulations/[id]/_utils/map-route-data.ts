@@ -147,52 +147,7 @@ export const buildCourierTracks = (decodedRoutes: DecodedRoute[]): CourierTrack[
 };
 
 export const buildRouteNodes = (routes: TLatestRouteBySimulationRow[]): RouteNode[] => {
-  const nodesByKey = new globalThis.Map<string, RouteNode>();
-
-  const upsertNode = ({
-    key,
-    lat,
-    lng,
-    sequence,
-    isOrigin,
-    isDestination,
-    visitState,
-  }: {
-    key: string;
-    lat: number;
-    lng: number;
-    sequence: number;
-    isOrigin: boolean;
-    isDestination: boolean;
-    visitState: RouteNodeVisitState;
-  }) => {
-    const existing = nodesByKey.get(key);
-
-    if (!existing) {
-      nodesByKey.set(key, {
-        lat,
-        lng,
-        sequence,
-        isOrigin,
-        isDestination,
-        visitState,
-      });
-      return;
-    }
-
-    const nextVisitState =
-      ROUTE_NODE_VISIT_PRIORITY[visitState] > ROUTE_NODE_VISIT_PRIORITY[existing.visitState]
-        ? visitState
-        : existing.visitState;
-
-    nodesByKey.set(key, {
-      ...existing,
-      sequence: Math.min(existing.sequence, sequence),
-      isOrigin: existing.isOrigin || isOrigin,
-      isDestination: existing.isDestination || isDestination,
-      visitState: nextVisitState,
-    });
-  };
+  const allNodes: RouteNode[] = [];
 
   const groupedByCourier = new globalThis.Map<number, TLatestRouteBySimulationRow[]>();
 
@@ -206,52 +161,41 @@ export const buildRouteNodes = (routes: TLatestRouteBySimulationRow[]): RouteNod
   groupedByCourier.forEach((legs) => {
     legs.sort((a, b) => (a.sequence ?? 0) - (b.sequence ?? 0));
 
-    legs.forEach((route) => {
-      const originKey = `${route.origin_latitude},${route.origin_longitude}`;
-      const destinationKey = `${route.destination_latitude},${route.destination_longitude}`;
+    // Fix #1: Buang zero-distance legs (origin == destination)
+    const realLegs = legs.filter(
+      (leg) =>
+        leg.origin_latitude !== leg.destination_latitude ||
+        leg.origin_longitude !== leg.destination_longitude,
+    );
 
-      // Use DB-provided sequence values (origin => route.sequence, destination => route.sequence + 1)
-      const originSeq = route.sequence ?? 0;
-      const destinationSeq = (route.sequence ?? 0) + 1;
+    const seenCoords = new Set<string>();
+    let stopCounter = 0;
 
-      if (!nodesByKey.has(originKey)) {
-        upsertNode({
-          key: originKey,
-          lat: route.origin_latitude,
-          lng: route.origin_longitude,
-          sequence: originSeq,
-          isOrigin: true,
-          isDestination: false,
-          visitState: getNodeVisitState(route.route_status, true),
-        });
-      } else {
-        upsertNode({
-          key: originKey,
-          lat: route.origin_latitude,
-          lng: route.origin_longitude,
-          sequence: nodesByKey.get(originKey)!.sequence,
-          isOrigin: true,
-          isDestination: false,
-          visitState: getNodeVisitState(route.route_status, true),
-        });
+    realLegs.forEach((route, index) => {
+      // Fix #2: Hanya push origin untuk leg pertama
+      if (index === 0) {
+        const key = `${route.origin_latitude.toFixed(6)},${route.origin_longitude.toFixed(6)}`;
+        if (!seenCoords.has(key)) {
+          seenCoords.add(key);
+          allNodes.push({
+            lat: route.origin_latitude,
+            lng: route.origin_longitude,
+            sequence: stopCounter++,
+            isOrigin: true,
+            isDestination: false,
+            visitState: getNodeVisitState(route.route_status, true),
+          });
+        }
       }
 
-      if (!nodesByKey.has(destinationKey)) {
-        upsertNode({
-          key: destinationKey,
+      // Fix #3: Deduplikasi destination berdasarkan koordinat
+      const destKey = `${route.destination_latitude.toFixed(6)},${route.destination_longitude.toFixed(6)}`;
+      if (!seenCoords.has(destKey)) {
+        seenCoords.add(destKey);
+        allNodes.push({
           lat: route.destination_latitude,
           lng: route.destination_longitude,
-          sequence: destinationSeq,
-          isOrigin: false,
-          isDestination: true,
-          visitState: getNodeVisitState(route.route_status, false),
-        });
-      } else {
-        upsertNode({
-          key: destinationKey,
-          lat: route.destination_latitude,
-          lng: route.destination_longitude,
-          sequence: nodesByKey.get(destinationKey)!.sequence,
+          sequence: stopCounter++,
           isOrigin: false,
           isDestination: true,
           visitState: getNodeVisitState(route.route_status, false),
@@ -260,5 +204,5 @@ export const buildRouteNodes = (routes: TLatestRouteBySimulationRow[]): RouteNod
     });
   });
 
-  return Array.from(nodesByKey.values()).sort((left, right) => left.sequence - right.sequence);
+  return allNodes.sort((left, right) => left.sequence - right.sequence);
 };

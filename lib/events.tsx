@@ -41,7 +41,7 @@ export const parseEventData = (rawData: string): TEventPayload => {
 export const eventHandlers: Record<string, TEventHandler> = {
   ROUTE_INITIALIZED: ({ queryClient, simulationId }) => {
     queryClient.invalidateQueries({
-      queryKey: SIMULATION_DETAIL_QUERY_KEYS.getFinalRoutes(simulationId),
+      queryKey: ["final-routes", simulationId],
     });
 
     queryClient.invalidateQueries({
@@ -50,7 +50,7 @@ export const eventHandlers: Record<string, TEventHandler> = {
   },
   VEHICLE_ARRIVED: ({ queryClient, simulationId }) => {
     queryClient.invalidateQueries({
-      queryKey: SIMULATION_DETAIL_QUERY_KEYS.getFinalRoutes(simulationId),
+      queryKey: ["final-routes", simulationId],
     });
 
     queryClient.invalidateQueries({
