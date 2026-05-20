@@ -1,6 +1,5 @@
 import { QueryClient } from "@tanstack/react-query";
 import { SIMULATIONS_QUERY_KEYS } from "@/app/(authenticated)/simulations/_api/queries";
-import { SIMULATION_DETAIL_QUERY_KEYS } from "@/app/(authenticated)/simulations/[id]/_api/queries";
 
 type TEventPayload = Record<string, unknown> | string | null;
 
