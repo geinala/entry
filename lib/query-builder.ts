@@ -129,26 +129,6 @@ const buildGenericWhereClause = <TTable extends PgTable>({
   );
 };
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-const applyJoins = (query: any, joins: TJoin[]): any => {
-  for (const { table, on, type } of joins) {
-    switch (type ?? "inner") {
-      case "left":
-        query = query.leftJoin(table, on);
-        break;
-      case "right":
-        query = query.rightJoin(table, on);
-        break;
-      case "full":
-        query = query.fullJoin(table, on);
-        break;
-      default:
-        query = query.innerJoin(table, on);
-    }
-  }
-  return query;
-};
-
 export const buildCountQuery = async <TTable extends PgTable>({
   table,
   columns,

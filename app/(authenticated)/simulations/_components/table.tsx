@@ -9,43 +9,47 @@ import {
   CardTitle,
 } from "@/app/_components/ui/card";
 import { ItemMedia } from "@/app/_components/ui/item";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/app/_components/ui/table";
 import { Download, FileText } from "lucide-react";
-import { Indicator } from "./indicator";
+import { useGetSimulationLogsQuery } from "../_hooks/use-queries";
+import DataTable from "@/app/_components/data-table";
+import { useFilters } from "@/app/_hooks/use-filters";
+import { useEffect, useState } from "react";
+import { IndexQueryParams, TIndexQueryParams } from "@/types/query-params";
+import { format } from "date-fns";
 
-interface ActivityLog {
-  id: string;
-  date: string;
-  activity: string;
-  description: string;
+interface ILogTable {
+  simulationId: string;
 }
 
-// TODO: Delete this mock data and replace it with real activity logs
-const ACTIVITY_LOGS: ActivityLog[] = [
-  {
-    id: "1",
-    date: "2024-06-15 10:30 AM",
-    activity: "Simulation Started",
-    description: "User initiated a new simulation for route optimization.",
-  },
-  {
-    id: "2",
-    date: "2024-06-15 11:45 AM",
-    activity: "Data Processed",
-    description: "System processed the route optimization data.",
-  },
-];
+export default function LogTable({ simulationId }: ILogTable) {
+  const { handleChange, pagination } = useFilters(IndexQueryParams);
 
-export default function LogTable() {
+  const [localPagination, setLocalPagination] = useState(() => ({
+    page: pagination.page,
+    pageSize: pagination.pageSize,
+  }));
+
+  useEffect(() => {
+    setLocalPagination({ page: pagination.page, pageSize: pagination.pageSize });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  const wrappedHandleChange = {
+    ...handleChange,
+    onPaginationChange: (page: number, pageSize: number) => {
+      setLocalPagination({ page: page > 0 ? page : 1, pageSize: pageSize > 0 ? pageSize : 10 });
+    },
+  };
+
+  const { data, isLoading } = useGetSimulationLogsQuery({
+    queryParams: {
+      ...localPagination,
+    } as TIndexQueryParams,
+    simulationId,
+  });
+
   return (
-    <Card className="gap-2">
+    <Card className="gap-2 w-full h-full">
       <CardHeader>
         <div className="flex items-center justify-between gap-4">
           <div className="flex items-center gap-4">
@@ -63,29 +67,32 @@ export default function LogTable() {
           </Button>
         </div>
       </CardHeader>
-      <CardContent className="p-0">
-        {/** TODO: Replace with dynamic activity logs */}
-        <Table>
-          <TableHeader>
-            <TableRow className="bg-background border-none">
-              <TableHead className="pl-6">Date</TableHead>
-              <TableHead>Activity</TableHead>
-              <TableHead>Description</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {ACTIVITY_LOGS.map((log) => (
-              <TableRow key={log.id}>
-                <TableCell className="pl-6">{log.date}</TableCell>
-                <TableCell className="flex items-center gap-3">
-                  <Indicator />
-                  {log.activity}
-                </TableCell>
-                <TableCell>{log.description}</TableCell>
-              </TableRow>
-            ))}
-          </TableBody>
-        </Table>
+      <CardContent className="w-full h-full">
+        <DataTable
+          isLoading={isLoading}
+          isSearchable={false}
+          handleChange={wrappedHandleChange}
+          pagination={localPagination}
+          source={data}
+          columns={[
+            {
+              accessorKey: "createdAt",
+              header: "Timestamp",
+              cell: ({ row }) => {
+                const createdAt = row.original.createdAt;
+                return (
+                  <div className="flex items-center gap-2">
+                    <span>[{format(new Date(createdAt), "HH:mm")}]</span>
+                  </div>
+                );
+              },
+            },
+            {
+              accessorKey: "title",
+              header: "Title",
+            },
+          ]}
+        />
       </CardContent>
     </Card>
   );
