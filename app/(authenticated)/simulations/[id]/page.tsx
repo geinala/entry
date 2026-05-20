@@ -47,6 +47,8 @@ export default function SimulationDetailPage() {
       const handler = (event: MessageEvent<string>) => {
         const payload = parseEventData(event.data);
 
+        console.log(`Received event: ${eventType}`, payload);
+
         if (!shouldHandleSimulationEvent(payload, simulationId)) {
           return;
         }
