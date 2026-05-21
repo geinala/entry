@@ -96,7 +96,9 @@ export const simulationQueries = {
       queryKey: ["simulations", simulationId, "global-summary", courierId] as const,
       queryFn: async (): Promise<TGlobalAlgorithmSummary> => {
         const response: AxiosResponse<TApiSuccessResponseWithData<TGlobalAlgorithmSummary>> =
-          await api.get(`/simulations/${simulationId}/algorithms/summary`, { params: { courierId } });
+          await api.get(`/simulations/${simulationId}/algorithms/summary`, {
+            params: { courierId },
+          });
 
         return response.data.data;
       },

@@ -10,7 +10,6 @@ import {
   routeLegTable,
   courierRouteTable,
   simulationJobTable,
-  simulationJobFileValidationStatusEnum,
   simulationUploadedRows,
   nodeDetailTable,
   simulationLogTable,
@@ -46,10 +45,6 @@ export type TSimulation = InferSelectModel<typeof simulationTable>;
 export type TSimulationWithDepot = TSimulation & {
   depot: TNode | null;
 };
-export type TUpdateSimulation = Partial<Omit<TSimulation, "id" | "createdAt" | "updatedAt">>;
-export type TSimulationWithUploadedFile = TSimulation & {
-  totalDemand: number;
-};
 export type TSimulationStatus = TSimulation["status"];
 
 // Depot Types
@@ -57,7 +52,7 @@ export type TDepot = InferSelectModel<typeof depotTable>;
 export type TDepotOption = Pick<TDepot, "id" | "name" | "address" | "latitude" | "longitude">;
 
 // Node Types
-export type TNode = InferSelectModel<typeof nodeTable>;
+type TNode = InferSelectModel<typeof nodeTable>;
 export type TNewNode = InferInsertModel<typeof nodeTable>;
 export type TNewNodeDetail = InferInsertModel<typeof nodeDetailTable>;
 
@@ -66,10 +61,10 @@ export type TCourier = InferSelectModel<typeof courierTable>;
 export type TNewCourier = InferInsertModel<typeof courierTable>;
 
 // Route Types
-export type TCourierRoute = InferSelectModel<typeof courierRouteTable>;
-export type TRouteLeg = InferSelectModel<typeof routeLegTable>;
+type TCourierRoute = InferSelectModel<typeof courierRouteTable>;
+type TRouteLeg = InferSelectModel<typeof routeLegTable>;
 
-export type TRouteCourierSummary = {
+type TRouteCourierSummary = {
   id: TCourier["id"];
   name: TCourier["name"];
 };
@@ -96,9 +91,6 @@ export type TLatestRouteBySimulationRow = {
   live_traffic_incidents_travel_time_in_seconds: TRouteLeg["liveTrafficIncidentsTravelTimeInSeconds"];
   route_status: TRouteLeg["routeStatus"];
 };
-
-export type TSimulationJobFileValidationStatusEnum =
-  (typeof simulationJobFileValidationStatusEnum.enumValues)[number];
 
 // Simulation Job Summary Types
 export type TSimulationJobDatasetSummary = {
@@ -136,19 +128,6 @@ export type TSimulationJobSummaryBaseRow = {
   fileTotalRows: number | null;
 };
 
-export type TSimulationJobDatasetSummaryRow = {
-  validOrders: number;
-  ignoredOrders: number;
-  courierCount: number;
-  estimatedTotalWeightKg: number;
-};
-
-export type TSimulationJobGeocodingSummaryRow = {
-  autoResolved: number;
-  manuallyCorrected: number;
-  ignored: number;
-};
-
 export type TSimulationJobCombinedSummaryRow = {
   validOrders: number;
   ignoredOrders: number;
@@ -165,7 +144,6 @@ export type TSimulationJobAreaDistributionRow = {
 };
 
 export type TSimulationLog = InferSelectModel<typeof simulationLogTable>;
-export type TNewSimulationLog = InferInsertModel<typeof simulationLogTable>;
 
 export type TGlobalAlgorithmSummary = {
   greedySummary: {

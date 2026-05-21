@@ -2,10 +2,7 @@ import { TDepot } from "@/types/database";
 import { TDepotOption } from "@/types/database";
 import { TPaginationResponse } from "@/types/meta";
 import { TIndexQueryParams } from "@/types/query-params";
-import {
-  TApiSuccessResponseWithData,
-  TApiSuccessResponseWithPagination,
-} from "@/types/response";
+import { TApiSuccessResponseWithData, TApiSuccessResponseWithPagination } from "@/types/response";
 import { queryOptions } from "@tanstack/react-query";
 import { AxiosInstance, AxiosResponse } from "axios";
 
@@ -42,9 +39,8 @@ export const GET_DEPOTS_QUERIES = {
     return queryOptions({
       queryKey: ["depots", "options"],
       queryFn: async (): Promise<TDepotOption[]> => {
-        const response: AxiosResponse<TApiSuccessResponseWithData<TDepotOption[]>> = await api.get(
-          "/depots/options",
-        );
+        const response: AxiosResponse<TApiSuccessResponseWithData<TDepotOption[]>> =
+          await api.get("/depots/options");
 
         return response.data.data;
       },

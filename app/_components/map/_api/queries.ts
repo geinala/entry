@@ -73,7 +73,7 @@ export const mapQueries = {
   },
 };
 
-export const MAP_QUERY_KEYS = {
+const MAP_QUERY_KEYS = {
   fuzzySearch: (query: string) => ["map", "fuzzySearch", query] as const,
   nearbySearch: ({ lat, lng }: { lat: number; lng: number }) =>
     ["map", "nearbySearch", lat, lng] as const,

@@ -8,7 +8,6 @@ import {
   TotalDistanceCard,
   TotalTimeTravelCard,
 } from "./_components/card";
-import LogTable from "./_components/table";
 import Page from "@/app/_components/page";
 import { DeleteSimulationButton, OpenSimulationButton } from "./_components/button";
 import SimulationStatus from "./_components/status";
@@ -22,6 +21,7 @@ import { Paragraph } from "@/app/_components/typography";
 import { Clock } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import GlobalSummaryTable from "./_components/tables/global-summary.table";
+import LogTable from "./_components/tables/log.table";
 
 const SHORTCUT_KEY_TO_REMOVE_DETAILS = "Escape";
 

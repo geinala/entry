@@ -46,6 +46,7 @@ export const createSimulationFromJobRepository = async (jobId: string) => {
       depotLocationLongitude: simulationJob.depotLocationLongitude,
       computationTimeLimitInSeconds: simulationJob.maxComputationTimeInSeconds,
       startedAt: simulationJob.startedAt,
+      depotId: simulationJob.depotId,
     })
     .returning();
 

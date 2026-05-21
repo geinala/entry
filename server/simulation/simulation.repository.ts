@@ -16,8 +16,7 @@ import {
 import { db } from "@/lib/db";
 import { buildCountQuery, buildPaginatedQuery, TColumnsDefinition } from "@/lib/query-builder";
 import { TIndexSimulationQueryParams } from "@/schemas/simulation.schema";
-import { and, eq, inArray, sum } from "drizzle-orm";
-import { TUpdateSimulation } from "@/types/database";
+import { and, eq, inArray } from "drizzle-orm";
 
 const SIMULATION_COLUMNS: TColumnsDefinition<typeof simulationTable> = {
   title: { searchable: true, sortable: true },
@@ -67,26 +66,6 @@ export const getSimulationByIdRepository = async (simulationId: string) => {
     .limit(1);
 };
 
-export const updateSimulationRepository = async (simulationId: string, data: TUpdateSimulation) => {
-  return await db
-    .update(simulationTable)
-    .set({
-      ...data,
-      updatedAt: new Date(),
-    })
-    .where(eq(simulationTable.id, simulationId))
-    .returning();
-};
-
-export const getAccumulatedSimulationNodeDemandRepository = async (simulationId: string) => {
-  return await db
-    .select({
-      totalDemand: sum(nodeTable.demand),
-    })
-    .from(nodeTable)
-    .where(eq(nodeTable.simulationId, simulationId));
-};
-
 export const deleteSimulationWithRelationsRepository = async (
   simulationId: string,
   userId: string,
@@ -107,12 +86,6 @@ export const deleteSimulationWithRelationsRepository = async (
       .from(courierTable)
       .where(eq(courierTable.simulationId, simulationId));
     const courierIds = couriers.map((courier) => courier.id);
-
-    const solutions = await tx
-      .select({ id: solutionTable.id })
-      .from(solutionTable)
-      .where(eq(solutionTable.simulationId, simulationId));
-    const solutionIds = solutions.map((solution) => solution.id);
 
     const nodes = await tx
       .select({ id: nodeTable.id })
@@ -136,11 +109,15 @@ export const deleteSimulationWithRelationsRepository = async (
           ).map((route) => route.id)
         : [];
 
-    await tx.delete(optimizationRunTable).where(eq(optimizationRunTable.simulationId, simulationId));
+    await tx
+      .delete(optimizationRunTable)
+      .where(eq(optimizationRunTable.simulationId, simulationId));
     await tx.delete(simulationLogTable).where(eq(simulationLogTable.simulationId, simulationId));
 
     if (matrixBatchIds.length > 0) {
-      await tx.delete(matrixResultTable).where(inArray(matrixResultTable.matrixBatchId, matrixBatchIds));
+      await tx
+        .delete(matrixResultTable)
+        .where(inArray(matrixResultTable.matrixBatchId, matrixBatchIds));
     }
 
     await tx.delete(matrixResultTable).where(eq(matrixResultTable.simulationId, simulationId));

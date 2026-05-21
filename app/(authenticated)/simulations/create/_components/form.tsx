@@ -44,6 +44,7 @@ const CreateSimulationForm = () => {
         depotLatitude: Number(value.depotLatitude),
         depotLongitude: Number(value.depotLongitude),
         computationTimeLimit: Number(value.computationTimeLimit),
+        depotId: Number(selectedDepotId),
       });
     },
   });

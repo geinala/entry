@@ -6,5 +6,6 @@ export const useDeleteDepotMutation = () => {
   const api = useAuthenticatedClient();
   const queryClient = useQueryClient();
 
+  /* eslint-disable drizzle/enforce-delete-with-where */
   return useMutation(DEPOT_MUTATIONS.delete(api, queryClient));
 };

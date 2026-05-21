@@ -25,7 +25,7 @@ type Props = {
   defaultValues?: TUpdateSimulationUploadedRowSchema["finalAddress"];
 };
 
-export const EditFinalAddressDialog: React.FC<Props> = ({
+const EditFinalAddressDialog: React.FC<Props> = ({
   open,
   onOpenChange,
   selectedRow,

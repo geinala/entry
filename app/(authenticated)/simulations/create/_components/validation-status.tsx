@@ -57,7 +57,7 @@ const defaultCopy: StatusCopy = {
     "Please review the failed rows in the table below. You can choose to edit or delete them. Once all issues are resolved, you can continue to the next step.",
 };
 
-export const ValidationStatus: React.FC<Props> = ({
+const ValidationStatus: React.FC<Props> = ({
   isFailed,
   isProcessing,
   progress,

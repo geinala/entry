@@ -120,5 +120,3 @@ export const CleaningAddressTable: FC<IProps> = ({ jobId, onDeleteRow, ...props 
     </>
   );
 };
-
-export default CleaningAddressTable;

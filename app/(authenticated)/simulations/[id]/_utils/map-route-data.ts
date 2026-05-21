@@ -11,11 +11,6 @@ export type DecodedRoute = {
   coordinates: MapCoordinate[];
 };
 
-export type CourierTrack = {
-  courierId: string;
-  legs: DecodedRoute[];
-};
-
 export type RouteNode = {
   lat: number;
   lng: number;
@@ -32,13 +27,6 @@ const ROUTE_STATUS_PRIORITY: Record<TLatestRouteBySimulationRow["route_status"],
   completed: 1,
   cancelled: 2,
   running: 3,
-};
-
-const ROUTE_NODE_VISIT_PRIORITY: Record<RouteNodeVisitState, number> = {
-  pending: 0,
-  "running-destination": 1,
-  "running-origin": 2,
-  visited: 3,
 };
 
 const ROUTE_NODE_STYLE: Record<RouteNodeVisitState, { borderColor: string; textColor: string }> = {
@@ -124,26 +112,6 @@ export const sortRoutesByDisplayPriority = (routes: DecodedRoute[]): DecodedRout
 
     return left.sequence - right.sequence;
   });
-};
-
-export const buildCourierTracks = (decodedRoutes: DecodedRoute[]): CourierTrack[] => {
-  const groupedTracks = new globalThis.Map<string, DecodedRoute[]>();
-
-  decodedRoutes.forEach((route) => {
-    const track = groupedTracks.get(route.courierId);
-
-    if (track) {
-      track.push(route);
-      return;
-    }
-
-    groupedTracks.set(route.courierId, [route]);
-  });
-
-  return Array.from(groupedTracks.entries()).map(([courierId, legs]) => ({
-    courierId,
-    legs: legs.sort((left, right) => left.sequence - right.sequence),
-  }));
 };
 
 export const buildRouteNodes = (routes: TLatestRouteBySimulationRow[]): RouteNode[] => {
