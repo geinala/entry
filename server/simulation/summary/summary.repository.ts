@@ -5,6 +5,7 @@ import { sql } from "drizzle-orm";
 
 export const getGlobalSummaryAlgorithmRepository = async (
   simulationId: string,
+  courierId?: string,
 ): Promise<Omit<TGlobalAlgorithmSummary, "improvement">> => {
   const [row] = await db
     .select({
@@ -78,7 +79,13 @@ export const getGlobalSummaryAlgorithmRepository = async (
         ), 0)`,
     })
     .from(optimizationRunTable)
-    .where(sql`${optimizationRunTable.simulationId} = ${simulationId}`);
+    .where(
+      courierId
+        ? sql`${optimizationRunTable.simulationId} = ${simulationId} AND ${optimizationRunTable.courierRouteId} IN (SELECT id FROM courier_routes WHERE courier_id = ${Number(
+            courierId,
+          )})`
+        : sql`${optimizationRunTable.simulationId} = ${simulationId}`,
+    );
 
   return {
     greedySummary: {

@@ -4,10 +4,10 @@ import useAuthenticatedClient from "@/app/_hooks/use-authenticated-client";
 import { useQuery } from "@tanstack/react-query";
 import { simulationDetailQueries } from "../_api/queries";
 
-export const useGetAllActiveCouriersQuery = (simulationId?: string) => {
+export const useGetAllCouriersQuery = (simulationId?: string) => {
   const api = useAuthenticatedClient();
 
-  return useQuery(simulationDetailQueries.getAllActiveCouriers(api, simulationId));
+  return useQuery(simulationDetailQueries.getAllCouriers(api, simulationId));
 };
 
 export const useGetFinalRoutesQuery = (simulationId?: string, courierId?: number) => {

@@ -36,8 +36,8 @@ export const useGetSimulationLogsQuery = ({
   return useQuery(simulationQueries.getLogs(api, simulationId, queryParams));
 };
 
-export const useGetGlobalSummaryAlgorithmQuery = (simulationId?: string) => {
+export const useGetGlobalSummaryAlgorithmQuery = (simulationId?: string, courierId?: string) => {
   const api = useAuthenticatedClient();
 
-  return useQuery(simulationQueries.getGlobalSummaryAlgorithm(api, simulationId));
+  return useQuery(simulationQueries.getGlobalSummaryAlgorithm(api, simulationId, courierId));
 };

@@ -10,7 +10,7 @@ import {
   SelectValue,
 } from "@/app/_components/ui/select";
 import { usePathname, useParams, useRouter, useSearchParams } from "next/navigation";
-import { useGetAllActiveCouriersQuery } from "../_hooks/use-queries";
+import { useGetAllCouriersQuery } from "../_hooks/use-queries";
 
 interface Props {
   totalActiveCouriers?: number;
@@ -22,7 +22,7 @@ export const CourierSelect = ({ totalActiveCouriers }: Props) => {
   const pathname = usePathname();
   const router = useRouter();
 
-  const { data, isLoading } = useGetAllActiveCouriersQuery(id);
+  const { data, isLoading } = useGetAllCouriersQuery(id);
 
   const selectedCourierId = searchParams.get("courierId") ?? "all";
 
