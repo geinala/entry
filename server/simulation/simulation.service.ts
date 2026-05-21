@@ -4,6 +4,7 @@ import { TIndexSimulationQueryParams } from "@/schemas/simulation.schema";
 import { findCurrentUserByClerkUserIdRepository } from "../user/user.repository";
 import { NotFoundException } from "@/common/exception/not-found.exception";
 import {
+  deleteSimulationWithRelationsRepository,
   getSimulationByIdRepository,
   getSimulationsCountRepository,
   getSimulationsWithPaginationRepository,
@@ -47,4 +48,20 @@ export const getSimulationByIdService = async (
     ...simulation[0].simulations,
     depot: simulation[0].nodes ?? null,
   };
+};
+
+export const deleteSimulationByIdService = async (clerkUserId: string, simulationId: string) => {
+  const user = await findCurrentUserByClerkUserIdRepository(clerkUserId);
+
+  if (!user) {
+    throw new NotFoundException("User not found");
+  }
+
+  const deletedSimulation = await deleteSimulationWithRelationsRepository(simulationId, user.userId);
+
+  if (!deletedSimulation) {
+    throw new NotFoundException("Simulation not found");
+  }
+
+  return deletedSimulation;
 };

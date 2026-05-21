@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/app/_components/ui/button";
 import {
   Card,
   CardContent,
@@ -9,7 +8,7 @@ import {
   CardTitle,
 } from "@/app/_components/ui/card";
 import { ItemMedia } from "@/app/_components/ui/item";
-import { Download, FileText } from "lucide-react";
+import { FileText } from "lucide-react";
 import { useGetSimulationLogsQuery } from "../_hooks/use-queries";
 import DataTable from "@/app/_components/data-table";
 import { useFilters } from "@/app/_hooks/use-filters";
@@ -61,10 +60,6 @@ export default function LogTable({ simulationId }: ILogTable) {
               <CardDescription>List of recent simulation activities.</CardDescription>
             </div>
           </div>
-          <Button variant={"outline"} size={"sm"}>
-            <Download className="w-4 h-4" />
-            Export Log
-          </Button>
         </div>
       </CardHeader>
       <CardContent className="w-full h-full">

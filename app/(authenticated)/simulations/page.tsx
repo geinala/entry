@@ -68,11 +68,14 @@ export default function HistoryPage() {
           description="This is your simulation history detail."
           headerAction={
             <div className="flex gap-2 items-end h-full">
-              <DeleteSimulationButton />
+              <DeleteSimulationButton
+                simulationId={selectedSimulationId}
+                onDeleted={() => setSelectedSimulationId(undefined)}
+              />
               <Link href={`/simulations/${selectedSimulationId}`}>
                 <OpenSimulationButton />
               </Link>
-              <SimulationStatus />
+              <SimulationStatus status={data.status} />
             </div>
           }
         >

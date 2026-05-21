@@ -1,17 +1,20 @@
 "use client";
 
 import { Item, ItemContent, ItemMedia, ItemTitle } from "@/app/_components/ui/item";
+import { TSimulationStatus } from "@/types/database";
 import { CircleCheck, Clock, X } from "lucide-react";
 
-// TODO: Adjust according to actual status types and icons
-const statusConfig = {
+const statusConfig: Record<
+  TSimulationStatus,
+  { label: string; icon: React.ElementType; colorClass: string }
+> = {
   completed: {
     label: "Completed",
     icon: CircleCheck,
     colorClass: "text-green-600",
   },
-  pending: {
-    label: "Pending",
+  optimizing: {
+    label: "Optimizing",
     icon: Clock,
     colorClass: "text-yellow-600",
   },
@@ -20,15 +23,20 @@ const statusConfig = {
     icon: X,
     colorClass: "text-red-600",
   },
+  running: {
+    label: "Running",
+    icon: Clock,
+    colorClass: "text-blue-600",
+  },
 };
 
 interface ISimulationStatusProps {
-  status?: "completed" | "pending" | "failed"; // TODO: Adjust according to actual status types
+  status?: TSimulationStatus;
 }
 
 export default function SimulationStatus({ status = "completed" }: ISimulationStatusProps) {
-  const config = statusConfig[status];
-  const IconComponent = config.icon;
+  const config = status ? (statusConfig[status] ?? statusConfig.completed) : statusConfig.completed;
+  const IconComponent = config.icon as React.ElementType;
 
   return (
     <Item variant={"outline"} size={"sm"}>
@@ -36,7 +44,6 @@ export default function SimulationStatus({ status = "completed" }: ISimulationSt
         <IconComponent className={config.colorClass} />
       </ItemMedia>
       <ItemContent>
-        {/** TODO: Change with actual simulation status */}
         <ItemTitle className={config.colorClass}>{config.label}</ItemTitle>
       </ItemContent>
     </Item>
