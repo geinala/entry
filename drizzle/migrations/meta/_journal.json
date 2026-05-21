@@ -50,6 +50,20 @@
       "when": 1779323171385,
       "tag": "0006_familiar_zuras",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1779332652652,
+      "tag": "0007_complex_screwball",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1779332698661,
+      "tag": "0008_lumpy_hercules",
+      "breakpoints": true
     }
   ]
 }

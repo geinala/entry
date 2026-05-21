@@ -16,6 +16,7 @@ import {
   createDepotService,
   deleteDepotService,
   getDepotByIdService,
+  getDepotOptionsService,
   getDepotsWithPaginationService,
   updateDepotService,
 } from "./depot.service";
@@ -110,6 +111,19 @@ export const getDepotByIdController = async (request: NextRequest, id: number) =
     return responseFormatter.successWithData({
       data: depot,
       message: "Depot retrieved successfully",
+    });
+  } catch (error) {
+    return handleException(error);
+  }
+};
+
+export const getDepotOptionsController = async (_request: NextRequest) => {
+  try {
+    const depotOptions = await getDepotOptionsService();
+
+    return responseFormatter.successWithData({
+      data: depotOptions,
+      message: "Depot options retrieved successfully",
     });
   } catch (error) {
     return handleException(error);

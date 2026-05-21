@@ -14,3 +14,9 @@ export const useGetDepotByIdQuery = (id: number) => {
 
   return useQuery(GET_DEPOTS_QUERIES.getDepotById(api, id));
 };
+
+export const useGetDepotOptionsQuery = () => {
+  const api = useAuthenticatedClient();
+
+  return useQuery(GET_DEPOTS_QUERIES.getDepotOptions(api));
+};

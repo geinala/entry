@@ -3,20 +3,28 @@
 import { useState } from "react";
 
 import { Button } from "@/app/_components/ui/button";
-import { CsvFileDropzone } from "@/app/_components/csv-file-dropzone";
 import { Field, FieldError, FieldLabel } from "@/app/_components/ui/field";
 import { Input } from "@/app/_components/ui/input";
-import { Label } from "@/app/_components/ui/label";
-import { ClickMarker, MapSearch, TomTomMap } from "@/app/_components/map";
 import DateTimeInput from "@/app/_components/ui/datetime-input";
-import { Item } from "@/app/_components/ui/item";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/app/_components/ui/select";
 import { useForm } from "@tanstack/react-form";
 import { CreateSimulationJobSchema } from "@/schemas/simulations/create-simulation.schema";
 import { formatDate } from "date-fns";
 import { useCreateSimulationJobMutations } from "../_hooks/use-mutations";
 import DownloadTemplateButton from "@/app/(authenticated)/_components/download-template.button";
+import { useGetDepotOptionsQuery } from "@/app/(authenticated)/depots/_hooks/use-queries";
 
 const CreateSimulationForm = () => {
+  const { mutateAsync } = useCreateSimulationJobMutations();
+  const { data: depotOptions = [], isLoading: isDepotOptionsLoading } = useGetDepotOptionsQuery();
+  const [selectedDepotId, setSelectedDepotId] = useState<string | undefined>();
+
   const form = useForm({
     defaultValues: {
       computationTimeLimit: 600,
@@ -40,11 +48,15 @@ const CreateSimulationForm = () => {
     },
   });
 
-  const [selectedFile, setSelectedFile] = useState<File | null>();
-  const [selectedPosition, setSelectedPosition] = useState<{ lng: number; lat: number } | null>(
-    null,
-  );
-  const { mutateAsync } = useCreateSimulationJobMutations();
+  const handleDepotChange = (depotId: string) => {
+    const depot = depotOptions.find((item) => item.id.toString() === depotId);
+
+    setSelectedDepotId(depotId);
+
+    form.setFieldValue("depotLatitude", depot?.latitude ?? 0);
+    form.setFieldValue("depotLongitude", depot?.longitude ?? 0);
+    form.setFieldValue("depotLocationAddress", depot?.address ?? "");
+  };
 
   return (
     <form
@@ -53,11 +65,42 @@ const CreateSimulationForm = () => {
         e.preventDefault();
         form.handleSubmit(e);
       }}
-      className="w-full flex flex-col items-end gap-3"
+      className="w-full max-w-3xl mx-auto flex flex-col items-end gap-3"
     >
       <DownloadTemplateButton />
-      <div className="grid grid-cols-2 items-stretch w-full gap-3 min-h-0">
+      <div className="w-full gap-3 min-h-0">
         <div className="flex-1 flex flex-col gap-2 h-full">
+          <form.Field
+            name="depotLocationAddress"
+            /* eslint-disable react/no-children-prop */
+            children={(field) => {
+              const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+
+              return (
+                <Field data-invalid={isInvalid}>
+                  <FieldLabel htmlFor="depotId">Depot</FieldLabel>
+                  <Select
+                    value={selectedDepotId}
+                    onValueChange={handleDepotChange}
+                    disabled={isDepotOptionsLoading || depotOptions.length === 0}
+                  >
+                    <SelectTrigger id="depotId" className="w-full">
+                      <SelectValue placeholder="Select a depot" />
+                    </SelectTrigger>
+                    <SelectContent position="popper">
+                      {depotOptions.map((depot) => (
+                        <SelectItem key={depot.id} value={depot.id.toString()}>
+                          {depot.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+
+                  {isInvalid && <FieldError errors={field.state.meta.errors} />}
+                </Field>
+              );
+            }}
+          />
           <form.Field
             name="title"
             /* eslint-disable react/no-children-prop */
@@ -133,95 +176,54 @@ const CreateSimulationForm = () => {
             }}
           />
           <form.Field
-            name="depotLocationAddress"
-            children={(field) => {
-              const isInvalid = field.state.meta.errors.length > 0;
-
-              return (
-                <Field className="mt-3" data-invalid={isInvalid}>
-                  <FieldLabel htmlFor={field.name}>Depot Location</FieldLabel>
-                  <input
-                    id={field.name}
-                    name={field.name}
-                    type="hidden"
-                    value={field.state.value}
-                    readOnly
-                  />
-                  <Item className="p-0 border-0 rounded-md mb-2">
-                    {field.state.value || "No location selected"}
-                  </Item>
-                  <div className="w-full h-80 border-secondary rounded-md border">
-                    <TomTomMap
-                      zoom={14}
-                      showTrafficFlow={true}
-                      showTrafficIncidents={true}
-                      style="monoLight"
-                    >
-                      <div className="absolute top-2 left-2 z-10 w-60">
-                        <MapSearch
-                          placeholder="Search for depot location..."
-                          onSelect={(result) => {
-                            setSelectedPosition({ lat: result.lat, lng: result.lng });
-                            form.setFieldValue("depotLatitude", result.lat);
-                            form.setFieldValue("depotLongitude", result.lng);
-                            field.handleChange(result.address || "");
-                            field.handleBlur();
-                          }}
-                        />
-                        <ClickMarker
-                          position={selectedPosition}
-                          onChange={(lngLat, nearestLocation) => {
-                            setSelectedPosition(lngLat);
-                            form.setFieldValue("depotLatitude", lngLat.lat);
-                            form.setFieldValue("depotLongitude", lngLat.lng);
-                            field.handleChange(nearestLocation?.address || "");
-                            field.handleBlur();
-                          }}
-                        />
-                      </div>
-                    </TomTomMap>
-                  </div>
-
-                  <FieldError errors={field.state.meta.errors} />
-                </Field>
-              );
-            }}
-          />
-        </div>
-        <div className="flex flex-1 flex-col gap-3 min-h-0">
-          <Label htmlFor="customersFile">Customers CSV File</Label>
-          {/* eslint-disable react/no-children-prop */}
-          <form.Field
             name="customersFile"
             children={(field) => {
               const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+              const selectedFile = field.state.value;
 
               return (
                 <Field data-invalid={isInvalid} className="w-full h-full">
-                  <CsvFileDropzone
-                    inputId={field.name}
-                    file={selectedFile as File}
-                    onFileChange={(file) => {
-                      setSelectedFile(file);
-                      field.setValue(file as File);
-                    }}
-                    onRemove={() => {
-                      setSelectedFile(null);
-                      field.setValue(null as unknown as File);
-                    }}
-                    onBlur={field.handleBlur}
-                    isInvalid={isInvalid}
-                    variant="default"
-                    className="flex flex-1 min-h-0 border-neutral-400 bg-gray-100 hover:bg-gray-50"
-                  />
+                  <FieldLabel htmlFor={field.name}>Customers Data</FieldLabel>
+                  <div className="flex items-center gap-3 rounded-md border border-dashed p-3">
+                    <Input
+                      id={field.name}
+                      name={field.name}
+                      type="file"
+                      aria-invalid={isInvalid}
+                      autoComplete="off"
+                      accept=".csv,text/csv"
+                      onBlur={field.handleBlur}
+                      onChange={(event) => {
+                        field.setValue((event.target.files?.[0] ?? null) as unknown as File);
+                      }}
+                      className="max-w-xs"
+                    />
+
+                    <div className="min-w-0 flex-1 text-sm text-muted-foreground">
+                      {selectedFile ? (
+                        <span className="block truncate">{selectedFile.name}</span>
+                      ) : (
+                        <span>No file selected</span>
+                      )}
+                    </div>
+
+                    {selectedFile && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => field.setValue(null as unknown as File)}
+                      >
+                        Remove
+                      </Button>
+                    )}
+                  </div>
+
+                  {isInvalid && <FieldError errors={field.state.meta.errors} />}
                 </Field>
               );
             }}
           />
-
-          <form.Subscribe selector={(state) => state.errorMap.onSubmit}>
-            {(error) => (error ? <FieldError errors={error.customersFile} /> : null)}
-          </form.Subscribe>
         </div>
       </div>
 
