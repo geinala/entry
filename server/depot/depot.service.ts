@@ -2,20 +2,22 @@ import "server-only";
 
 import { NotFoundException } from "@/common/exception/not-found.exception";
 import { paginationResponseMapper } from "@/lib/pagination";
-import { TCreateOrUpdateDepotSchema, TIndexDepotQueryParams } from "@/schemas/depot.schema";
-import { TDepot } from "@/types/database";
+import { TCreateOrUpdateDepotSchema } from "@/schemas/depot.schema";
+import { TDepot, TDepotOption } from "@/types/database";
 import { TPaginationResponse } from "@/types/meta";
 import {
   createDepotRepository,
   deleteDepotRepository,
   getDepotByIdRepository,
+  getDepotOptionsRepository,
   getDepotsCountRepository,
   getDepotsWithPaginationRepository,
   updateDepotRepository,
 } from "./depot.repository";
+import { TIndexQueryParams } from "@/types/query-params";
 
 export const getDepotsWithPaginationService = async (
-  queryParams: TIndexDepotQueryParams,
+  queryParams: TIndexQueryParams,
 ): Promise<TPaginationResponse<TDepot>> => {
   const [depots, total] = await Promise.all([
     getDepotsWithPaginationRepository(queryParams),
@@ -37,6 +39,10 @@ export const getDepotByIdService = async (id: number): Promise<TDepot> => {
   }
 
   return depot;
+};
+
+export const getDepotOptionsService = async (): Promise<TDepotOption[]> => {
+  return await getDepotOptionsRepository();
 };
 
 export const createDepotService = async (data: TCreateOrUpdateDepotSchema): Promise<TDepot> => {

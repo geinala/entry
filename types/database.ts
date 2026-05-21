@@ -54,6 +54,7 @@ export type TSimulationStatus = TSimulation["status"];
 
 // Depot Types
 export type TDepot = InferSelectModel<typeof depotTable>;
+export type TDepotOption = Pick<TDepot, "id" | "name" | "address" | "latitude" | "longitude">;
 
 // Node Types
 export type TNode = InferSelectModel<typeof nodeTable>;

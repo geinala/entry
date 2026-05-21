@@ -3,9 +3,10 @@ import "server-only";
 import { depotTable } from "@/drizzle/schema";
 import { db } from "@/lib/db";
 import { buildCountQuery, buildPaginatedQuery, TColumnsDefinition } from "@/lib/query-builder";
-import { eq } from "drizzle-orm";
+import { asc, eq } from "drizzle-orm";
 import { TIndexQueryParams } from "@/types/query-params";
 import { TCreateOrUpdateDepotSchema } from "@/schemas/depot.schema";
+import { TDepotOption } from "@/types/database";
 
 const DEPOT_COLUMNS: TColumnsDefinition<typeof depotTable> = {
   name: { searchable: true },
@@ -26,6 +27,19 @@ export const getDepotsCountRepository = async (queryParams: TIndexQueryParams) =
     columns: DEPOT_COLUMNS,
     queryParams,
   });
+};
+
+export const getDepotOptionsRepository = async (): Promise<TDepotOption[]> => {
+  return await db
+    .select({
+      id: depotTable.id,
+      name: depotTable.name,
+      address: depotTable.address,
+      latitude: depotTable.latitude,
+      longitude: depotTable.longitude,
+    })
+    .from(depotTable)
+    .orderBy(asc(depotTable.name));
 };
 
 export const getDepotByIdRepository = async (id: number) => {
