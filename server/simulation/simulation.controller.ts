@@ -10,6 +10,7 @@ import { parseSortParams } from "@/lib/query-param";
 import { handleException } from "@/common/exception/helper";
 import { NotFoundException } from "@/common/exception/not-found.exception";
 import {
+  deleteSimulationByIdService,
   getSimulationByIdService,
   getSimulationsWithPaginationService,
 } from "./simulation.service";
@@ -66,6 +67,26 @@ export const getSimulationByIdController = async (clerkUserId: string, simulatio
     return responseFormatter.successWithData({
       data: simulation,
       message: "Simulation retrieved successfully",
+    });
+  } catch (error) {
+    return handleException(error);
+  }
+};
+
+export const deleteSimulationByIdController = async (clerkUserId: string, simulationId: string) => {
+  try {
+    validateSchema(
+      SimulationIdParamSchema,
+      { simulationId },
+      () => new NotFoundException("Simulation not found"),
+    );
+
+    await checkUserPermissionsService(clerkUserId, [PERMISSIONS.DELETE_SIMULATION]);
+
+    await deleteSimulationByIdService(clerkUserId, simulationId);
+
+    return responseFormatter.deleted({
+      message: "Simulation deleted successfully",
     });
   } catch (error) {
     return handleException(error);

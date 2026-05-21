@@ -54,4 +54,21 @@ export const simulationMutations = {
       },
     });
   },
+  deleteSimulationById: (api: AxiosInstance, queryClient: QueryClient) => {
+    return mutationOptions({
+      mutationFn: async (simulationId: string): Promise<TBaseApiResponse> => {
+        const response: AxiosResponse<TBaseApiResponse> = await api.delete(
+          `/simulations/${simulationId}`,
+        );
+
+        return response.data;
+      },
+      onSuccess: (data, simulationId) => {
+        toast.success(data.message);
+
+        queryClient.invalidateQueries({ queryKey: SIMULATIONS_QUERY_KEYS.all });
+        queryClient.removeQueries({ queryKey: SIMULATIONS_QUERY_KEYS.findById(simulationId) });
+      },
+    });
+  },
 };

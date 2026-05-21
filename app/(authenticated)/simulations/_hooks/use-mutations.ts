@@ -17,3 +17,10 @@ export const useDeleteDraftSimulationJobMutation = () => {
 
   return useMutation(simulationMutations.deleteDraftSimulationJob(api, queryClient));
 };
+
+export const useDeleteSimulationByIdMutation = () => {
+  const api = useAuthenticatedClient();
+  const queryClient = useQueryClient();
+
+  return useMutation(simulationMutations.deleteSimulationById(api, queryClient));
+};
