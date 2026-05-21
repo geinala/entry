@@ -3,9 +3,12 @@ import { responseFormatter } from "@/lib/response-formatter";
 import "server-only";
 import { getGlobalSummaryAlgorithmService } from "./summary.service";
 
-export const getGlobalSummaryAlgorithmController = async (simulationId: string) => {
+export const getGlobalSummaryAlgorithmController = async (
+  simulationId: string,
+  courierId?: string,
+) => {
   try {
-    const result = await getGlobalSummaryAlgorithmService(simulationId);
+    const result = await getGlobalSummaryAlgorithmService(simulationId, courierId);
 
     return responseFormatter.successWithData({
       message: "Global summary retrieved successfully",

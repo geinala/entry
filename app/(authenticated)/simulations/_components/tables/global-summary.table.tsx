@@ -9,16 +9,28 @@ import {
 } from "@/app/_components/ui/card";
 import { ItemMedia } from "@/app/_components/ui/item";
 import { FileText, TrendingDown, TrendingUp } from "lucide-react";
+import { useState } from "react";
 import { useGetGlobalSummaryAlgorithmQuery } from "../../_hooks/use-queries";
+import {} from /* useSearchParams, usePathname, useRouter */ "next/navigation";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/app/_components/ui/table";
 import { formatSeconds, metersToKm } from "@/lib/utils";
+import { useGetAllCouriersQuery } from "../../[id]/_hooks/use-queries";
+import CourierSelect from "../courier.select";
 
 interface ILogTable {
   simulationId: string;
 }
 
 export default function GlobalSummaryTable({ simulationId }: ILogTable) {
-  const { data } = useGetGlobalSummaryAlgorithmQuery(simulationId);
+  const [selectedCourierId, setSelectedCourierId] = useState<string>("all");
+  const courierIdForQuery = selectedCourierId === "all" ? undefined : selectedCourierId;
+
+  const { data } = useGetGlobalSummaryAlgorithmQuery(simulationId, courierIdForQuery);
+  const { data: couriersData, isLoading } = useGetAllCouriersQuery(simulationId);
+
+  const handleCourierChange = (courierId: string) => {
+    setSelectedCourierId(courierId);
+  };
 
   const renderImprovement = (value?: number) => {
     if (value === undefined || value === null) return "-";
@@ -54,6 +66,12 @@ export default function GlobalSummaryTable({ simulationId }: ILogTable) {
               <CardDescription>Summary of algorithm performance metrics.</CardDescription>
             </div>
           </div>
+          <CourierSelect
+            value={selectedCourierId}
+            onValueChange={handleCourierChange}
+            couriers={couriersData}
+            isLoading={isLoading}
+          />
         </div>
       </CardHeader>
       <CardContent className="w-full h-full">

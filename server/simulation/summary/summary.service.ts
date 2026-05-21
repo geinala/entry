@@ -3,8 +3,9 @@ import { getGlobalSummaryAlgorithmRepository } from "./summary.repository";
 
 export const getGlobalSummaryAlgorithmService = async (
   simulationId: string,
+  courierId?: string,
 ): Promise<TGlobalAlgorithmSummary> => {
-  const result = await getGlobalSummaryAlgorithmRepository(simulationId);
+  const result = await getGlobalSummaryAlgorithmRepository(simulationId, courierId);
 
   const timeTravelImprovement =
     result.greedySummary.totalTimeTravelledInSeconds > 0

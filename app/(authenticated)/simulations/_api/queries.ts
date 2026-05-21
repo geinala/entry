@@ -91,12 +91,12 @@ export const simulationQueries = {
       enabled: !!simulationId,
     });
   },
-  getGlobalSummaryAlgorithm: (api: AxiosInstance, simulationId?: string) => {
+  getGlobalSummaryAlgorithm: (api: AxiosInstance, simulationId?: string, courierId?: string) => {
     return queryOptions({
-      queryKey: ["simulations", simulationId, "global-summary"] as const,
+      queryKey: ["simulations", simulationId, "global-summary", courierId] as const,
       queryFn: async (): Promise<TGlobalAlgorithmSummary> => {
         const response: AxiosResponse<TApiSuccessResponseWithData<TGlobalAlgorithmSummary>> =
-          await api.get(`/simulations/${simulationId}/algorithms/summary`);
+          await api.get(`/simulations/${simulationId}/algorithms/summary`, { params: { courierId } });
 
         return response.data.data;
       },
