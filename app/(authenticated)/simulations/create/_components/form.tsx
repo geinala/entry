@@ -56,7 +56,7 @@ const CreateSimulationForm = () => {
       className="w-full flex flex-col items-end gap-3"
     >
       <DownloadTemplateButton />
-      <div className="grid grid-cols-2 items-stretch w-full gap-4 min-h-0">
+      <div className="grid grid-cols-2 items-stretch w-full gap-3 min-h-0">
         <div className="flex-1 flex flex-col gap-2 h-full">
           <form.Field
             name="title"

@@ -86,10 +86,10 @@ export default function CSVInput({ onFileUpload, ...props }: CSVInputProps) {
                 onBlur={field.handleBlur}
                 isInvalid={isInvalid}
                 variant={props.variant ?? "muted"}
-                    className={cn(
-                      "border border-neutral-400 border-dashed flex items-center rounded-md flex-col justify-center text-center cursor-pointer hover:bg-gray-50 bg-muted",
-                      props.className,
-                    )}
+                className={cn(
+                  "border border-neutral-400 border-dashed flex items-center rounded-md flex-col justify-center text-center cursor-pointer hover:bg-gray-50 bg-muted",
+                  props.className,
+                )}
               />
             </Field>
           );
@@ -102,7 +102,7 @@ export default function CSVInput({ onFileUpload, ...props }: CSVInputProps) {
 
       <Button
         type="submit"
-        className="mt-4 w-full"
+        className="mt-3 w-full"
         form="form-csv-input"
         disabled={isPending || form.state.isSubmitting || !selectedFile}
         isLoading={isPending || form.state.isSubmitting}

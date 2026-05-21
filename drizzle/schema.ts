@@ -553,6 +553,7 @@ export const optimizationRunTable = pgTable(
     totalDistanceInMeters: integer("total_distance_in_meters").notNull(),
     totalTravelTimeInSeconds: integer("total_travel_time_in_seconds").notNull(),
     computationTimeInMs: real("computation_time_in_ms").notNull(),
+    totalNodesExplored: integer("total_nodes_explored").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
@@ -610,5 +611,21 @@ export const simulationLogTable = pgTable(
     index("simulation_logs_simulation_id_idx").on(table.simulationId),
     index("simulation_logs_courier_route_id_idx").on(table.courierRouteId),
     index("simulation_logs_courier_id_idx").on(table.courierId),
+  ],
+);
+
+export const depotTable = pgTable(
+  "depots",
+  {
+    id: serial().primaryKey(),
+    name: varchar("name").notNull(),
+    address: varchar("address").notNull(),
+    latitude: doublePrecision("latitude").notNull(),
+    longitude: doublePrecision("longitude").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    index("depots_name_idx").on(table.name),
+    index("depots_coordinates_idx").on(table.latitude, table.longitude),
   ],
 );

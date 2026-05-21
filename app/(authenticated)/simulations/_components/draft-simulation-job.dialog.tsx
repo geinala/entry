@@ -36,7 +36,7 @@ export const DraftSimulationJobDialog = () => {
       </DialogHeader>
 
       {/* 🔹 Ringkasan Draft */}
-      <div className="py-4 space-y-2 text-sm">
+      <div className="py-3 space-y-2 text-sm">
         <div>
           <span className="font-medium">Title:</span> {data?.title || "-"}
         </div>

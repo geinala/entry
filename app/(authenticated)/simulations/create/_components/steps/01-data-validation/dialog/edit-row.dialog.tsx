@@ -45,8 +45,8 @@ export const EditRowDialog: React.FC<Props> = ({
         </DialogHeader>
 
         {selectedRow && formValues && (
-          <form className="space-y-4" onSubmit={onSubmit}>
-            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+          <form className="space-y-3" onSubmit={onSubmit}>
+            <div className="grid grid-cols-1 gap-3 md:grid-cols-2">
               <div className="space-y-2">
                 <Label htmlFor="nosi">No SI</Label>
                 <Input

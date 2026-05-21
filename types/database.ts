@@ -14,6 +14,7 @@ import {
   simulationUploadedRows,
   nodeDetailTable,
   simulationLogTable,
+  depotTable,
 } from "@/drizzle/schema";
 
 // User Types
@@ -50,6 +51,9 @@ export type TSimulationWithUploadedFile = TSimulation & {
   totalDemand: number;
 };
 export type TSimulationStatus = TSimulation["status"];
+
+// Depot Types
+export type TDepot = InferSelectModel<typeof depotTable>;
 
 // Node Types
 export type TNode = InferSelectModel<typeof nodeTable>;
@@ -161,3 +165,22 @@ export type TSimulationJobAreaDistributionRow = {
 
 export type TSimulationLog = InferSelectModel<typeof simulationLogTable>;
 export type TNewSimulationLog = InferInsertModel<typeof simulationLogTable>;
+
+export type TGlobalAlgorithmSummary = {
+  greedySummary: {
+    totalDistanceInMeters: number;
+    totalTimeTravelledInSeconds: number;
+    computationTimeInMs: number;
+  };
+  tabuSearchSummary: {
+    totalDistanceInMeters: number;
+    totalTimeTravelledInSeconds: number;
+    computationTimeInMs: number;
+  };
+  totalNodesExplored: number;
+  improvement: {
+    totalDistanceImprovementPercentage: number;
+    totalTimeTravelledImprovementPercentage: number;
+    computationTimeImprovementPercentage: number;
+  };
+};

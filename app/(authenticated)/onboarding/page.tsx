@@ -30,7 +30,7 @@ export default function OnboardingPage() {
   return (
     <main className="w-dvw h-dvh flex justify-center items-center">
       <Card className="w-full max-w-md mx-auto text-center shadow-lg">
-        <CardHeader className="space-y-4">
+        <CardHeader className="space-y-3">
           {" "}
           <div className="flex justify-center">
             <ShieldCheck className="h-14 w-14 text-green-600" />

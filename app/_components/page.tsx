@@ -21,7 +21,7 @@ export default function Page({
   ...props
 }: PropsWithChildren<Props>) {
   return (
-    <div className="w-full h-full flex flex-col gap-4 p-4" {...props}>
+    <div className="w-full h-full min-h-0 flex flex-col gap-3 p-3" {...props}>
       {isLoading ? (
         <Empty>
           <EmptyContent>

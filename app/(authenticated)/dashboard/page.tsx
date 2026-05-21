@@ -17,7 +17,7 @@ export default function DashboardPage() {
   }, [setBreadcrumbs]);
 
   return (
-    <div className="w-full h-full flex justify-center items-center flex-col gap-4">
+    <div className="w-full h-full flex justify-center items-center flex-col gap-3">
       <Empty>
         <EmptyHeader>
           <EmptyTitle>Dashboard</EmptyTitle>

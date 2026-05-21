@@ -9,7 +9,7 @@ export default function Page() {
       <Link href={"/sign-in"}>
         <Button>Masuk</Button>
       </Link>
-      <Link href={"/waitlist"} className="ml-4">
+      <Link href={"/waitlist"} className="ml-3">
         <Button variant="outline">Daftar Waitlist</Button>
       </Link>
     </main>
