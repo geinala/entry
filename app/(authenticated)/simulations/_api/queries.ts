@@ -3,6 +3,7 @@
 import { getNextPage } from "@/lib/infinite-scroll";
 import { TIndexSimulationQueryParams } from "@/schemas/simulation.schema";
 import {
+  TGlobalAlgorithmSummary,
   TSimulation,
   TSimulationJob,
   TSimulationLog,
@@ -84,6 +85,18 @@ export const simulationQueries = {
       queryFn: async (): Promise<TPaginationResponse<TSimulationLog>> => {
         const response: AxiosResponse<TApiSuccessResponseWithPagination<TSimulationLog>> =
           await api.get(`/simulations/${simulationId}/logs`, { params: queryParams });
+
+        return response.data.data;
+      },
+      enabled: !!simulationId,
+    });
+  },
+  getGlobalSummaryAlgorithm: (api: AxiosInstance, simulationId?: string) => {
+    return queryOptions({
+      queryKey: ["simulations", simulationId, "global-summary"] as const,
+      queryFn: async (): Promise<TGlobalAlgorithmSummary> => {
+        const response: AxiosResponse<TApiSuccessResponseWithData<TGlobalAlgorithmSummary>> =
+          await api.get(`/simulations/${simulationId}/algorithms/summary`);
 
         return response.data.data;
       },

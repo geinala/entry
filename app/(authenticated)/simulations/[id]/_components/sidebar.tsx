@@ -20,7 +20,7 @@ interface SimulationDetailSidebarLeftProps {
 export const SimulationDetailLeftSidebar = ({ status }: SimulationDetailSidebarLeftProps) => {
   return (
     <Sidebar containerClassName="relative h-full" className="h-full relative w-full" side="left">
-      <SidebarContent className="p-4">
+      <SidebarContent className="p-3">
         <SimulationStatusItem status={status} />
       </SidebarContent>
     </Sidebar>
@@ -34,7 +34,7 @@ interface RightSidebarProps {
 export const SimulationDetailRightSidebar = ({ data }: RightSidebarProps) => {
   return (
     <Sidebar containerClassName="relative h-full" className="h-full relative w-full" side="right">
-      <SidebarHeader className="flex flex-row items-center gap-2 px-4 py-4">
+      <SidebarHeader className="flex flex-row items-center gap-2 p-3">
         <ChartNoAxesCombined className="w-5 h-5 text-primary" />
         <Paragraph className="not-first:mt-0 text-md font-semibold">Results</Paragraph>
       </SidebarHeader>

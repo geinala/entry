@@ -1,6 +1,6 @@
 "use client";
 
-import { BrickWallShield, LayoutDashboard, Route, UserCog, Users } from "lucide-react";
+import { BrickWallShield, LayoutDashboard, Route, Users, Warehouse } from "lucide-react";
 import { Route as RouteNext } from "next";
 import { PERMISSIONS } from "./permissions/permissions";
 
@@ -54,10 +54,10 @@ export const MENU_ITEMS: (TMenuItem | IGroupedMenuItem)[] = [
         permissions: ["user:view"], // TODO: Replace with actual permission constants
       },
       {
-        path: "/users/waitlist",
-        icon: <UserCog />,
-        label: "Waitlist Users",
-        permissions: [PERMISSIONS.VIEW_WAITLIST],
+        path: "/depots",
+        icon: <Warehouse />,
+        label: "Depots",
+        permissions: ["depot:view"], // TODO: Replace with actual permission constants
       },
     ],
   },

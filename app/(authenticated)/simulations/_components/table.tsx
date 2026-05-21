@@ -51,8 +51,8 @@ export default function LogTable({ simulationId }: ILogTable) {
   return (
     <Card className="gap-2 w-full h-full">
       <CardHeader>
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex items-center gap-4">
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
             <ItemMedia variant={"icon"} className="bg-blue-100 border-0 h-full size-10">
               <FileText className="text-blue-500 w-full h-full" />
             </ItemMedia>

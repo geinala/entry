@@ -21,7 +21,7 @@ export default function NotFound() {
   }, [setBreadcrumbs]);
 
   return (
-    <div className="w-dvw h-dvh flex flex-col justify-center items-center gap-4">
+    <div className="w-dvw h-dvh flex flex-col justify-center items-center gap-3">
       <Empty>
         <EmptyHeader>
           <EmptyTitle>Resource Not Found</EmptyTitle>

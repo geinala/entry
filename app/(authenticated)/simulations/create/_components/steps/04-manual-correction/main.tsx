@@ -36,7 +36,7 @@ export const ManualCorrection = () => {
 
   if (isLoading) {
     return (
-      <div className="w-full flex flex-col items-center justify-center gap-4 py-6">
+      <div className="w-full flex flex-col items-center justify-center gap-3 py-6">
         <Skeleton className="h-25 w-25 rounded-full" />
         <div className="w-full max-w-md space-y-3">
           <Skeleton className="h-4 w-1/3" />

@@ -92,7 +92,7 @@ export const SimulationHistorySidebar = ({ onSelectSimulation }: ISimulationHist
             <Paragraph className="text-muted-foreground">No simulations found</Paragraph>
           </div>
         ) : (
-          <div className="overflow-y-auto h-full space-y-4 scrollbar-thin">
+          <div className="overflow-y-auto h-full space-y-3 scrollbar-thin">
             {simulationsData?.map((page) => (
               <SimulationCard {...page} key={page.id} onSelectSimulation={onSelectSimulation} />
             ))}
@@ -135,7 +135,7 @@ const SimulationCard = (
       <div className="h-fit w-full flex justify-center items-center absolute top-0 left-0">
         <div className="bg-primary w-full h-[2.8px] rounded-full" />
       </div>
-      <CardContent className="px-4">
+      <CardContent className="px-3">
         <div className="w-full flex justify-between items-center">
           <CardTitle className="text-primary text-md">{truncateText(data.id, 15)}</CardTitle>
           <Badge variant={"success"} className={STATUS_CONFIG[data.status].color}>
@@ -144,7 +144,7 @@ const SimulationCard = (
         </div>
         <CardTitle>{truncateText(data.title, 30)}</CardTitle>
       </CardContent>
-      <CardFooter className="px-4">
+      <CardFooter className="px-3">
         <CardDescription className="flex gap-2 justify-center items-center">
           <Calendar className="w-4 h-4 bg-slate-100" />
           <Paragraph>

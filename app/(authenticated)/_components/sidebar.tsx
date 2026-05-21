@@ -67,7 +67,7 @@ export default function AuthenticatedSidebar() {
 
   return (
     <Sidebar containerClassName="z-999">
-      <SidebarHeader className="flex justify-between items-center flex-row p-4">
+      <SidebarHeader className="flex justify-between items-center flex-row p-3">
         <Logo />
         <SidebarTrigger variant={"ghost"}>
           <X />

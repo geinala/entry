@@ -110,7 +110,7 @@ const EditFinalAddressForm: React.FC<FormProps> = ({
   };
 
   return (
-    <form className="space-y-4" onSubmit={handleSubmit} id="edit-final-address-form">
+    <form className="space-y-3" onSubmit={handleSubmit} id="edit-final-address-form">
       <Field data-invalid={isInvalid}>
         <FieldLabel htmlFor="finalAddress">Final Address</FieldLabel>
 

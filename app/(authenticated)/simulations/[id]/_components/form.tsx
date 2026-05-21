@@ -59,7 +59,7 @@ export const ConstraintsForm = ({ onSuccess }: { onSuccess?: () => void }) => {
           mode="array"
           /* eslint-disable react/no-children-prop */
           children={(field) => (
-            <div className="space-y-4">
+            <div className="space-y-3">
               {/* Header */}
               <div className="flex items-center justify-between">
                 <FieldLabel>Vehicle Constraints ({field.state.value.length})</FieldLabel>

@@ -29,7 +29,7 @@ export const IgnoreConfirmationDialog = ({ ...props }: IProps) => {
               "All rows marked as errors will be permanently ignored before continuing the process."}
           </DialogDescription>
         </DialogHeader>
-        <p className="mb-4">
+        <p className="mb-3">
           This action cannot be undone. Please make sure you want to ignore all error rows before
           proceeding.
         </p>

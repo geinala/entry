@@ -108,7 +108,7 @@ export const CsvFileDropzone = ({
         {!file ? (
           <label
             htmlFor={inputId}
-            className="flex min-h-55 h-full w-full cursor-pointer flex-col items-center justify-center px-4 text-center"
+            className="flex min-h-55 h-full w-full cursor-pointer flex-col items-center justify-center px-3 text-center"
           >
             <Empty className="p-1!">
               <EmptyContent className="gap-2">
