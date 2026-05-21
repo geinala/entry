@@ -34,6 +34,7 @@ const CreateSimulationForm = () => {
       depotLocationAddress: "",
       startDatetime: new Date().toISOString(),
       title: "Simulation Job - " + formatDate(new Date(), "yyyy-MM-dd"),
+      depotId: 0,
     },
     validators: {
       onSubmit: CreateSimulationJobSchema,
@@ -44,7 +45,6 @@ const CreateSimulationForm = () => {
         depotLatitude: Number(value.depotLatitude),
         depotLongitude: Number(value.depotLongitude),
         computationTimeLimit: Number(value.computationTimeLimit),
-        depotId: Number(selectedDepotId),
       });
     },
   });
@@ -57,6 +57,7 @@ const CreateSimulationForm = () => {
     form.setFieldValue("depotLatitude", depot?.latitude ?? 0);
     form.setFieldValue("depotLongitude", depot?.longitude ?? 0);
     form.setFieldValue("depotLocationAddress", depot?.address ?? "");
+    form.setFieldValue("depotId", Number(depot?.id));
   };
 
   return (

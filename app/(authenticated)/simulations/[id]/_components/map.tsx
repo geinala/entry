@@ -13,10 +13,24 @@ import {
   sortRoutesByDisplayPriority,
 } from "../_utils/map-route-data";
 
+export interface SimulationVehicleTick {
+  id: number;
+  courierId: number;
+  courierRouteId: number;
+  routeLegId: number;
+  sequence: number;
+  lat: number;
+  lng: number;
+  speed: number;
+  progress: number;
+  status: string;
+}
+
 interface MapProps {
   center?: [number, number];
   zoom?: number;
   routes?: TLatestRouteBySimulationRow[];
+  vehicles?: SimulationVehicleTick[];
 }
 
 const isNodeAtDepot = (node: { lat: number; lng: number }, center?: [number, number]) => {
@@ -29,12 +43,16 @@ const isNodeAtDepot = (node: { lat: number; lng: number }, center?: [number, num
   return Math.abs(node.lng - center[0]) < EPSILON && Math.abs(node.lat - center[1]) < EPSILON;
 };
 
-const Map = ({ center, zoom, routes = [] }: MapProps) => {
+const Map = ({ center, zoom, routes = [], vehicles = [] }: MapProps) => {
   const decodedRoutes = useMemo(() => decodeRoutes(routes), [routes]);
 
   const displayRoutes = useMemo(() => sortRoutesByDisplayPriority(decodedRoutes), [decodedRoutes]);
 
   const routeNodes = useMemo(() => buildRouteNodes(routes), [routes]);
+  const displayVehicles = useMemo(
+    () => [...vehicles].sort((left, right) => left.id - right.id),
+    [vehicles],
+  );
 
   return (
     <TomTomMap
@@ -97,6 +115,30 @@ const Map = ({ center, zoom, routes = [] }: MapProps) => {
           );
         });
       })()}
+      {displayVehicles.map((vehicle) => (
+        <Marker
+          key={`vehicle-${vehicle.id}`}
+          lng={vehicle.lng}
+          lat={vehicle.lat}
+          icon={<span>{vehicle.id}</span>}
+          className="w-8 h-8"
+          style={{
+            borderRadius: "9999px",
+            border: "2px solid #1d4ed8",
+            backgroundColor: "#2563eb",
+            color: "#ffffff",
+            fontWeight: "700",
+            fontSize: "12px",
+            width: "32px",
+            height: "32px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            lineHeight: "1",
+            boxShadow: "0 2px 6px rgba(37, 99, 235, 0.35)",
+          }}
+        />
+      ))}
     </TomTomMap>
   );
 };

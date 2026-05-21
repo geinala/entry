@@ -7,7 +7,7 @@ import Link from "next/link";
 const DownloadTemplateButton = () => {
   return (
     <Link href={"/template.xlsx"} download={"Simulation Template Input Data.xlsx"}>
-      <Button variant={"outline"} size="sm" className="bg-transparent">
+      <Button variant={"outline"} type="button" size="sm" className="bg-transparent">
         <Download className="w-4 h-4 mr-2" />
         Download Template
       </Button>
