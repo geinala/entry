@@ -3,7 +3,7 @@ export type MapCoordinate = {
   lng: number;
 };
 
-export const interpolatePath = (coordinates: MapCoordinate[], progress: number) => {
+const _interpolatePath = (coordinates: MapCoordinate[], progress: number) => {
   if (coordinates.length === 0) {
     return null;
   }
@@ -43,7 +43,8 @@ export const interpolatePath = (coordinates: MapCoordinate[], progress: number) 
     }
 
     const segmentLength = endDistance - startDistance;
-    const segmentProgress = segmentLength === 0 ? 0 : (targetDistance - startDistance) / segmentLength;
+    const segmentProgress =
+      segmentLength === 0 ? 0 : (targetDistance - startDistance) / segmentLength;
     const start = coordinates[index - 1];
     const end = coordinates[index];
 

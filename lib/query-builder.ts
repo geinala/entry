@@ -21,7 +21,7 @@ import { TIndexQueryParams } from "@/types/query-params";
 /**
  * Metadata untuk single column (regular atau computed)
  */
-export type TColumnDefinition<TTable extends PgTable> = {
+type TColumnDefinition<TTable extends PgTable> = {
   /** Bisa di-search (text search dengan ILIKE) */
   searchable?: boolean;
   /** Bisa di-filter (exact match) */
@@ -36,18 +36,6 @@ export type TColumnDefinition<TTable extends PgTable> = {
  * Definisi semua columns (regular dan computed)
  */
 export type TColumnsDefinition<TTable extends PgTable> = Record<string, TColumnDefinition<TTable>>;
-
-/**
- * Definisi join untuk query builder
- */
-type TJoin = {
-  /** Tabel yang di-join */
-  table: PgTable;
-  /** Kondisi join (ON clause) */
-  on: SQL;
-  /** Tipe join (default: "inner") */
-  type?: "inner" | "left" | "right" | "full";
-};
 
 type TPaginationParams<TTable extends PgTable> = {
   table: TTable;

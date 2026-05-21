@@ -57,7 +57,10 @@ export const deleteSimulationByIdService = async (clerkUserId: string, simulatio
     throw new NotFoundException("User not found");
   }
 
-  const deletedSimulation = await deleteSimulationWithRelationsRepository(simulationId, user.userId);
+  const deletedSimulation = await deleteSimulationWithRelationsRepository(
+    simulationId,
+    user.userId,
+  );
 
   if (!deletedSimulation) {
     throw new NotFoundException("Simulation not found");

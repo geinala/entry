@@ -40,15 +40,4 @@ const SimulationStatusItem = ({ status }: ISimulationStatusItemProps) => {
   );
 };
 
-const StatisticsItem = ({ title, content }: { title: string; content: React.ReactNode }) => {
-  return (
-    <Item variant={"outline"} className={`gap-2`}>
-      <ItemHeader>
-        <ItemTitle className="text-muted-foreground font-semibold">{title}</ItemTitle>
-      </ItemHeader>
-      <ItemContent>{content}</ItemContent>
-    </Item>
-  );
-};
-
-export { SimulationStatusItem, StatisticsItem };
+export { SimulationStatusItem };

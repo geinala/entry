@@ -1,6 +1,5 @@
 "use client";
 
-import { TCreateSimulationSchema } from "@/schemas/simulation.schema";
 import { mutationOptions, QueryClient } from "@tanstack/react-query";
 import { AxiosInstance, AxiosResponse } from "axios";
 import { toast } from "sonner";
@@ -9,18 +8,6 @@ import { TBaseApiResponse } from "@/types/response";
 import { TUpdateSimulationJobSchema } from "@/schemas/simulations/jobs/update-simulation-job.schema";
 
 export const simulationMutations = {
-  createSimulation: (api: AxiosInstance, queryClient: QueryClient) => {
-    return mutationOptions({
-      mutationFn: async (payload: TCreateSimulationSchema) => {
-        return await api.post("/simulations", payload);
-      },
-      onSuccess: () => {
-        toast.success("Simulation created successfully");
-
-        queryClient.invalidateQueries({ queryKey: SIMULATIONS_QUERY_KEYS.all });
-      },
-    });
-  },
   deleteDraftSimulationJob: (api: AxiosInstance, queryClient: QueryClient) => {
     return mutationOptions({
       mutationFn: async (): Promise<TBaseApiResponse> => {

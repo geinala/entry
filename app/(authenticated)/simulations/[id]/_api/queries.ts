@@ -5,7 +5,7 @@ import { TApiSuccessResponseWithData } from "@/types/response";
 import { queryOptions } from "@tanstack/react-query";
 import { AxiosInstance, AxiosResponse } from "axios";
 
-export const SIMULATION_DETAIL_QUERY_KEYS = {
+const SIMULATION_DETAIL_QUERY_KEYS = {
   findFileWithSimulationId: (simulationId: string) => ["simulation-file", simulationId] as const,
   getAllActiveVehicles: (simulationId?: string) => ["active-vehicles", simulationId] as const,
   getFinalRoutes: (simulationId?: string, vehicleId?: number) =>

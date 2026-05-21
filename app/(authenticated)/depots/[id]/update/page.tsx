@@ -20,6 +20,7 @@ export default function UpdateDepotPage() {
       { label: "Depots", href: "/depots" },
       { label: "Update Depot", href: `/depots/${id}/update` },
     ]);
+    /* eslint-disable-next-line react-hooks/exhaustive-deps */
   }, [setBreadcrumbs]);
 
   return (

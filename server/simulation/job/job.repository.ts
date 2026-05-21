@@ -28,6 +28,7 @@ export const createSimulationJobRepository = async (
       fileTotalRows,
       fileValidationStatus: "uploaded",
       fileValidationStartedAt: new Date(),
+      depotId: data.depotId,
     })
     .returning();
 

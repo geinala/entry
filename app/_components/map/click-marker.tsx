@@ -12,12 +12,18 @@ interface ClickMarkerProps {
   position?: { lng: number; lat: number } | null;
 }
 
-export const ClickMarker = ({ onChange, color = "#ef4444", position: controlledPosition }: ClickMarkerProps) => {
+export const ClickMarker = ({
+  onChange,
+  color = "#ef4444",
+  position: controlledPosition,
+}: ClickMarkerProps) => {
   const { mapLibreMap } = useMap();
   const queryClient = useQueryClient();
   const markerRef = useRef<maplibregl.Marker | null>(null);
   const clickRequestRef = useRef(0);
-  const [internalPosition, setInternalPosition] = useState<{ lng: number; lat: number } | null>(null);
+  const [internalPosition, setInternalPosition] = useState<{ lng: number; lat: number } | null>(
+    null,
+  );
   const position = controlledPosition ?? internalPosition;
 
   useEffect(() => {

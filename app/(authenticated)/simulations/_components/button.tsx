@@ -46,8 +46,8 @@ const DeleteSimulationButton = ({ simulationId, onDeleted }: IDeleteSimulationBu
         <DialogHeader>
           <DialogTitle>Delete simulation?</DialogTitle>
           <DialogDescription>
-            This action will permanently delete the simulation and all related data. This cannot
-            be undone.
+            This action will permanently delete the simulation and all related data. This cannot be
+            undone.
           </DialogDescription>
         </DialogHeader>
 

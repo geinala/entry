@@ -48,20 +48,12 @@ export const formatDateTime = (value: Date | string | null | undefined) => {
   const str = String(value).trim();
 
   // Try ISO parse first
-  try {
-    const iso = parseISO(str);
-    if (isValid(iso)) return dfFormat(iso, "yyyy-MM-dd HH:mm:ss");
-  } catch (e) {
-    // ignore
-  }
+  const iso = parseISO(str);
+  if (isValid(iso)) return dfFormat(iso, "yyyy-MM-dd HH:mm:ss");
 
   // Try parsing as local 'yyyy-MM-dd HH:mm:ss'
-  try {
-    const parsed = dfParse(str, "yyyy-MM-dd HH:mm:ss", new Date());
-    if (isValid(parsed)) return dfFormat(parsed, "yyyy-MM-dd HH:mm:ss");
-  } catch (e) {
-    // ignore
-  }
+  const parsed = dfParse(str, "yyyy-MM-dd HH:mm:ss", new Date());
+  if (isValid(parsed)) return dfFormat(parsed, "yyyy-MM-dd HH:mm:ss");
 
   // Fallback to Date constructor (may interpret as UTC or local depending on format)
   const fallback = new Date(str);

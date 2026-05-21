@@ -19,7 +19,7 @@ interface IProps extends Omit<IDataTableProps<TSimulationUploadedRowWithErrors>,
   isDeletingRow: boolean;
 }
 
-export const ErrorRowsTable: React.FC<IProps> = ({
+const ErrorRowsTable: React.FC<IProps> = ({
   jobId,
   onEditRow,
   onDeleteRow,

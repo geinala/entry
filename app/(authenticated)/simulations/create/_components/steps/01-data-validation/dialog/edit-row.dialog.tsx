@@ -25,7 +25,7 @@ type Props = {
   onSubmit: (event: FormEvent<HTMLFormElement>) => Promise<void> | void;
 };
 
-export const EditRowDialog: React.FC<Props> = ({
+const EditRowDialog: React.FC<Props> = ({
   open,
   onOpenChange,
   selectedRow,
