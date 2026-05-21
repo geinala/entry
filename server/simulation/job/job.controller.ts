@@ -36,6 +36,7 @@ export const createSimulationJobController = async (request: NextRequest, clerkU
       computationTimeLimit: Number(formData.get("computationTimeLimit")),
       customersFile: formData.get("customersFile") as File,
       startDatetime: formData.get("startDatetime") as string,
+      depotId: Number(formData.get("depotId")),
     };
 
     const { data } = validateSchema<TCreateSimulationJobSchema>(CreateSimulationJobSchema, payload);

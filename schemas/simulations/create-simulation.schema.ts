@@ -45,7 +45,7 @@ export const CreateSimulationJobSchema = z.object({
       const date = new Date(value);
       return !isNaN(date.getTime());
     }, "Invalid date format"),
-  depotId: z.number({
+  depotId: z.coerce.number({
     required_error: "Depot ID is required",
     message: "Depot ID must be a number",
   }),
