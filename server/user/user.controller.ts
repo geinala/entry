@@ -20,7 +20,7 @@ export const onBoardingUserController = async (clerkUserId: string): Promise<Nex
       });
     }
 
-    await updateClerkUserMetadata(clerkUserId, { isEligible: true });
+    await updateClerkUserMetadata(clerkUserId, { is_eligible: true });
 
     return responseFormatter.successWithData({
       data: { registered: false, redirectTo: "/onboarding" },
