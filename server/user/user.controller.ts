@@ -15,12 +15,18 @@ export const onBoardingUserController = async (clerkUserId: string): Promise<Nex
     const user = await findCurrentUserByIdService(clerkUserId);
 
     if (user) {
-      return NextResponse.json({ registered: true, redirectTo: "/dashboard" }, { status: 200 });
+      return responseFormatter.successWithData({
+        data: { registered: true, redirectTo: "/dashboard" },
+        message: "User is already registered",
+      });
     }
 
     await clerkService.updateUserMetadata(clerkUserId, { onboardingStarted: true });
 
-    return NextResponse.json({ registered: false, redirectTo: "/onboarding" }, { status: 200 });
+    return responseFormatter.successWithData({
+      data: { registered: false, redirectTo: "/onboarding" },
+      message: "Onboarding started",
+    });
   } catch (error) {
     return handleException(error);
   }

@@ -33,7 +33,7 @@ export default function OnboardingPage() {
         <CardHeader className="space-y-3">
           {" "}
           <div className="flex justify-center">
-            <ShieldCheck className="h-14 w-14 text-green-600" />
+            {!data && !isLoading && <ShieldCheck className="h-14 w-14 text-primary" />}
           </div>
           <div className="space-y-2">
             {" "}
@@ -46,26 +46,26 @@ export default function OnboardingPage() {
           </div>
         </CardHeader>
 
-        <CardContent className="flex justify-center">
+        <CardContent className="flex flex-col justify-center items-center">
           {isLoading && <Spinner className="h-8 w-8 text-primary animate-spin" />}
-          {!isLoading && data && !data.registered && (
+          {!isLoading && !data && (
             <div className="flex flex-col justify-center items-center gap-2">
               <p className="text-sm text-muted-foreground">
                 It seems like you are not registered yet.
               </p>
               <Button
                 onClick={() => {
-                  toast.info("Redirecting to waitlist page...", {
+                  toast.info("Redirecting to homepage...", {
                     duration: 2000,
                     closeButton: false,
                     dismissible: false,
                     onAutoClose: () => {
-                      signOut({ redirectUrl: "/waitlist" });
+                      signOut({ redirectUrl: "/" });
                     },
                   });
                 }}
               >
-                Request Access
+                Go to homepage
               </Button>
             </div>
           )}
