@@ -5,10 +5,10 @@ import { findCurrentUserByIdService, getUsersWithPaginationService } from "./use
 import { clerkService } from "@/server/clerk/clerk.service";
 import { parseQueryParams } from "@/lib/validation";
 import { parseSortParams } from "@/lib/query-param";
-import { GetUsersQueryParams } from "@/schemas/user.schema";
 import { handleException } from "@/common/exception/helper";
 import { UnauthorizedException } from "@/common/exception/unauthorized.exception";
 import { responseFormatter } from "@/lib/response-formatter";
+import { UserIndexQueryParams } from "@/schemas/user.schema";
 
 export const onBoardingUserController = async (clerkUserId: string): Promise<NextResponse> => {
   try {
@@ -61,15 +61,19 @@ export const getUsersWithPaginationController = async (req: NextRequest): Promis
       sort: parseSortParams(searchParams),
     };
 
-    const result = parseQueryParams(GetUsersQueryParams, rawQueryParams);
+    const result = parseQueryParams(UserIndexQueryParams, rawQueryParams);
 
     if (!result.success) {
       return NextResponse.json({ message: "Invalid query parameters" }, { status: 400 });
     }
 
-    const users = await getUsersWithPaginationService(result.data);
+    const { data, meta } = await getUsersWithPaginationService(result.data);
 
-    return NextResponse.json(users, { status: 200 });
+    return responseFormatter.successWithPagination({
+      data: data,
+      meta: meta,
+      message: "Users retrieved successfully",
+    });
   } catch (error) {
     return handleException(error);
   }

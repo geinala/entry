@@ -31,8 +31,6 @@ export type TApiValidationErrorResponse = TBaseApiResponse & {
   errors: ValidationErrorDetail[];
 };
 
-export type TApiListResponse<T> = TBaseApiResponse & TPaginationResponse<T>;
-
 export const HTTP_STATUS = {
   OK: 200,
   CREATED: 201,
