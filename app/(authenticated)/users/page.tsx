@@ -9,18 +9,21 @@ import { useEffect, useMemo } from "react";
 import { useGetUsers } from "./_hooks/use-get-users";
 import { useFilters } from "@/app/_hooks/use-filters";
 import Page from "@/app/_components/page";
-import { TSortOption } from "@/app/_components/data-table/sort";
-import { GetUsersQueryParams } from "@/schemas/user.schema";
+import { UserIndexQueryParams } from "@/schemas/user.schema";
 
 export default function UsersPage() {
   const { setBreadcrumbs } = useBreadcrumb();
-  const { handleChange, pagination, filters, search } = useFilters(GetUsersQueryParams);
+  const { handleChange, pagination, filters, search } = useFilters(UserIndexQueryParams);
 
   const { data, isLoading } = useGetUsers({
     ...pagination,
     search: filters.search,
     sort: filters.sort,
   });
+
+  useEffect(() => {
+    console.log("Data fetched:", data);
+  }, [data]);
 
   useEffect(() => {
     setBreadcrumbs([
@@ -61,32 +64,11 @@ export default function UsersPage() {
     [],
   );
 
-  const sortOptions = useMemo<TSortOption[]>(
-    () => [
-      {
-        key: "fullName",
-        label: "Name",
-        options: [
-          { direction: "asc", label: "A-Z" },
-          { direction: "desc", label: "Z-A" },
-        ],
-      },
-      {
-        key: "email",
-        label: "Email",
-        options: [
-          { direction: "asc", label: "A-Z" },
-          { direction: "desc", label: "Z-A" },
-        ],
-      },
-    ],
-    [],
-  );
-
   return (
     <Page
       title="Users Management"
       description="View and manage all registered users in the system. Use the search and sorting features to quickly find specific users."
+      isLoading={isLoading}
     >
       <DataTable
         columns={columns}
@@ -96,8 +78,6 @@ export default function UsersPage() {
         handleChange={handleChange}
         isSearchable
         pagination={pagination}
-        sortOptions={sortOptions}
-        sortDefaultValue={filters.sort}
       />
     </Page>
   );

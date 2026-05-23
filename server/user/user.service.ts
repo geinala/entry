@@ -1,15 +1,11 @@
 import "server-only";
 
-import {
-  findCurrentUserByIdRepository,
-  getUsersCountRepository,
-  getUsersWithPaginationRepository,
-} from "./user.repository";
+import { findCurrentUserByIdRepository, getUsersWithPaginationRepository } from "./user.repository";
 import { paginationResponseMapper } from "@/lib/pagination";
 import { TUser } from "@/types/database";
 import { TPaginationResponse } from "@/types/meta";
-import { TGetUsersQueryParams } from "@/schemas/user.schema";
 import { NotFoundException } from "@/common/exception/not-found.exception";
+import { TUserIndexQueryParams } from "@/schemas/user.schema";
 
 export const findCurrentUserByIdService = async (id: string) => {
   const user = await findCurrentUserByIdRepository(id);
@@ -22,12 +18,9 @@ export const findCurrentUserByIdService = async (id: string) => {
 };
 
 export const getUsersWithPaginationService = async (
-  queryParams: TGetUsersQueryParams,
+  queryParams: TUserIndexQueryParams,
 ): Promise<TPaginationResponse<TUser>> => {
-  const [users, total] = await Promise.all([
-    getUsersWithPaginationRepository(queryParams),
-    getUsersCountRepository(queryParams),
-  ]);
+  const [users, total] = await getUsersWithPaginationRepository(queryParams);
 
   return paginationResponseMapper<TUser>(users, {
     currentPage: queryParams.page,
