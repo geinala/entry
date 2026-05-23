@@ -1,17 +1,16 @@
 import { Button } from "@/app/_components/ui/button";
-import { useUpdateSimulationJobMutation } from "../../../../_hooks/use-mutations";
+import { useRevalidateAddressRowMutation } from "../../../../_hooks/use-mutations";
 import { ContinueConfirmationDialog } from "../dialog/continue-confirmation.dialog";
 import { useState } from "react";
 
 interface IProps {
   jobId: string;
-  currentStep: number;
   disabled?: boolean;
 }
 
-export const ContinueToRouteOptimizationButton = ({ jobId, currentStep, disabled }: IProps) => {
+export const ContinueToRouteOptimizationButton = ({ jobId, disabled }: IProps) => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const { mutateAsync, isPending } = useUpdateSimulationJobMutation();
+  const { mutateAsync, isPending } = useRevalidateAddressRowMutation();
 
   return (
     <>
@@ -30,8 +29,7 @@ export const ContinueToRouteOptimizationButton = ({ jobId, currentStep, disabled
         isLoading={isPending}
         onConfirm={async () => {
           await mutateAsync({
-            simulationJobId: jobId,
-            payload: { currentStep, geocodingStatus: "completed" },
+            jobId,
           });
           setIsDialogOpen(false);
         }}

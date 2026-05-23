@@ -1,6 +1,5 @@
 "use client";
 
-import { GuardComponent } from "@/app/_components/guard";
 import { Button } from "@/app/_components/ui/button";
 import {
   Sidebar,
@@ -8,7 +7,6 @@ import {
   SidebarFooter,
   SidebarHeader,
 } from "@/app/_components/ui/sidebar";
-import { PERMISSIONS } from "@/common/constants/permissions/permissions";
 import { Calendar, ListFilter, Plus } from "lucide-react";
 import { useFilters } from "@/app/_hooks/use-filters";
 import { IndexSimulationQueryParams } from "@/schemas/simulation.schema";
@@ -105,13 +103,11 @@ export const SimulationHistorySidebar = ({ onSelectSimulation }: ISimulationHist
         )}
       </SidebarContent>
       <SidebarFooter>
-        <GuardComponent requirePermission={PERMISSIONS.CREATE_SIMULATION}>
-          <Link href="/simulations/create">
-            <Button className="w-full">
-              <Plus /> Create New Simulation
-            </Button>
-          </Link>
-        </GuardComponent>
+        <Link href="/simulations/create">
+          <Button className="w-full">
+            <Plus /> Create New Simulation
+          </Button>
+        </Link>
       </SidebarFooter>
     </Sidebar>
   );

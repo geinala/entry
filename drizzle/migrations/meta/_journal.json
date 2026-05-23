@@ -5,64 +5,8 @@
     {
       "idx": 0,
       "version": "7",
-      "when": 1779155670071,
-      "tag": "0000_milky_vermin",
-      "breakpoints": true
-    },
-    {
-      "idx": 1,
-      "version": "7",
-      "when": 1779173662925,
-      "tag": "0001_confused_spitfire",
-      "breakpoints": true
-    },
-    {
-      "idx": 2,
-      "version": "7",
-      "when": 1779175884476,
-      "tag": "0002_fast_typhoid_mary",
-      "breakpoints": true
-    },
-    {
-      "idx": 3,
-      "version": "7",
-      "when": 1779272522126,
-      "tag": "0003_red_sunfire",
-      "breakpoints": true
-    },
-    {
-      "idx": 4,
-      "version": "7",
-      "when": 1779277349671,
-      "tag": "0004_silky_blur",
-      "breakpoints": true
-    },
-    {
-      "idx": 5,
-      "version": "7",
-      "when": 1779318390846,
-      "tag": "0005_goofy_scarecrow",
-      "breakpoints": true
-    },
-    {
-      "idx": 6,
-      "version": "7",
-      "when": 1779323171385,
-      "tag": "0006_familiar_zuras",
-      "breakpoints": true
-    },
-    {
-      "idx": 7,
-      "version": "7",
-      "when": 1779332652652,
-      "tag": "0007_complex_screwball",
-      "breakpoints": true
-    },
-    {
-      "idx": 8,
-      "version": "7",
-      "when": 1779332698661,
-      "tag": "0008_lumpy_hercules",
+      "when": 1779570794925,
+      "tag": "0000_romantic_colonel_america",
       "breakpoints": true
     }
   ]

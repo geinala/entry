@@ -7,8 +7,6 @@ import Loading from "../_components/loading";
 
 const UserContext = createContext<{
   userDetails: TUserWithRoleAndPermissionNames | null;
-  permissions?: string[];
-  role?: string;
 } | null>(null);
 
 export function UserProvider({ children }: { children: React.ReactNode }) {

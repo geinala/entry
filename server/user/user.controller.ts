@@ -1,11 +1,7 @@
 import "server-only";
 
 import { NextRequest, NextResponse } from "next/server";
-import {
-  findUserWithRoleAndPermissionsService,
-  getUsersWithPaginationService,
-  findCurrentUserByClerkUserIdService,
-} from "./user.service";
+import { findCurrentUserByIdService, getUsersWithPaginationService } from "./user.service";
 import { clerkService } from "@/server/clerk/clerk.service";
 import { parseQueryParams } from "@/lib/validation";
 import { parseSortParams } from "@/lib/query-param";
@@ -16,7 +12,7 @@ import { responseFormatter } from "@/lib/response-formatter";
 
 export const onBoardingUserController = async (clerkUserId: string): Promise<NextResponse> => {
   try {
-    const user = await findCurrentUserByClerkUserIdService(clerkUserId);
+    const user = await findCurrentUserByIdService(clerkUserId);
 
     if (user) {
       return NextResponse.json({ registered: true, redirectTo: "/dashboard" }, { status: 200 });
@@ -35,7 +31,7 @@ export const getUserDetailsController = async (
   sessionId: string,
 ): Promise<NextResponse> => {
   try {
-    const user = await findUserWithRoleAndPermissionsService(clerkUserId);
+    const user = await findCurrentUserByIdService(clerkUserId);
 
     if (!user) {
       await clerkService.revokeSession(sessionId);

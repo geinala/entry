@@ -4,8 +4,6 @@ import { responseFormatter } from "@/lib/response-formatter";
 import { parseQueryParams, validateSchema } from "@/lib/validation";
 import { IndexSimulationQueryParams, SimulationIdParamSchema } from "@/schemas/simulation.schema";
 import { NextRequest } from "next/server";
-import { checkUserPermissionsService } from "../permission/permission.service";
-import { PERMISSIONS } from "@/common/constants/permissions/permissions";
 import { parseSortParams } from "@/lib/query-param";
 import { handleException } from "@/common/exception/helper";
 import { NotFoundException } from "@/common/exception/not-found.exception";
@@ -17,8 +15,6 @@ import {
 
 export const getSimulationsController = async (clerkUserId: string, req: NextRequest) => {
   try {
-    await checkUserPermissionsService(clerkUserId, [PERMISSIONS.VIEW_SIMULATION]);
-
     const { searchParams } = new URL(req.url);
 
     const rawQueryParams = {
@@ -60,8 +56,6 @@ export const getSimulationByIdController = async (clerkUserId: string, simulatio
       () => new NotFoundException("Simulation not found"),
     );
 
-    await checkUserPermissionsService(clerkUserId, [PERMISSIONS.VIEW_SIMULATION]);
-
     const simulation = await getSimulationByIdService(simulationId);
 
     return responseFormatter.successWithData({
@@ -80,8 +74,6 @@ export const deleteSimulationByIdController = async (clerkUserId: string, simula
       { simulationId },
       () => new NotFoundException("Simulation not found"),
     );
-
-    await checkUserPermissionsService(clerkUserId, [PERMISSIONS.DELETE_SIMULATION]);
 
     await deleteSimulationByIdService(clerkUserId, simulationId);
 

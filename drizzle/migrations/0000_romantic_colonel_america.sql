@@ -7,7 +7,6 @@ CREATE TYPE "public"."simulation_cleaning_status_enum" AS ENUM('pending', 'in_pr
 CREATE TYPE "public"."simulation_file_validation_status_enum" AS ENUM('uploaded', 'validating', 'validated', 'needed_review', 'completed', 'failed');--> statement-breakpoint
 CREATE TYPE "public"."simulation_job_status_enum" AS ENUM('uploaded', 'processing', 'completed', 'failed');--> statement-breakpoint
 CREATE TYPE "public"."simulation_status_enum" AS ENUM('optimizing', 'running', 'completed', 'failed');--> statement-breakpoint
-CREATE TYPE "public"."waitlist_status_enum" AS ENUM('pending', 'sending', 'confirmed', 'denied', 'invited', 'revoked', 'failed', 'expired');--> statement-breakpoint
 CREATE TABLE "courier_routes" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"solution_id" integer,
@@ -19,6 +18,7 @@ CREATE TABLE "courier_routes" (
 	"reoptimized_from_route_id" integer,
 	"trigger_node_id" integer,
 	"triggered_by_traffic" boolean DEFAULT false,
+	"is_initial_route" boolean DEFAULT false NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
@@ -27,6 +27,15 @@ CREATE TABLE "couriers" (
 	"simulation_id" uuid,
 	"name" varchar NOT NULL,
 	"is_active" boolean DEFAULT true NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "depots" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"name" varchar NOT NULL,
+	"address" varchar NOT NULL,
+	"latitude" double precision NOT NULL,
+	"longitude" double precision NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "matrix_batches" (
@@ -67,35 +76,85 @@ CREATE TABLE "node_details" (
 CREATE TABLE "nodes" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"simulation_id" uuid,
+	"courier_id" integer,
 	"matrix_index" integer NOT NULL,
 	"latitude" double precision NOT NULL,
 	"longitude" double precision NOT NULL,
+	"is_completed" boolean DEFAULT false NOT NULL,
+	"completed_at" timestamp with time zone,
+	"completed_by" integer,
 	"demand" real NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "permissions" (
+CREATE TABLE "optimization_runs" (
 	"id" serial PRIMARY KEY NOT NULL,
-	"name" varchar NOT NULL,
-	"description" varchar,
-	CONSTRAINT "permissions_name_unique" UNIQUE("name")
+	"simulation_id" uuid,
+	"traffic_incident_id" integer,
+	"courier_route_id" integer,
+	"run_type" varchar NOT NULL,
+	"algorithm" varchar NOT NULL,
+	"trigger_type" varchar NOT NULL,
+	"total_distance_in_meters" integer NOT NULL,
+	"total_travel_time_in_seconds" integer NOT NULL,
+	"computation_time_in_ms" real NOT NULL,
+	"total_nodes_explored" integer NOT NULL,
+	"triggered_at" timestamp with time zone NOT NULL,
+	"before_total_distance_in_meters" integer,
+	"before_total_travel_time_in_seconds" integer,
+	"before_computation_time_in_ms" real,
+	"before_total_nodes_explored" integer,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "role_permissions" (
+CREATE TABLE "reoptimization_events" (
 	"id" serial PRIMARY KEY NOT NULL,
-	"role_id" integer,
-	"permission_id" integer
+	"simulation_id" uuid,
+	"courier_route_id" integer,
+	"traffic_incident_id" integer,
+	"reopt_sequence" integer NOT NULL,
+	"triggered_at" timestamp with time zone NOT NULL,
+	"before_route_id" integer,
+	"before_total_distance_in_meters" integer NOT NULL,
+	"before_total_time_in_seconds" integer NOT NULL,
+	"after_route_id" integer,
+	"after_total_distance_in_meters" integer NOT NULL,
+	"after_total_time_in_seconds" integer NOT NULL,
+	"improvement_in_distance_in_meters" integer NOT NULL,
+	"improvement_in_time_in_seconds" integer NOT NULL,
+	"courier_position" jsonb NOT NULL,
+	"distance_saved_in_meters" integer NOT NULL,
+	"time_saved_in_seconds" integer NOT NULL,
+	"algorithm_used" varchar NOT NULL,
+	"computation_time_in_ms" real NOT NULL,
+	"incident_category" smallint,
+	"incident_delay_in_seconds" integer,
+	"incident_details" jsonb,
+	"incident_description" text,
+	"outcome" varchar,
+	"trigger_route_leg_id" integer,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "roles" (
+CREATE TABLE "route_leg_congestion_checks" (
 	"id" serial PRIMARY KEY NOT NULL,
-	"name" varchar NOT NULL,
-	"description" varchar,
-	CONSTRAINT "roles_name_unique" UNIQUE("name")
+	"simulation_id" uuid,
+	"route_leg_id" integer,
+	"courier_id" integer,
+	"checked_at" timestamp with time zone NOT NULL,
+	"bbox_min_lng" double precision NOT NULL,
+	"bbox_min_lat" double precision NOT NULL,
+	"bbox_max_lng" double precision NOT NULL,
+	"bbox_max_lat" double precision NOT NULL,
+	"incidents_found" integer DEFAULT 0 NOT NULL,
+	"accepted_incident_id" integer,
+	"match_details" jsonb
 );
 --> statement-breakpoint
 CREATE TABLE "route_legs" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"courier_route_id" integer,
+	"from_node_id" integer,
+	"to_node_id" integer,
 	"origin_latitude" double precision NOT NULL,
 	"origin_longitude" double precision NOT NULL,
 	"destination_latitude" double precision NOT NULL,
@@ -120,6 +179,7 @@ CREATE TABLE "simulation_jobs" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" varchar NOT NULL,
 	"title" varchar(300) NOT NULL,
+	"depot_id" integer NOT NULL,
 	"depot_location_address" varchar NOT NULL,
 	"depot_location_latitude" double precision NOT NULL,
 	"depot_location_longitude" double precision NOT NULL,
@@ -156,24 +216,47 @@ CREATE TABLE "simulation_jobs" (
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "simulation_logs" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"simulation_id" uuid,
+	"courier_route_id" integer,
+	"courier_id" integer,
+	"log_level" varchar NOT NULL,
+	"event_type" varchar NOT NULL,
+	"title" varchar NOT NULL,
+	"description" text,
+	"latitude" double precision,
+	"longitude" double precision,
+	"metadata" jsonb,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "simulations" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" varchar NOT NULL,
+	"simulation_job_id" uuid NOT NULL,
 	"title" varchar(300) NOT NULL,
 	"status" "simulation_status_enum" DEFAULT 'optimizing' NOT NULL,
 	"started_at" timestamp with time zone,
 	"completed_at" timestamp with time zone,
 	"computation_time_limit_in_seconds" integer DEFAULT 600 NOT NULL,
+	"depot_id" integer NOT NULL,
 	"depot_location_address" varchar NOT NULL,
 	"depot_location_latitude" double precision NOT NULL,
 	"depot_location_longitude" double precision NOT NULL,
 	"total_demand_in_kilograms" real DEFAULT 0 NOT NULL,
-	"total_distance_in_meters" integer DEFAULT 0 NOT NULL,
 	"total_couriers" integer DEFAULT 0 NOT NULL,
-	"total_duration_in_seconds" integer DEFAULT 0 NOT NULL,
 	"total_active_couriers" integer DEFAULT 0 NOT NULL,
 	"total_completed_nodes" integer DEFAULT 0 NOT NULL,
 	"total_nodes" integer DEFAULT 0 NOT NULL,
+	"initial_total_distance_in_meters" integer DEFAULT 0 NOT NULL,
+	"initial_total_duration_in_seconds" integer DEFAULT 0 NOT NULL,
+	"final_total_distance_in_meters" integer DEFAULT 0 NOT NULL,
+	"final_total_duration_in_seconds" integer DEFAULT 0 NOT NULL,
+	"distance_improvement_in_meters" integer DEFAULT 0 NOT NULL,
+	"duration_improvement_in_seconds" integer DEFAULT 0 NOT NULL,
+	"total_reoptimized_routes" integer DEFAULT 0 NOT NULL,
+	"total_incidents_affecting_routes" integer DEFAULT 0 NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
 );
@@ -214,31 +297,30 @@ CREATE TABLE "solutions" (
 	"time_in_seconds" integer NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "traffic_incidents" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"tomtom_incident_id" varchar NOT NULL,
+	"simulation_id" uuid,
+	"detected_at" timestamp with time zone NOT NULL,
+	"category" smallint NOT NULL,
+	"delay_in_seconds" integer NOT NULL,
+	"geometry" jsonb NOT NULL,
+	"start_time" timestamp with time zone NOT NULL,
+	"end_time" timestamp with time zone,
+	"length_in_meters" integer,
+	"from_address" varchar,
+	"to_address" varchar,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	CONSTRAINT "traffic_incidents_tomtom_incident_id_unique" UNIQUE("tomtom_incident_id")
+);
+--> statement-breakpoint
 CREATE TABLE "users" (
-	"role_id" integer NOT NULL,
 	"user_id" varchar PRIMARY KEY NOT NULL,
 	"email" varchar NOT NULL,
 	"full_name" varchar NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "users_user_id_unique" UNIQUE("user_id"),
 	CONSTRAINT "users_email_unique" UNIQUE("email")
-);
---> statement-breakpoint
-CREATE TABLE "waitlist" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"clerk_invitation_id" varchar,
-	"email" varchar NOT NULL,
-	"first_name" varchar NOT NULL,
-	"last_name" varchar NOT NULL,
-	"status" "waitlist_status_enum" DEFAULT 'pending' NOT NULL,
-	"ticket_id" varchar,
-	"invited_at" timestamp with time zone,
-	"expired_at" timestamp with time zone,
-	"confirmed_at" timestamp with time zone,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	CONSTRAINT "waitlist_clerk_invitation_id_unique" UNIQUE("clerk_invitation_id"),
-	CONSTRAINT "waitlist_email_unique" UNIQUE("email"),
-	CONSTRAINT "waitlist_ticket_id_unique" UNIQUE("ticket_id")
 );
 --> statement-breakpoint
 ALTER TABLE "courier_routes" ADD CONSTRAINT "courier_routes_solution_id_solutions_id_fk" FOREIGN KEY ("solution_id") REFERENCES "public"."solutions"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -251,38 +333,64 @@ ALTER TABLE "matrix_results" ADD CONSTRAINT "matrix_results_simulation_id_simula
 ALTER TABLE "matrix_results" ADD CONSTRAINT "matrix_results_matrix_batch_id_matrix_batches_id_fk" FOREIGN KEY ("matrix_batch_id") REFERENCES "public"."matrix_batches"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "node_details" ADD CONSTRAINT "node_details_node_id_nodes_id_fk" FOREIGN KEY ("node_id") REFERENCES "public"."nodes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "nodes" ADD CONSTRAINT "nodes_simulation_id_simulations_id_fk" FOREIGN KEY ("simulation_id") REFERENCES "public"."simulations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permissions_role_id_roles_id_fk" FOREIGN KEY ("role_id") REFERENCES "public"."roles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "role_permissions" ADD CONSTRAINT "role_permissions_permission_id_permissions_id_fk" FOREIGN KEY ("permission_id") REFERENCES "public"."permissions"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "nodes" ADD CONSTRAINT "nodes_courier_id_couriers_id_fk" FOREIGN KEY ("courier_id") REFERENCES "public"."couriers"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "nodes" ADD CONSTRAINT "nodes_completed_by_couriers_id_fk" FOREIGN KEY ("completed_by") REFERENCES "public"."couriers"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "nodes" ADD CONSTRAINT "nodes_completed_by_courier_id_couriers_id_fk" FOREIGN KEY ("completed_by") REFERENCES "public"."couriers"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "optimization_runs" ADD CONSTRAINT "optimization_runs_simulation_id_simulations_id_fk" FOREIGN KEY ("simulation_id") REFERENCES "public"."simulations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "optimization_runs" ADD CONSTRAINT "optimization_runs_traffic_incident_id_traffic_incidents_id_fk" FOREIGN KEY ("traffic_incident_id") REFERENCES "public"."traffic_incidents"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "optimization_runs" ADD CONSTRAINT "optimization_runs_courier_route_id_courier_routes_id_fk" FOREIGN KEY ("courier_route_id") REFERENCES "public"."courier_routes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "reoptimization_events" ADD CONSTRAINT "reoptimization_events_simulation_id_simulations_id_fk" FOREIGN KEY ("simulation_id") REFERENCES "public"."simulations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "reoptimization_events" ADD CONSTRAINT "reoptimization_events_courier_route_id_courier_routes_id_fk" FOREIGN KEY ("courier_route_id") REFERENCES "public"."courier_routes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "reoptimization_events" ADD CONSTRAINT "reoptimization_events_traffic_incident_id_traffic_incidents_id_fk" FOREIGN KEY ("traffic_incident_id") REFERENCES "public"."traffic_incidents"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "reoptimization_events" ADD CONSTRAINT "reoptimization_events_before_route_id_courier_routes_id_fk" FOREIGN KEY ("before_route_id") REFERENCES "public"."courier_routes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "reoptimization_events" ADD CONSTRAINT "reoptimization_events_after_route_id_courier_routes_id_fk" FOREIGN KEY ("after_route_id") REFERENCES "public"."courier_routes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "reoptimization_events" ADD CONSTRAINT "reoptimization_events_trigger_route_leg_id_route_legs_id_fk" FOREIGN KEY ("trigger_route_leg_id") REFERENCES "public"."route_legs"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "route_leg_congestion_checks" ADD CONSTRAINT "route_leg_congestion_checks_simulation_id_simulations_id_fk" FOREIGN KEY ("simulation_id") REFERENCES "public"."simulations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "route_leg_congestion_checks" ADD CONSTRAINT "route_leg_congestion_checks_route_leg_id_route_legs_id_fk" FOREIGN KEY ("route_leg_id") REFERENCES "public"."route_legs"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "route_leg_congestion_checks" ADD CONSTRAINT "route_leg_congestion_checks_courier_id_couriers_id_fk" FOREIGN KEY ("courier_id") REFERENCES "public"."couriers"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "route_leg_congestion_checks" ADD CONSTRAINT "route_leg_congestion_checks_accepted_incident_id_traffic_incidents_id_fk" FOREIGN KEY ("accepted_incident_id") REFERENCES "public"."traffic_incidents"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "route_legs" ADD CONSTRAINT "route_legs_courier_route_id_courier_routes_id_fk" FOREIGN KEY ("courier_route_id") REFERENCES "public"."courier_routes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "route_legs" ADD CONSTRAINT "route_legs_from_node_id_nodes_id_fk" FOREIGN KEY ("from_node_id") REFERENCES "public"."nodes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "route_legs" ADD CONSTRAINT "route_legs_to_node_id_nodes_id_fk" FOREIGN KEY ("to_node_id") REFERENCES "public"."nodes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "simulation_jobs" ADD CONSTRAINT "simulation_jobs_user_id_users_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("user_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "simulation_jobs" ADD CONSTRAINT "simulation_jobs_depot_id_depots_id_fk" FOREIGN KEY ("depot_id") REFERENCES "public"."depots"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "simulation_jobs" ADD CONSTRAINT "simulation_jobs_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("user_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "simulation_logs" ADD CONSTRAINT "simulation_logs_simulation_id_simulations_id_fk" FOREIGN KEY ("simulation_id") REFERENCES "public"."simulations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "simulation_logs" ADD CONSTRAINT "simulation_logs_courier_route_id_courier_routes_id_fk" FOREIGN KEY ("courier_route_id") REFERENCES "public"."courier_routes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "simulation_logs" ADD CONSTRAINT "simulation_logs_courier_id_couriers_id_fk" FOREIGN KEY ("courier_id") REFERENCES "public"."couriers"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "simulations" ADD CONSTRAINT "simulations_user_id_users_user_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("user_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "simulations" ADD CONSTRAINT "simulations_simulation_job_id_simulation_jobs_id_fk" FOREIGN KEY ("simulation_job_id") REFERENCES "public"."simulation_jobs"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "simulations" ADD CONSTRAINT "simulations_depot_id_depots_id_fk" FOREIGN KEY ("depot_id") REFERENCES "public"."depots"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "simulations" ADD CONSTRAINT "simulations_user_id_users_id_fk" FOREIGN KEY ("user_id") REFERENCES "public"."users"("user_id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "simulation_uploaded_rows" ADD CONSTRAINT "simulation_uploaded_rows_simulation_job_id_simulation_jobs_id_fk" FOREIGN KEY ("simulation_job_id") REFERENCES "public"."simulation_jobs"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "solutions" ADD CONSTRAINT "solutions_simulation_id_simulations_id_fk" FOREIGN KEY ("simulation_id") REFERENCES "public"."simulations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "solutions" ADD CONSTRAINT "solutions_courier_id_couriers_id_fk" FOREIGN KEY ("courier_id") REFERENCES "public"."couriers"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "users" ADD CONSTRAINT "users_role_id_roles_id_fk" FOREIGN KEY ("role_id") REFERENCES "public"."roles"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "traffic_incidents" ADD CONSTRAINT "traffic_incidents_simulation_id_simulations_id_fk" FOREIGN KEY ("simulation_id") REFERENCES "public"."simulations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "courier_routes_solution_id_idx" ON "courier_routes" USING btree ("solution_id");--> statement-breakpoint
 CREATE INDEX "courier_routes_courier_id_idx" ON "courier_routes" USING btree ("courier_id");--> statement-breakpoint
 CREATE INDEX "couriers_simulation_id_idx" ON "couriers" USING btree ("simulation_id");--> statement-breakpoint
+CREATE INDEX "depots_name_idx" ON "depots" USING btree ("name");--> statement-breakpoint
+CREATE INDEX "depots_coordinates_idx" ON "depots" USING btree ("latitude","longitude");--> statement-breakpoint
 CREATE INDEX "matrix_batches_simulation_id_idx" ON "matrix_batches" USING btree ("simulation_id");--> statement-breakpoint
 CREATE INDEX "matrix_results_simulation_id_idx" ON "matrix_results" USING btree ("simulation_id");--> statement-breakpoint
 CREATE INDEX "matrix_results_matrix_batch_id_idx" ON "matrix_results" USING btree ("matrix_batch_id");--> statement-breakpoint
 CREATE INDEX "node_details_node_id_idx" ON "node_details" USING btree ("node_id");--> statement-breakpoint
 CREATE INDEX "nodes_simulation_id_idx" ON "nodes" USING btree ("simulation_id");--> statement-breakpoint
-CREATE INDEX "role_permissions_role_id_idx" ON "role_permissions" USING btree ("role_id");--> statement-breakpoint
-CREATE INDEX "role_permissions_permission_id_idx" ON "role_permissions" USING btree ("permission_id");--> statement-breakpoint
+CREATE INDEX "optimization_runs_simulation_id_idx" ON "optimization_runs" USING btree ("simulation_id");--> statement-breakpoint
+CREATE INDEX "optimization_runs_courier_route_id_idx" ON "optimization_runs" USING btree ("courier_route_id");--> statement-breakpoint
 CREATE INDEX "route_legs_courier_route_id_idx" ON "route_legs" USING btree ("courier_route_id");--> statement-breakpoint
 CREATE INDEX "route_legs_origin_coordinates_idx" ON "route_legs" USING btree ("origin_latitude","origin_longitude");--> statement-breakpoint
 CREATE INDEX "route_legs_destination_coordinates_idx" ON "route_legs" USING btree ("destination_latitude","destination_longitude");--> statement-breakpoint
 CREATE UNIQUE INDEX "route_legs_courier_route_sequence_unique" ON "route_legs" USING btree ("courier_route_id","sequence");--> statement-breakpoint
 CREATE INDEX "route_legs_sequence_idx" ON "route_legs" USING btree ("sequence");--> statement-breakpoint
+CREATE INDEX "simulation_logs_simulation_id_idx" ON "simulation_logs" USING btree ("simulation_id");--> statement-breakpoint
+CREATE INDEX "simulation_logs_courier_route_id_idx" ON "simulation_logs" USING btree ("courier_route_id");--> statement-breakpoint
+CREATE INDEX "simulation_logs_courier_id_idx" ON "simulation_logs" USING btree ("courier_id");--> statement-breakpoint
 CREATE INDEX "simulations_user_id_idx" ON "simulations" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "simulations_depot_id_idx" ON "simulations" USING btree ("depot_id");--> statement-breakpoint
 CREATE INDEX "simulations_status_idx" ON "simulations" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "simulation_uploaded_rows_simulation_job_id_idx" ON "simulation_uploaded_rows" USING btree ("simulation_job_id");--> statement-breakpoint
 CREATE INDEX "simulation_uploaded_rows_nosi_idx" ON "simulation_uploaded_rows" USING btree ("nosi");--> statement-breakpoint
 CREATE INDEX "solutions_simulation_id_idx" ON "solutions" USING btree ("simulation_id");--> statement-breakpoint
 CREATE INDEX "solutions_courier_id_idx" ON "solutions" USING btree ("courier_id");--> statement-breakpoint
-CREATE INDEX "users_user_id_idx" ON "users" USING btree ("user_id");--> statement-breakpoint
-CREATE INDEX "users_role_id_idx" ON "users" USING btree ("role_id");--> statement-breakpoint
-CREATE INDEX "idx_waitlist_status" ON "waitlist" USING btree ("status");--> statement-breakpoint
-CREATE INDEX "idx_waitlist_email" ON "waitlist" USING btree ("email");--> statement-breakpoint
-CREATE INDEX "idx_waitlist_ticket_id" ON "waitlist" USING btree ("ticket_id");
+CREATE INDEX "users_user_id_idx" ON "users" USING btree ("user_id");
