@@ -6,7 +6,7 @@ const isPublicRoute = createRouteMatcher(["/", "/sign-in(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
   const { sessionClaims, redirectToSignIn, isAuthenticated } = await auth();
-  const isEligible = sessionClaims?.metadata?.isEligible;
+  const isEligible = sessionClaims?.metadata?.is_eligible;
 
   // user yang belum login tidak boleh mengakses halaman private
   if (!isAuthenticated) {
