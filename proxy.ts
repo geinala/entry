@@ -6,7 +6,7 @@ const isPublicRoute = createRouteMatcher(["/", "/sign-in(.*)"]);
 
 export default clerkMiddleware(async (auth, req) => {
   const { sessionClaims, redirectToSignIn, isAuthenticated } = await auth();
-  const isOnboarded = sessionClaims?.metadata?.isOnboarded;
+  const isEligible = sessionClaims?.metadata?.isEligible;
 
   // user yang belum login tidak boleh mengakses halaman private
   if (!isAuthenticated) {
@@ -22,12 +22,12 @@ export default clerkMiddleware(async (auth, req) => {
   }
 
   // user yang sudah login tapi belum onboarding harus diarahkan ke halaman onboarding
-  if (!isOnboarded && !isOnboardingRoute(req)) {
+  if (!isEligible && !isOnboardingRoute(req)) {
     return NextResponse.redirect(new URL("/onboarding", req.url));
   }
 
   // user yang sudah onboarding tidak boleh mengakses halaman onboarding
-  if (isOnboarded && isOnboardingRoute(req)) {
+  if (isEligible && isOnboardingRoute(req)) {
     return NextResponse.redirect(new URL("/dashboard", req.url));
   }
 });

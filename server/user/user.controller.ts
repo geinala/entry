@@ -2,7 +2,7 @@ import "server-only";
 
 import { NextRequest, NextResponse } from "next/server";
 import { findCurrentUserByIdService, getUsersWithPaginationService } from "./user.service";
-import { clerkService } from "@/server/clerk/clerk.service";
+import { revokeClerkSession, updateClerkUserMetadata } from "@/server/clerk/clerk.service";
 import { parseQueryParams } from "@/lib/validation";
 import { parseSortParams } from "@/lib/query-param";
 import { handleException } from "@/common/exception/helper";
@@ -20,7 +20,7 @@ export const onBoardingUserController = async (clerkUserId: string): Promise<Nex
       });
     }
 
-    await clerkService.updateUserMetadata(clerkUserId, { onboardingStarted: true });
+    await updateClerkUserMetadata(clerkUserId, { isEligible: true });
 
     return responseFormatter.successWithData({
       data: { registered: false, redirectTo: "/onboarding" },
@@ -44,7 +44,7 @@ export const getUserDetailsController = async (
     });
   } catch (error) {
     if (sessionId) {
-      await clerkService.revokeSession(sessionId);
+      await revokeClerkSession(sessionId);
     }
 
     return handleException(error);
