@@ -13,7 +13,6 @@ import {
   SidebarMenuItem,
   SidebarTrigger,
 } from "@/app/_components/ui/sidebar";
-import { useUserContext } from "@/app/_contexts/user.context";
 import { IGroupedMenuItem, MENU_ITEMS, TMenuItem } from "@/common/constants/menu";
 import { X } from "lucide-react";
 import Link from "next/link";
@@ -26,7 +25,6 @@ const checkIsMenuActive = (menuPath: string, currentPath: string) => {
 };
 
 export default function AuthenticatedSidebar() {
-  const {} = useUserContext();
   const pathname = usePathname();
 
   const isMenuActive = useMemo(() => {

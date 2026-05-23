@@ -6,7 +6,6 @@ import { clerkService } from "@/server/clerk/clerk.service";
 import { parseQueryParams } from "@/lib/validation";
 import { parseSortParams } from "@/lib/query-param";
 import { handleException } from "@/common/exception/helper";
-import { UnauthorizedException } from "@/common/exception/unauthorized.exception";
 import { responseFormatter } from "@/lib/response-formatter";
 import { UserIndexQueryParams } from "@/schemas/user.schema";
 
@@ -39,19 +38,15 @@ export const getUserDetailsController = async (
   try {
     const user = await findCurrentUserByIdService(clerkUserId);
 
-    if (!user) {
-      await clerkService.revokeSession(sessionId);
-
-      throw new UnauthorizedException(
-        "User not found. Please contact support if you believe this is an error.",
-      );
-    }
-
     return responseFormatter.successWithData({
       data: user,
       message: "User details retrieved successfully",
     });
   } catch (error) {
+    if (sessionId) {
+      await clerkService.revokeSession(sessionId);
+    }
+
     return handleException(error);
   }
 };

@@ -8,8 +8,8 @@ import { NextRequest } from "next/server";
 export const GET = async (req: NextRequest) => {
   return handleAuthenticatedRequest({
     request: req,
-    callback: (_, data) => {
-      return getUserDetailsController(data.clerkUserId, data.sessionId);
+    callback: (_, { clerkUserId, sessionId }) => {
+      return getUserDetailsController(clerkUserId, sessionId);
     },
   });
 };
