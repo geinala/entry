@@ -16,12 +16,6 @@ import {
 // User Types
 export type TUser = InferSelectModel<typeof userTable>;
 
-// User with Role and Permissions
-export type TUserWithRoleAndPermissionNames = TUser & {
-  role: string;
-  permissions: string[];
-};
-
 // Simulation Job Types
 export type TSimulationJob = InferSelectModel<typeof simulationJobTable>;
 export type TUpdateSimulationJob = Partial<Omit<TSimulationJob, "id" | "createdAt">>;
