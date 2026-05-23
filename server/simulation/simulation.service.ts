@@ -1,7 +1,7 @@
 import "server-only";
 
 import { TIndexSimulationQueryParams } from "@/schemas/simulation.schema";
-import { findCurrentUserByClerkUserIdRepository } from "../user/user.repository";
+import { findCurrentUserByIdRepository } from "../user/user.repository";
 import { NotFoundException } from "@/common/exception/not-found.exception";
 import {
   deleteSimulationWithRelationsRepository,
@@ -17,15 +17,15 @@ export const getSimulationsWithPaginationService = async (
   clerkUserId: string,
   queryParams: TIndexSimulationQueryParams,
 ): Promise<TPaginationResponse<TSimulation>> => {
-  const user = await findCurrentUserByClerkUserIdRepository(clerkUserId);
+  const user = await findCurrentUserByIdRepository(clerkUserId);
 
   if (!user) {
     throw new NotFoundException("User not found");
   }
 
   const [entries, total] = await Promise.all([
-    getSimulationsWithPaginationRepository(user.userId, queryParams),
-    getSimulationsCountRepository(user.userId, queryParams),
+    getSimulationsWithPaginationRepository(user.id, queryParams),
+    getSimulationsCountRepository(user.id, queryParams),
   ]);
 
   return paginationResponseMapper<TSimulation>(entries, {
@@ -51,16 +51,13 @@ export const getSimulationByIdService = async (
 };
 
 export const deleteSimulationByIdService = async (clerkUserId: string, simulationId: string) => {
-  const user = await findCurrentUserByClerkUserIdRepository(clerkUserId);
+  const user = await findCurrentUserByIdRepository(clerkUserId);
 
   if (!user) {
     throw new NotFoundException("User not found");
   }
 
-  const deletedSimulation = await deleteSimulationWithRelationsRepository(
-    simulationId,
-    user.userId,
-  );
+  const deletedSimulation = await deleteSimulationWithRelationsRepository(simulationId, user.id);
 
   if (!deletedSimulation) {
     throw new NotFoundException("Simulation not found");

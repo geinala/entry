@@ -215,6 +215,7 @@ const CreateSimulationForm = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => field.setValue(null as unknown as File)}
+                        className="text-destructive"
                       >
                         Remove
                       </Button>

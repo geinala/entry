@@ -86,7 +86,6 @@ export const ManualCorrection = () => {
               />
               <ContinueToRouteOptimizationButton
                 jobId={data.id}
-                currentStep={Number(data.currentStep)}
                 disabled={uploadedRowsData?.data.length !== 0}
               />
             </div>

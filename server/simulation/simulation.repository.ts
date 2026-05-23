@@ -62,7 +62,10 @@ export const getSimulationByIdRepository = async (simulationId: string) => {
     .select()
     .from(simulationTable)
     .where(eq(simulationTable.id, simulationId))
-    .leftJoin(nodeTable, eq(simulationTable.id, nodeTable.simulationId))
+    .leftJoin(
+      nodeTable,
+      and(eq(simulationTable.id, nodeTable.simulationId), eq(nodeTable.matrixIndex, 0)),
+    )
     .limit(1);
 };
 

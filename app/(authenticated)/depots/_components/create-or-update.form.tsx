@@ -168,7 +168,7 @@ export const CreateOrUpdateDepotForm = ({
       />
 
       <div className="w-full h-72 border-secondary rounded-md border">
-        <TomTomMap zoom={14} showTrafficFlow={false} showTrafficIncidents={false} style="monoLight">
+        <TomTomMap zoom={14} showTrafficFlow={true} showTrafficIncidents={true} style="monoLight">
           <div className="absolute top-2 left-2 z-10 w-60">
             <MapSearch
               placeholder="Search for depot location..."

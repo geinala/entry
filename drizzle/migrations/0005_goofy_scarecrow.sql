@@ -1,1 +1,0 @@
-ALTER TABLE "optimization_runs" ADD COLUMN "total_nodes_explored" integer NOT NULL;

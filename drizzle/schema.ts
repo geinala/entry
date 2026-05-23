@@ -9,6 +9,7 @@ import {
   pgTable,
   real,
   serial,
+  smallint,
   text,
   timestamp,
   uniqueIndex,
@@ -19,89 +20,12 @@ import {
 export const userTable = pgTable(
   "users",
   {
-    roleId: integer("role_id").notNull(),
-    userId: varchar("user_id").notNull().unique().primaryKey(), // This is the Clerk user ID, which is a string. We use it as the primary key for the users table to simplify integration with Clerk.
+    id: varchar("user_id").notNull().unique().primaryKey(), // This is the Clerk user ID, which is a string. We use it as the primary key for the users table to simplify integration with Clerk.
     email: varchar("email").notNull().unique(),
     fullName: varchar("full_name").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
-  (table) => [
-    foreignKey({
-      columns: [table.roleId],
-      foreignColumns: [roleTable.id],
-      name: "users_role_id_roles_id_fk",
-    }),
-    index("users_user_id_idx").on(table.userId),
-    index("users_role_id_idx").on(table.roleId),
-  ],
-);
-
-export const roleTable = pgTable("roles", {
-  id: serial().primaryKey(),
-  name: varchar("name").notNull().unique(),
-  description: varchar("description"),
-});
-
-export const permissionTable = pgTable("permissions", {
-  id: serial().primaryKey(),
-  name: varchar("name").notNull().unique(),
-  description: varchar("description"),
-});
-
-export const rolePermissionTable = pgTable(
-  "role_permissions",
-  {
-    id: serial().primaryKey(),
-    roleId: integer("role_id").references(() => roleTable.id),
-    permissionId: integer("permission_id").references(() => permissionTable.id),
-  },
-  (table) => [
-    foreignKey({
-      columns: [table.roleId],
-      foreignColumns: [roleTable.id],
-      name: "role_permissions_role_id_roles_id_fk",
-    }),
-    foreignKey({
-      columns: [table.permissionId],
-      foreignColumns: [permissionTable.id],
-      name: "role_permissions_permission_id_permissions_id_fk",
-    }),
-    index("role_permissions_role_id_idx").on(table.roleId),
-    index("role_permissions_permission_id_idx").on(table.permissionId),
-  ],
-);
-
-export const waitlistStatusEnum = pgEnum("waitlist_status_enum", [
-  "pending",
-  "sending",
-  "confirmed",
-  "denied",
-  "invited",
-  "revoked",
-  "failed",
-  "expired",
-]);
-
-export const waitlistTable = pgTable(
-  "waitlist",
-  {
-    id: serial().primaryKey(),
-    clerkInvitationId: varchar("clerk_invitation_id").unique(),
-    email: varchar("email").notNull().unique(),
-    firstName: varchar("first_name").notNull(),
-    lastName: varchar("last_name").notNull(),
-    status: waitlistStatusEnum("status").notNull().default("pending"),
-    ticketId: varchar("ticket_id").unique(),
-    invitedAt: timestamp("invited_at", { withTimezone: true }),
-    expiredAt: timestamp("expired_at", { withTimezone: true }),
-    confirmedAt: timestamp("confirmed_at", { withTimezone: true }),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-  },
-  (table) => [
-    index("idx_waitlist_status").on(table.status),
-    index("idx_waitlist_email").on(table.email),
-    index("idx_waitlist_ticket_id").on(table.ticketId),
-  ],
+  (table) => [index("users_user_id_idx").on(table.id)],
 );
 
 export const simulationJobStatusEnum = pgEnum("simulation_job_status_enum", [
@@ -145,7 +69,7 @@ export const simulationJobTable = pgTable(
     // Basic info
     id: uuid().primaryKey().defaultRandom(),
     userId: varchar("user_id")
-      .references(() => userTable.userId)
+      .references(() => userTable.id)
       .notNull(),
     title: varchar("title", { length: 300 }).notNull(),
     depotId: integer("depot_id")
@@ -204,8 +128,8 @@ export const simulationJobTable = pgTable(
   (table) => [
     foreignKey({
       columns: [table.userId],
-      foreignColumns: [userTable.userId],
-      name: "simulation_jobs_user_id_users_user_id_fk",
+      foreignColumns: [userTable.id],
+      name: "simulation_jobs_user_id_users_id_fk",
     }),
   ],
 );
@@ -257,8 +181,6 @@ export const simulationUploadedRows = pgTable(
   ],
 );
 
-// Old table
-
 export const simulationStatusEnum = pgEnum("simulation_status_enum", [
   "optimizing",
   "running",
@@ -271,7 +193,7 @@ export const simulationTable = pgTable(
   {
     id: uuid().primaryKey().defaultRandom(),
     userId: varchar("user_id")
-      .references(() => userTable.userId)
+      .references(() => userTable.id)
       .notNull(),
     simulationJobId: uuid("simulation_job_id")
       .references(() => simulationJobTable.id)
@@ -290,20 +212,28 @@ export const simulationTable = pgTable(
     depotLocationLatitude: doublePrecision("depot_location_latitude").notNull(),
     depotLocationLongitude: doublePrecision("depot_location_longitude").notNull(),
     totalDemandInKilograms: real("total_demand_in_kilograms").notNull().default(0),
-    totalDistanceInMeters: integer("total_distance_in_meters").notNull().default(0),
     totalCouriers: integer("total_couriers").notNull().default(0),
-    totalDurationInSeconds: integer("total_duration_in_seconds").notNull().default(0),
     totalActiveCouriers: integer("total_active_couriers").notNull().default(0),
     totalCompletedNodes: integer("total_completed_nodes").notNull().default(0),
     totalNodes: integer("total_nodes").notNull().default(0),
+    initialTotalDistanceInMeters: integer("initial_total_distance_in_meters").notNull().default(0), // Total jarak semua rute saat pertama kali dibuat (sebelum ada re-optimisasi)
+    initialTotalDurationInSeconds: integer("initial_total_duration_in_seconds")
+      .notNull()
+      .default(0), // Total estimasi durasi semua rute saat pertama kali dibuat
+    finalTotalDistanceInMeters: integer("final_total_distance_in_meters").notNull().default(0), // Total jarak semua rute setelah semua re-optimisasi selesai
+    finalTotalDurationInSeconds: integer("final_total_duration_in_seconds").notNull().default(0), // Total estimasi durasi semua rute di akhir simulasi
+    distanceImprovementInMeters: integer("distance_improvement_in_meters").notNull().default(0), // Selisih jarak (m): initial - final. Positif = re-opt berhasil mempersingkat rute.
+    durationImprovementInSeconds: integer("duration_improvement_in_seconds").notNull().default(0), // Selisih durasi (s): initial - final. Positif = re-opt berhasil menghemat waktu.
+    totalReoptimizedRoutes: integer("total_reoptimized_routes").notNull().default(0), // Total jumlah reoptimasi selama simulasi berjalan
+    totalIncidentsAffectingRoutes: integer("total_incidents_affecting_routes").notNull().default(0), // Total jumlah insiden lalu lintas yang pernah mempengaruhi rute selama simulasi berjalan
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
     foreignKey({
       columns: [table.userId],
-      foreignColumns: [userTable.userId],
-      name: "simulations_user_id_users_user_id_fk",
+      foreignColumns: [userTable.id],
+      name: "simulations_user_id_users_id_fk",
     }),
     foreignKey({
       columns: [table.depotId],
@@ -330,6 +260,9 @@ export const nodeTable = pgTable(
     matrixIndex: integer("matrix_index").notNull(),
     latitude: doublePrecision("latitude").notNull(),
     longitude: doublePrecision("longitude").notNull(),
+    isCompleted: boolean("is_completed").notNull().default(false),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+    completedBy: integer("completed_by").references(() => courierTable.id),
     demand: real("demand").notNull(),
   },
   (table) => [
@@ -342,6 +275,11 @@ export const nodeTable = pgTable(
       columns: [table.courierId],
       foreignColumns: [courierTable.id],
       name: "nodes_courier_id_couriers_id_fk",
+    }),
+    foreignKey({
+      columns: [table.completedBy],
+      foreignColumns: [courierTable.id],
+      name: "nodes_completed_by_courier_id_couriers_id_fk",
     }),
     index("nodes_simulation_id_idx").on(table.simulationId),
   ],
@@ -485,6 +423,7 @@ export const courierRouteTable = pgTable(
     reoptimizedFromRouteId: integer("reoptimized_from_route_id"),
     triggerNodeId: integer("trigger_node_id").references(() => nodeTable.id),
     triggeredByTraffic: boolean("triggered_by_traffic").default(false),
+    isInitialRoute: boolean("is_initial_route").notNull().default(false), // To indicate if this route is part of the initial solution before any re-optimizations
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
@@ -520,6 +459,8 @@ export const routeLegTable = pgTable(
   {
     id: serial().primaryKey(),
     courierRouteId: integer("courier_route_id").references(() => courierRouteTable.id),
+    fromNodeId: integer("from_node_id").references(() => nodeTable.id),
+    toNodeId: integer("to_node_id").references(() => nodeTable.id),
     originLatitude: doublePrecision("origin_latitude").notNull(),
     originLongitude: doublePrecision("origin_longitude").notNull(),
     destinationLatitude: doublePrecision("destination_latitude").notNull(),
@@ -568,6 +509,7 @@ export const optimizationRunTable = pgTable(
   {
     id: serial().primaryKey(),
     simulationId: uuid("simulation_id").references(() => simulationTable.id),
+    trafficIncidentId: integer("traffic_incident_id").references(() => trafficIncidentTable.id),
     courierRouteId: integer("courier_route_id").references(() => courierRouteTable.id),
     runType: varchar("run_type").notNull(), // e.g., "initial", "reoptimization", etc.
     algorithm: varchar("algorithm").notNull(), // e.g., "OR-Tools", "Genetic Algorithm", etc.
@@ -576,6 +518,11 @@ export const optimizationRunTable = pgTable(
     totalTravelTimeInSeconds: integer("total_travel_time_in_seconds").notNull(),
     computationTimeInMs: real("computation_time_in_ms").notNull(),
     totalNodesExplored: integer("total_nodes_explored").notNull(),
+    triggeredAt: timestamp("triggered_at", { withTimezone: true }).notNull(),
+    beforeTotalDistanceInMeters: integer("before_total_distance_in_meters"),
+    beforeTotalTravelTimeInSeconds: integer("before_total_travel_time_in_seconds"),
+    beforeComputationTimeInMs: real("before_computation_time_in_ms"),
+    beforeTotalNodesExplored: integer("before_total_nodes_explored"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
@@ -651,3 +598,66 @@ export const depotTable = pgTable(
     index("depots_coordinates_idx").on(table.latitude, table.longitude),
   ],
 );
+
+export const trafficIncidentTable = pgTable("traffic_incidents", {
+  id: serial().primaryKey(),
+  tomtomIncidentId: varchar("tomtom_incident_id").notNull().unique(),
+  simulationId: uuid("simulation_id").references(() => simulationTable.id),
+  detectedAt: timestamp("detected_at", { withTimezone: true }).notNull(), // Kapan ditemukan
+  category: smallint("category").notNull(), // Kategori insiden menurut TomTom
+  delayInSeconds: integer("delay_in_seconds").notNull(), // Perkiraan delay yang disebabkan oleh insiden ini
+  geometry: jsonb("geometry").notNull(), // Geometri insiden, bisa berupa titik, garis, atau poligon
+  startTime: timestamp("start_time", { withTimezone: true }).notNull(), // Kapan insiden dimulai
+  endTime: timestamp("end_time", { withTimezone: true }), // Kapan insiden berakhir (jika sudah berakhir)
+  lengthInMeters: integer("length_in_meters"), // Panjang area yang terdampak oleh insiden ini
+  fromAddress: varchar("from_address"), // Alamat awal insiden
+  toAddress: varchar("to_address"), // Alamat akhir insiden
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const reoptimizationEventTable = pgTable("reoptimization_events", {
+  id: serial().primaryKey(),
+  simulationId: uuid("simulation_id").references(() => simulationTable.id),
+  courierRouteId: integer("courier_route_id").references(() => courierRouteTable.id),
+  trafficIncidentId: integer("traffic_incident_id").references(() => trafficIncidentTable.id),
+  reoptSequence: integer("reopt_sequence").notNull(), // Urutan reoptimasi yang terjadi pada route ini (1 untuk reopt pertama, 2 untuk reopt kedua, dst.)
+  triggeredAt: timestamp("triggered_at", { withTimezone: true }).notNull(), // Kapan reoptimasi ini dipicu
+  beforeRouteId: integer("before_route_id").references(() => courierRouteTable.id), // Route sebelum reoptimasi
+  beforeTotalDistanceInMeters: integer("before_total_distance_in_meters").notNull(),
+  beforeTotalTimeInSeconds: integer("before_total_time_in_seconds").notNull(),
+  afterRouteId: integer("after_route_id").references(() => courierRouteTable.id), // Route setelah reoptimasi
+  afterTotalDistanceInMeters: integer("after_total_distance_in_meters").notNull(),
+  afterTotalTimeInSeconds: integer("after_total_time_in_seconds").notNull(),
+  improvementInDistanceInMeters: integer("improvement_in_distance_in_meters").notNull(), // Selisih jarak (m): before - after. Positif = re-opt berhasil mempersingkat rute.
+  improvementInTimeInSeconds: integer("improvement_in_time_in_seconds").notNull(), // Selisih waktu (s): before - after. Positif = re-opt berhasil menghemat waktu.
+  courierPosition: jsonb("courier_position").notNull(), // Posisi kurir saat reoptimasi dipicu, format: { latitude: number, longitude: number }
+  distanceSavedInMeters: integer("distance_saved_in_meters").notNull(), // Jarak yang berhasil dihemat dari reoptimasi ini
+  timeSavedInSeconds: integer("time_saved_in_seconds").notNull(), // Waktu yang berhasil dihemat dari reoptimasi ini
+  algorithmUsed: varchar("algorithm_used").notNull(), // Algoritma yang digunakan untuk reoptimasi ini
+  computationTimeInMs: real("computation_time_in_ms").notNull(), // Waktu yang dibutuhkan untuk melakukan reoptimasi ini
+  incidentCategory: smallint("incident_category"), // Kategori insiden yang memicu reoptimasi ini, jika ada
+  incidentDelayInSeconds: integer("incident_delay_in_seconds"), // Perkiraan delay yang disebabkan oleh insiden yang memicu reoptimasi ini, jika ada
+  incidentDetails: jsonb("incident_details"), // Detail insiden yang memicu reoptimasi ini, jika ada
+  incidentDescription: text("incident_description"), // Deskripsi insiden yang memicu reoptimasi ini, jika ada
+  outcome: varchar("outcome"), // Hasil dari reoptimasi ini, misalnya "resequence", "duration_updated", "failed", dll.
+  triggerRouteLegId: integer("trigger_route_leg_id").references(() => routeLegTable.id), // Route leg yang memicu reoptimasi ini, jika ada
+  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+});
+
+export const routeLegCongestionCheckTable = pgTable("route_leg_congestion_checks", {
+  id: serial().primaryKey(),
+  simulationId: uuid("simulation_id").references(() => simulationTable.id),
+  routeLegId: integer("route_leg_id").references(() => routeLegTable.id),
+  courierId: integer("courier_id").references(() => courierTable.id),
+  checkedAt: timestamp("checked_at", { withTimezone: true }).notNull(),
+
+  bboxMinLng: doublePrecision("bbox_min_lng").notNull(),
+  bboxMinLat: doublePrecision("bbox_min_lat").notNull(),
+  bboxMaxLng: doublePrecision("bbox_max_lng").notNull(),
+  bboxMaxLat: doublePrecision("bbox_max_lat").notNull(),
+
+  incidents_found: integer("incidents_found").notNull().default(0), // Jumlah insiden yang ditemukan dalam bounding box pada saat pengecekan
+  accepted_incident_id: integer("accepted_incident_id").references(() => trafficIncidentTable.id), // Jika ada insiden yang ditemukan dan dianggap relevan, simpan ID-nya di sini
+
+  matchDetails: jsonb("match_details"), // Detail tentang bagaimana insiden yang ditemukan cocok dengan rute leg ini, termasuk alasan mengapa insiden tersebut dianggap relevan atau tidak relevan
+});

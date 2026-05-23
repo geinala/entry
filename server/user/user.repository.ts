@@ -1,31 +1,17 @@
 import "server-only";
 
 import { db } from "@/lib/db";
-import { permissionTable, rolePermissionTable, roleTable, userTable } from "@/drizzle/schema";
+import { userTable } from "@/drizzle/schema";
 import { AnyColumn, eq, or, sql } from "drizzle-orm";
 import { buildFilterClause, buildSortingClause, TFilterCriterion } from "@/lib/query";
 import { PgColumn } from "drizzle-orm/pg-core";
 import { calculateOffset } from "@/lib/pagination";
 import { TGetUsersQueryParams } from "@/schemas/user.schema";
 
-export const findCurrentUserByClerkUserIdRepository = async (clerkUserId: string) => {
-  const [user] = await db
-    .select()
-    .from(userTable)
-    .where(eq(userTable.userId, clerkUserId))
-    .limit(1);
+export const findCurrentUserByIdRepository = async (id: string) => {
+  const [user] = await db.select().from(userTable).where(eq(userTable.id, id)).limit(1);
 
   return user;
-};
-
-export const findUserWithRoleAndPermissionsRepository = async (clerkUserId: string) => {
-  return await db
-    .select()
-    .from(userTable)
-    .innerJoin(roleTable, eq(userTable.roleId, roleTable.id))
-    .leftJoin(rolePermissionTable, eq(roleTable.id, rolePermissionTable.roleId))
-    .leftJoin(permissionTable, eq(rolePermissionTable.permissionId, permissionTable.id))
-    .where(eq(userTable.userId, clerkUserId));
 };
 
 export const getUsersWithPaginationRepository = async (queryParams: TGetUsersQueryParams) => {
@@ -102,18 +88,4 @@ export const getUsersCountRepository = async (queryParams: TGetUsersQueryParams)
     .where(searchConditions.length ? or(...searchConditions) : undefined);
 
   return result[0].count;
-};
-
-export const createUserRepository = async (
-  clerkUserId: string,
-  email: string,
-  fullName: string,
-  roleId: number,
-) => {
-  return await db.insert(userTable).values({
-    userId: clerkUserId,
-    email,
-    fullName,
-    roleId,
-  });
 };

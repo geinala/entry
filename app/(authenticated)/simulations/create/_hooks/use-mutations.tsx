@@ -81,3 +81,10 @@ export const useStartOptimizationProcessMutation = () => {
     }),
   );
 };
+
+export const useRevalidateAddressRowMutation = () => {
+  const api = useAuthenticatedClient();
+  const queryClient = useQueryClient();
+
+  return useMutation(createSimulationJobMutations.revalidateAddressRow(api, queryClient));
+};

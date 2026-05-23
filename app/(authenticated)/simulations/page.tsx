@@ -85,7 +85,10 @@ export default function HistoryPage() {
                 <TotalDistanceCard
                   content={
                     <Paragraph className="font-medium text-2xl">
-                      {metersToKm(data.totalDistanceInMeters)} km
+                      {data.finalTotalDistanceInMeters
+                        ? metersToKm(data.finalTotalDistanceInMeters)
+                        : metersToKm(data.initialTotalDistanceInMeters)}{" "}
+                      km
                     </Paragraph>
                   }
                   footer={
@@ -100,7 +103,10 @@ export default function HistoryPage() {
                 <TotalTimeTravelCard
                   content={
                     <Paragraph className="font-medium text-2xl">
-                      {formatSeconds(data.totalDurationInSeconds, ["hours", "minutes"])}
+                      {formatSeconds(
+                        data.finalTotalDurationInSeconds || data.initialTotalDurationInSeconds,
+                        ["hours", "minutes"],
+                      )}
                     </Paragraph>
                   }
                   footer={

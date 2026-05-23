@@ -227,4 +227,21 @@ export const createSimulationJobMutations = {
       },
     });
   },
+  revalidateAddressRow: (api: AxiosInstance, queryClient: QueryClient) => {
+    return mutationOptions({
+      mutationFn: async ({ jobId }: { jobId: string }): Promise<TBaseApiResponse> => {
+        const response: AxiosResponse<TBaseApiResponse> = await api.post(
+          `/simulations/jobs/${jobId}/files/rows/revalidate`,
+        );
+
+        return response.data;
+      },
+      onSuccess: (data, variables) => {
+        toast.success(data.message);
+
+        queryClient.invalidateQueries({ queryKey: ["simulationUploadedRows", variables.jobId] });
+        queryClient.invalidateQueries({ queryKey: ["simulations", "draft-job"] as const });
+      },
+    });
+  },
 };
