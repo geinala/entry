@@ -11,6 +11,7 @@ import {
 import { mutationOptions, QueryClient } from "@tanstack/react-query";
 import { AxiosInstance, AxiosResponse } from "axios";
 import { toast } from "sonner";
+import { simulationQueries } from "../../_api/queries";
 
 export const createSimulationJobMutations = {
   createSimulationJob: (api: AxiosInstance, queryClient: QueryClient) => {
@@ -241,6 +242,7 @@ export const createSimulationJobMutations = {
 
         queryClient.invalidateQueries({ queryKey: ["simulationUploadedRows", variables.jobId] });
         queryClient.invalidateQueries({ queryKey: ["simulations", "draft-job"] as const });
+        queryClient.fetchQuery(simulationQueries.getDraftSimulationJob(api));
       },
     });
   },

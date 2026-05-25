@@ -41,3 +41,21 @@ export const useGetGlobalSummaryAlgorithmQuery = (simulationId?: string, courier
 
   return useQuery(simulationQueries.getGlobalSummaryAlgorithm(api, simulationId, courierId));
 };
+
+export const useGetReoptimizationEventsQuery = ({
+  simulationId,
+  queryParams,
+}: {
+  simulationId?: string;
+  queryParams: TIndexQueryParams;
+}) => {
+  const api = useAuthenticatedClient();
+
+  return useQuery(
+    simulationQueries.getReoptimizationEvents({
+      api,
+      simulationId,
+      queryParams,
+    }),
+  );
+};

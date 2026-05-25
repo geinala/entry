@@ -18,23 +18,13 @@ import { db } from "./db";
 import { calculateOffset } from "./pagination";
 import { TIndexQueryParams } from "@/types/query-params";
 
-/**
- * Metadata untuk single column (regular atau computed)
- */
 type TColumnDefinition<TTable extends PgTable> = {
-  /** Bisa di-search (text search dengan ILIKE) */
   searchable?: boolean;
-  /** Bisa di-filter (exact match) */
   filterable?: boolean;
-  /** Bisa di-sort */
   sortable?: boolean;
-  /** SQL expression untuk computed column (jika ada) */
   compute?: (table: TTable) => SQL;
 };
 
-/**
- * Definisi semua columns (regular dan computed)
- */
 export type TColumnsDefinition<TTable extends PgTable> = Record<string, TColumnDefinition<TTable>>;
 
 type TPaginationParams<TTable extends PgTable> = {

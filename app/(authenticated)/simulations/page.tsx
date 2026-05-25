@@ -22,6 +22,7 @@ import { Clock } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import GlobalSummaryTable from "./_components/tables/global-summary.table";
 import LogTable from "./_components/tables/log.table";
+import ReoptimizationEventsTable from "./_components/tables/reoptimization-events.table";
 
 const SHORTCUT_KEY_TO_REMOVE_DETAILS = "Escape";
 
@@ -63,7 +64,7 @@ export default function HistoryPage() {
     >
       {selectedSimulationId && data ? (
         <Page
-          title="Simulations"
+          title={`${data.title} - Simulation Details`}
           isLoading={isLoading}
           description="This is your simulation history detail."
           headerAction={
@@ -151,6 +152,7 @@ export default function HistoryPage() {
               </section>
               <section className="w-full h-full flex flex-col gap-3">
                 <GlobalSummaryTable simulationId={selectedSimulationId} />
+                <ReoptimizationEventsTable simulationId={selectedSimulationId} />
                 <LogTable simulationId={selectedSimulationId} />
               </section>
             </div>

@@ -22,10 +22,6 @@ export default function UsersPage() {
   });
 
   useEffect(() => {
-    console.log("Data fetched:", data);
-  }, [data]);
-
-  useEffect(() => {
     setBreadcrumbs([
       {
         label: "Users",

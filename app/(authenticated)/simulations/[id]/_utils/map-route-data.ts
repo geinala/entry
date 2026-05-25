@@ -1,6 +1,6 @@
+import { decodePolyline } from "@/lib/utils";
 import { TLatestRouteBySimulationRow } from "@/types/database";
-import { decodePolyline } from "./decode-polyline";
-import { MapCoordinate } from "./map-animation";
+import { TCoordinate } from "@/types/route";
 
 export type DecodedRoute = {
   id: string;
@@ -8,7 +8,7 @@ export type DecodedRoute = {
   sequence: number;
   travelTimeMs: number;
   routeStatus: TLatestRouteBySimulationRow["route_status"];
-  coordinates: MapCoordinate[];
+  coordinates: TCoordinate[];
 };
 
 export type RouteNode = {

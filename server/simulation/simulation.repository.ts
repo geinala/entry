@@ -8,10 +8,13 @@ import {
   nodeDetailTable,
   nodeTable,
   optimizationRunTable,
+  reoptimizationEventTable,
+  routeLegCongestionCheckTable,
   routeLegTable,
   simulationLogTable,
   simulationTable,
   solutionTable,
+  trafficIncidentTable,
 } from "@/drizzle/schema";
 import { db } from "@/lib/db";
 import { buildCountQuery, buildPaginatedQuery, TColumnsDefinition } from "@/lib/query-builder";
@@ -116,6 +119,15 @@ export const deleteSimulationWithRelationsRepository = async (
       .delete(optimizationRunTable)
       .where(eq(optimizationRunTable.simulationId, simulationId));
     await tx.delete(simulationLogTable).where(eq(simulationLogTable.simulationId, simulationId));
+    await tx
+      .delete(reoptimizationEventTable)
+      .where(eq(reoptimizationEventTable.simulationId, simulationId));
+    await tx
+      .delete(routeLegCongestionCheckTable)
+      .where(eq(routeLegCongestionCheckTable.simulationId, simulationId));
+    await tx
+      .delete(trafficIncidentTable)
+      .where(eq(trafficIncidentTable.simulationId, simulationId));
 
     if (matrixBatchIds.length > 0) {
       await tx
