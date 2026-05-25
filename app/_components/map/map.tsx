@@ -32,6 +32,8 @@ interface TomTomMapProps {
   showTrafficIncidents?: boolean;
   style?: MapStyleId;
   containerClassName?: string;
+  disablePan?: boolean;
+  disableInteractions?: boolean;
   onClick?: (lngLat: { lng: number; lat: number }) => void;
 }
 
@@ -43,6 +45,8 @@ const TomTomMapInner = ({
   showTrafficIncidents = true,
   style = "monoLight",
   containerClassName = "relative w-full h-full rounded-lg overflow-hidden",
+  disablePan = false,
+  disableInteractions = false,
   onClick,
 }: TomTomMapProps) => {
   const targetCenter = center ?? DEFAULT_CENTER;
@@ -99,6 +103,19 @@ const TomTomMapInner = ({
     mapInstanceRef.current = map;
 
     const onLoad = () => {
+      if (disablePan || disableInteractions) {
+        map.mapLibreMap.dragPan.disable();
+      }
+
+      if (disableInteractions) {
+        map.mapLibreMap.scrollZoom.disable();
+        map.mapLibreMap.boxZoom.disable();
+        map.mapLibreMap.doubleClickZoom.disable();
+        map.mapLibreMap.keyboard.disable();
+        map.mapLibreMap.touchZoomRotate.disable();
+        map.mapLibreMap.dragRotate.disable();
+      }
+
       setMapContext({ map, mapLibreMap: map.mapLibreMap, marker: null });
     };
 
@@ -151,7 +168,7 @@ const TomTomMapInner = ({
     });
 
     lastViewportRef.current = { center: targetCenter, zoom: targetZoom };
-  }, [targetCenter, targetZoom]);
+  }, [disablePan, targetCenter, targetZoom]);
 
   return (
     <MapProvider value={mapContext}>

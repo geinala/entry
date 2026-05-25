@@ -1,3 +1,4 @@
+import { TIncidentMatchDetail, TTrafficIncidentGeometry } from "@/types/database";
 import {
   boolean,
   doublePrecision,
@@ -606,7 +607,7 @@ export const trafficIncidentTable = pgTable("traffic_incidents", {
   detectedAt: timestamp("detected_at", { withTimezone: true }).notNull(), // Kapan ditemukan
   category: smallint("category").notNull(), // Kategori insiden menurut TomTom
   delayInSeconds: integer("delay_in_seconds").notNull(), // Perkiraan delay yang disebabkan oleh insiden ini
-  geometry: jsonb("geometry").notNull(), // Geometri insiden, bisa berupa titik, garis, atau poligon
+  geometry: jsonb("geometry").$type<TTrafficIncidentGeometry>().notNull(), // Geometri insiden, bisa berupa titik, garis, atau poligon
   startTime: timestamp("start_time", { withTimezone: true }).notNull(), // Kapan insiden dimulai
   endTime: timestamp("end_time", { withTimezone: true }), // Kapan insiden berakhir (jika sudah berakhir)
   lengthInMeters: integer("length_in_meters"), // Panjang area yang terdampak oleh insiden ini
@@ -659,5 +660,5 @@ export const routeLegCongestionCheckTable = pgTable("route_leg_congestion_checks
   incidents_found: integer("incidents_found").notNull().default(0), // Jumlah insiden yang ditemukan dalam bounding box pada saat pengecekan
   accepted_incident_id: integer("accepted_incident_id").references(() => trafficIncidentTable.id), // Jika ada insiden yang ditemukan dan dianggap relevan, simpan ID-nya di sini
 
-  matchDetails: jsonb("match_details"), // Detail tentang bagaimana insiden yang ditemukan cocok dengan rute leg ini, termasuk alasan mengapa insiden tersebut dianggap relevan atau tidak relevan
+  matchDetails: jsonb("match_details").$type<TIncidentMatchDetail>(), // Detail tentang bagaimana insiden yang ditemukan cocok dengan rute leg ini, termasuk alasan mengapa insiden tersebut dianggap relevan atau tidak relevan
 });

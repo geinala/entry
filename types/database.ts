@@ -11,6 +11,8 @@ import {
   nodeDetailTable,
   simulationLogTable,
   depotTable,
+  reoptimizationEventTable,
+  trafficIncidentTable,
 } from "@/drizzle/schema";
 
 // User Types
@@ -45,7 +47,7 @@ export type TNewCourier = InferInsertModel<typeof courierTable>;
 
 // Route Types
 type TCourierRoute = InferSelectModel<typeof courierRouteTable>;
-type TRouteLeg = InferSelectModel<typeof routeLegTable>;
+export type TRouteLeg = InferSelectModel<typeof routeLegTable>;
 
 type TRouteCourierSummary = {
   id: TCourier["id"];
@@ -146,3 +148,60 @@ export type TGlobalAlgorithmSummary = {
     computationTimeImprovementPercentage: number;
   };
 };
+
+export type TReoptimizationEvent = InferSelectModel<typeof reoptimizationEventTable> & {
+  courierName: string;
+  fromNodeId: TNode["id"] | null;
+  toNodeId: TNode["id"] | null;
+};
+
+export type TTrafficIncident = InferSelectModel<typeof trafficIncidentTable>;
+export type TRouteSegmentWithBoundingBox = {
+  routeSegmentPolyline: string;
+  fromNode: TNode;
+  toNode: TNode;
+  bboxMinLat: number;
+  bboxMinLon: number;
+  bboxMaxLat: number;
+  bboxMaxLon: number;
+  acceptedIncident: TTrafficIncident | null;
+};
+
+export type TIncidentMatchDebug = {
+  incident_id: string;
+  overlap_ratio: number;
+  rejected_reasons: string[];
+  route_intersects: boolean;
+  route_point_count: number;
+  is_valid_congestion: boolean;
+  incident_point_count: number;
+  proximity_threshold_m: number;
+  incident_delay_seconds: number;
+  delay_threshold_seconds: number;
+  overlap_threshold_ratio: number;
+};
+export type TIncidentMatchDetail = {
+  incident_count: number;
+  threshold_seconds: number;
+  congestion_detected: boolean;
+  accepted_incident_id?: number;
+  incident_match_debugs: TIncidentMatchDebug[];
+};
+export type TTrafficIncidentGeometry =
+  | {
+      type: "Point";
+      coordinates: [number, number];
+    }
+  | {
+      type: "LineString";
+      coordinates: [number, number][];
+    }
+  | {
+      type: "Polygon";
+      coordinates: [number, number][][];
+    };
+
+export type TFullRouteComparison = {
+  beforeRoute: TRouteLeg[];
+  afterRoute: TRouteLeg[];
+} & InferSelectModel<typeof reoptimizationEventTable>;
