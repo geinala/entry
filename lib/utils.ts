@@ -217,3 +217,9 @@ export const getAutoZoom = (
 
   return fallbackZoom;
 };
+
+export function calculatePercentageChange(initialValue: number, finalValue: number): number {
+  if (initialValue <= 0) return 0;
+
+  return ((initialValue - finalValue) / initialValue) * 100;
+}

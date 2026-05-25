@@ -6,12 +6,12 @@ export const GET = async (
   request: NextRequest,
   context: { params: Promise<{ id: string; eventId: string }> },
 ) => {
-  const { id, eventId } = await context.params;
+  const { eventId } = await context.params;
 
   return await handleAuthenticatedRequest({
     request,
     callback: async () => {
-      return await getRouteSegmentCongestionCheckMatchDetailsController(id, Number(eventId));
+      return await getRouteSegmentCongestionCheckMatchDetailsController(Number(eventId));
     },
   });
 };

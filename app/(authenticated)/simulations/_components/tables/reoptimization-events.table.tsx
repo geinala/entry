@@ -1,8 +1,8 @@
 "use client";
 
-import { Route, Triangle } from "lucide-react";
+import { Route } from "lucide-react";
 import { useGetReoptimizationEventsQuery } from "../../_hooks/use-queries";
-import { convertUtcToLocalTime, formatSeconds, snakeToText } from "@/lib/utils";
+import { convertUtcToLocalTime, snakeToText } from "@/lib/utils";
 import { useFilters } from "@/app/_hooks/use-filters";
 import { IndexQueryParams } from "@/types/query-params";
 import DataTable from "@/app/_components/data-table";
@@ -47,9 +47,9 @@ export default function ReoptimizationEventsTable({ simulationId }: ILogTable) {
   const columns: ColumnDef<TReoptimizationEvent>[] = [
     {
       id: "timestamp",
-      header: "Time",
+      header: "Check Time",
       cell: ({ row }) => {
-        const timestamp = row.original.triggeredAt;
+        const timestamp = row.original.checkedAt;
         return (
           <span>
             {convertUtcToLocalTime({
@@ -82,45 +82,32 @@ export default function ReoptimizationEventsTable({ simulationId }: ILogTable) {
       },
     },
     {
-      id: "delay",
-      header: "Traffic Delay",
-      cell: ({ row }) => {
-        const delay = row.original.incidentDelayInSeconds;
-        return delay && delay > 0 ? (
-          <span>{formatSeconds(delay, ["hours", "minutes", "seconds"])}</span>
-        ) : (
-          <span>N/A</span>
-        );
-      },
+      accessorKey: "incidentsFound",
+      header: "Incident Found",
+    },
+    {
+      accessorKey: "acceptedIncidentCount",
+      header: "Accepted Incidents",
     },
     {
       accessorKey: "outcome",
       header: "Outcome",
       cell: ({ row }) => {
         const outcome = row.original.outcome;
-        return <span>{outcome ? snakeToText(outcome) : "N/A"}</span>;
-      },
-    },
-    {
-      id: "duration",
-      header: () => (
-        <div className="flex items-center gap-1">
-          <Triangle className="w-4 h-4" /> Duration saved
-        </div>
-      ),
-      cell: ({ row }) => {
-        const length = row.original.timeSavedInSeconds;
-        const isUpdatedDuration = row.original.outcome === "duration_updated";
         return (
-          <span>
-            {!isUpdatedDuration ? formatSeconds(length, ["hours", "minutes", "seconds"]) : "-"}
-          </span>
+          <>
+            {outcome ? (
+              snakeToText(outcome)
+            ) : (
+              <i className="text-destructive">No relevant incidents found</i>
+            )}
+          </>
         );
       },
     },
     {
       id: "actions",
-      header: "Actions",
+      size: 50,
       cell: ({ row }) => {
         const eventId = row.original.id;
         return (

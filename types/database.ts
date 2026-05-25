@@ -13,6 +13,8 @@ import {
   depotTable,
   reoptimizationEventTable,
   trafficIncidentTable,
+  routeLegCongestionCheckTable,
+  routeLegCongestionCheckIncidentTable,
 } from "@/drizzle/schema";
 
 // User Types
@@ -149,11 +151,12 @@ export type TGlobalAlgorithmSummary = {
   };
 };
 
-export type TReoptimizationEvent = InferSelectModel<typeof reoptimizationEventTable> & {
-  courierName: string;
-  fromNodeId: TNode["id"] | null;
-  toNodeId: TNode["id"] | null;
-};
+export type TReoptimizationEvent = InferSelectModel<typeof reoptimizationEventTable> &
+  InferSelectModel<typeof routeLegCongestionCheckTable> & {
+    courierName: string;
+    fromNodeId: TNode["id"] | null;
+    toNodeId: TNode["id"] | null;
+  };
 
 export type TTrafficIncident = InferSelectModel<typeof trafficIncidentTable>;
 export type TRouteSegmentWithBoundingBox = {
@@ -167,26 +170,9 @@ export type TRouteSegmentWithBoundingBox = {
   acceptedIncident: TTrafficIncident | null;
 };
 
-export type TIncidentMatchDebug = {
-  incident_id: string;
-  overlap_ratio: number;
-  rejected_reasons: string[];
-  route_intersects: boolean;
-  route_point_count: number;
-  is_valid_congestion: boolean;
-  incident_point_count: number;
-  proximity_threshold_m: number;
-  incident_delay_seconds: number;
-  delay_threshold_seconds: number;
-  overlap_threshold_ratio: number;
-};
-export type TIncidentMatchDetail = {
-  incident_count: number;
-  threshold_seconds: number;
-  congestion_detected: boolean;
-  accepted_incident_id?: number;
-  incident_match_debugs: TIncidentMatchDebug[];
-};
+export type TRouteLegCongestionCheckIncident = InferSelectModel<
+  typeof routeLegCongestionCheckIncidentTable
+>;
 export type TTrafficIncidentGeometry =
   | {
       type: "Point";

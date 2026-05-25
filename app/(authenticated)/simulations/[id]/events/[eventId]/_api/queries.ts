@@ -1,7 +1,7 @@
 import {
   TFullRouteComparison,
-  TIncidentMatchDetail,
   TRouteLeg,
+  TRouteLegCongestionCheckIncident,
   TRouteSegmentWithBoundingBox,
   TTrafficIncident,
 } from "@/types/database";
@@ -13,44 +13,45 @@ export const REOPTIMIZATION_EVENT_QUERIES = {
   getRouteSegmentCongestion: ({
     api,
     simulationId,
-    eventId,
+    congestionCheckId,
   }: {
     api: AxiosInstance;
     simulationId?: string;
-    eventId?: number;
+    congestionCheckId?: number;
   }) => {
     return queryOptions({
-      queryKey: ["route-segment-congestion", simulationId, eventId],
+      queryKey: ["route-segment-congestion", simulationId, congestionCheckId],
       queryFn: async (): Promise<TRouteSegmentWithBoundingBox> => {
         const response: AxiosResponse<TApiSuccessResponseWithData<TRouteSegmentWithBoundingBox>> =
           await api.get(
-            `/simulations/${simulationId}/reoptimizations/events/${eventId}/routes/segments`,
+            `/simulations/${simulationId}/reoptimizations/events/${congestionCheckId}/routes/segments`,
           );
         return response.data.data;
       },
-      enabled: !!simulationId && !!eventId,
+      enabled: !!simulationId && !!congestionCheckId,
     });
   },
-  getRouteSegmentCongestionCheckMatchDetails: ({
+  getRouteSegmentCongestionIncidents: ({
     api,
     simulationId,
-    eventId,
+    congestionCheckId,
   }: {
     api: AxiosInstance;
     simulationId?: string;
-    eventId?: number;
+    congestionCheckId?: number;
   }) => {
     return queryOptions({
-      queryKey: ["route-segment-congestion-match-details", simulationId, eventId],
-      queryFn: async (): Promise<TIncidentMatchDetail> => {
-        const response: AxiosResponse<TApiSuccessResponseWithData<TIncidentMatchDetail>> =
-          await api.get(
-            `/simulations/${simulationId}/reoptimizations/events/${eventId}/routes/segments/congestions/detail`,
-          );
+      queryKey: ["route-segment-congestion-incidents", simulationId, congestionCheckId],
+      queryFn: async (): Promise<TRouteLegCongestionCheckIncident[]> => {
+        const response: AxiosResponse<
+          TApiSuccessResponseWithData<TRouteLegCongestionCheckIncident[]>
+        > = await api.get(
+          `/simulations/${simulationId}/reoptimizations/events/${congestionCheckId}/routes/segments/congestions/detail`,
+        );
 
         return response.data.data;
       },
-      enabled: !!simulationId && !!eventId,
+      enabled: !!simulationId && !!congestionCheckId,
     });
   },
   getIncidentRouteSegmentByTomTomIds: ({
@@ -80,52 +81,60 @@ export const REOPTIMIZATION_EVENT_QUERIES = {
   getRouteSegmentAffectedIncidents: ({
     api,
     simulationId,
-    eventId,
+    congestionCheckId,
   }: {
     api: AxiosInstance;
     simulationId?: string;
-    eventId?: number;
+    congestionCheckId?: number;
   }) => {
     return queryOptions({
-      queryKey: ["route-segment-affected-incidents", simulationId, eventId],
-      queryFn: async (): Promise<{
-        beforeRoute: TRouteLeg;
-        afterRoute: TRouteLeg;
-        timeSavedInSeconds: number;
-      }> => {
-        const response: AxiosResponse<
-          TApiSuccessResponseWithData<{
+      queryKey: ["route-segment-affected-incidents", simulationId, congestionCheckId],
+      queryFn: async (): Promise<
+        | {
             beforeRoute: TRouteLeg;
             afterRoute: TRouteLeg;
             timeSavedInSeconds: number;
-          }>
+          }
+        | undefined
+      > => {
+        const response: AxiosResponse<
+          TApiSuccessResponseWithData<
+            | {
+                beforeRoute: TRouteLeg;
+                afterRoute: TRouteLeg;
+                timeSavedInSeconds: number;
+              }
+            | undefined
+          >
         > = await api.get(
-          `/simulations/${simulationId}/reoptimizations/events/${eventId}/routes/segments/congestions/affected`,
+          `/simulations/${simulationId}/reoptimizations/events/${congestionCheckId}/routes/segments/congestions/affected`,
         );
 
-        return response.data.data;
+        return response.data.data || undefined;
       },
-      enabled: !!simulationId && !!eventId,
+      enabled: !!simulationId && !!congestionCheckId,
     });
   },
   getFullRouteComparison: ({
     api,
     simulationId,
-    eventId,
+    congestionCheckId,
   }: {
     api: AxiosInstance;
     simulationId?: string;
-    eventId?: number;
+    congestionCheckId?: number;
   }) => {
     return queryOptions({
-      queryKey: ["full-route-comparison", simulationId, eventId],
+      queryKey: ["full-route-comparison", simulationId, congestionCheckId],
       queryFn: async (): Promise<TFullRouteComparison> => {
         const response: AxiosResponse<TApiSuccessResponseWithData<TFullRouteComparison>> =
-          await api.get(`/simulations/${simulationId}/reoptimizations/events/${eventId}/routes`);
+          await api.get(
+            `/simulations/${simulationId}/reoptimizations/events/${congestionCheckId}/routes`,
+          );
 
         return response.data.data;
       },
-      enabled: !!simulationId && !!eventId,
+      enabled: !!simulationId && !!congestionCheckId,
     });
   },
 };

@@ -29,6 +29,8 @@ export interface SimulationVehicleTick {
 interface MapProps {
   center?: [number, number];
   zoom?: number;
+  pitch?: number;
+  bearing?: number;
   routes?: TLatestRouteBySimulationRow[];
   vehicles?: SimulationVehicleTick[];
 }
@@ -43,7 +45,7 @@ const isNodeAtDepot = (node: { lat: number; lng: number }, center?: [number, num
   return Math.abs(node.lng - center[0]) < EPSILON && Math.abs(node.lat - center[1]) < EPSILON;
 };
 
-const Map = ({ center, zoom, routes = [], vehicles = [] }: MapProps) => {
+const Map = ({ center, zoom, pitch, bearing, routes = [], vehicles = [] }: MapProps) => {
   const decodedRoutes = useMemo(() => decodeRoutes(routes), [routes]);
 
   const displayRoutes = useMemo(() => sortRoutesByDisplayPriority(decodedRoutes), [decodedRoutes]);
@@ -58,6 +60,8 @@ const Map = ({ center, zoom, routes = [], vehicles = [] }: MapProps) => {
     <TomTomMap
       center={center}
       zoom={zoom}
+      pitch={pitch}
+      bearing={bearing}
       showTrafficFlow={false}
       showTrafficIncidents={true}
       style="monoLight"
@@ -120,17 +124,17 @@ const Map = ({ center, zoom, routes = [], vehicles = [] }: MapProps) => {
           key={`vehicle-${vehicle.id}`}
           lng={vehicle.lng}
           lat={vehicle.lat}
-          icon={<span>{vehicle.id}</span>}
-          className="w-8 h-8"
+          icon={<Image src="/images/courier.png" alt="Vehicle" width={40} height={40} />}
+          className="w-20 h-20"
           style={{
             borderRadius: "9999px",
             border: "2px solid #1d4ed8",
-            backgroundColor: "#2563eb",
-            color: "#ffffff",
+            backgroundColor: "#ffffff",
+            color: "#1d4ed8",
             fontWeight: "700",
             fontSize: "12px",
-            width: "32px",
-            height: "32px",
+            width: "40px",
+            height: "40px",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",

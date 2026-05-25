@@ -1,6 +1,7 @@
 CREATE TYPE "public"."calculation_status_enum" AS ENUM('pending', 'processing', 'completed', 'failed');--> statement-breakpoint
 CREATE TYPE "public"."geocoding_status_enum" AS ENUM('pending', 'in_progress', 'needed_review', 'completed', 'failed');--> statement-breakpoint
 CREATE TYPE "public"."matrix_batch_status_enum" AS ENUM('submitted', 'validated', 'completed', 'failed');--> statement-breakpoint
+CREATE TYPE "public"."reoptimization_outcome_enum" AS ENUM('resequencing_applied', 'duration_updated', 'no_improvement');--> statement-breakpoint
 CREATE TYPE "public"."resolution_status" AS ENUM('pending', 'auto_solved', 'needed_review', 'failed', 'manual_override');--> statement-breakpoint
 CREATE TYPE "public"."route_status_enum" AS ENUM('planned', 'running', 'completed', 'cancelled');--> statement-breakpoint
 CREATE TYPE "public"."simulation_cleaning_status_enum" AS ENUM('pending', 'in_progress', 'completed', 'needed_review', 'failed');--> statement-breakpoint
@@ -110,7 +111,7 @@ CREATE TABLE "reoptimization_events" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"simulation_id" uuid,
 	"courier_route_id" integer,
-	"traffic_incident_id" integer,
+	"congestion_check_id" integer,
 	"reopt_sequence" integer NOT NULL,
 	"triggered_at" timestamp with time zone NOT NULL,
 	"before_route_id" integer,
@@ -119,19 +120,36 @@ CREATE TABLE "reoptimization_events" (
 	"after_route_id" integer,
 	"after_total_distance_in_meters" integer NOT NULL,
 	"after_total_time_in_seconds" integer NOT NULL,
-	"improvement_in_distance_in_meters" integer NOT NULL,
-	"improvement_in_time_in_seconds" integer NOT NULL,
-	"courier_position" jsonb NOT NULL,
 	"distance_saved_in_meters" integer NOT NULL,
 	"time_saved_in_seconds" integer NOT NULL,
+	"courier_position" jsonb NOT NULL,
 	"algorithm_used" varchar NOT NULL,
 	"computation_time_in_ms" real NOT NULL,
-	"incident_category" smallint,
-	"incident_delay_in_seconds" integer,
-	"incident_details" jsonb,
-	"incident_description" text,
-	"outcome" varchar,
+	"total_incident_delay_in_seconds" integer,
+	"outcome" "reoptimization_outcome_enum" NOT NULL,
 	"trigger_route_leg_id" integer,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "route_leg_congestion_check_incidents" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"congestion_check_id" integer NOT NULL,
+	"traffic_incident_id" integer NOT NULL,
+	"tomtom_incident_id" varchar(255) NOT NULL,
+	"delay_in_seconds" integer NOT NULL,
+	"overlap_ratio" real NOT NULL,
+	"rejected_reasons" jsonb DEFAULT '[]'::jsonb NOT NULL,
+	"route_intersects" boolean DEFAULT false NOT NULL,
+	"is_valid_congestion" boolean DEFAULT false NOT NULL,
+	"direction_matches" boolean DEFAULT false NOT NULL,
+	"route_point_count" integer,
+	"incident_point_count" integer,
+	"cluster_group" smallint,
+	"delay_contribution_in_seconds" integer DEFAULT 0 NOT NULL,
+	"chosen_for_reopt" boolean DEFAULT false NOT NULL,
+	"delay_threshold_in_seconds" integer NOT NULL,
+	"overlap_threshold" real NOT NULL,
+	"proximity_threshold_in_meters" integer NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
@@ -146,8 +164,8 @@ CREATE TABLE "route_leg_congestion_checks" (
 	"bbox_max_lng" double precision NOT NULL,
 	"bbox_max_lat" double precision NOT NULL,
 	"incidents_found" integer DEFAULT 0 NOT NULL,
-	"accepted_incident_id" integer,
-	"match_details" jsonb
+	"accepted_incident_count" integer DEFAULT 0 NOT NULL,
+	"total_delay_in_seconds" integer DEFAULT 0 NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "route_legs" (
@@ -310,6 +328,7 @@ CREATE TABLE "traffic_incidents" (
 	"length_in_meters" integer,
 	"from_address" varchar,
 	"to_address" varchar,
+	"incident_description" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "traffic_incidents_tomtom_incident_id_unique" UNIQUE("tomtom_incident_id")
 );
@@ -341,14 +360,17 @@ ALTER TABLE "optimization_runs" ADD CONSTRAINT "optimization_runs_traffic_incide
 ALTER TABLE "optimization_runs" ADD CONSTRAINT "optimization_runs_courier_route_id_courier_routes_id_fk" FOREIGN KEY ("courier_route_id") REFERENCES "public"."courier_routes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "reoptimization_events" ADD CONSTRAINT "reoptimization_events_simulation_id_simulations_id_fk" FOREIGN KEY ("simulation_id") REFERENCES "public"."simulations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "reoptimization_events" ADD CONSTRAINT "reoptimization_events_courier_route_id_courier_routes_id_fk" FOREIGN KEY ("courier_route_id") REFERENCES "public"."courier_routes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "reoptimization_events" ADD CONSTRAINT "reoptimization_events_traffic_incident_id_traffic_incidents_id_fk" FOREIGN KEY ("traffic_incident_id") REFERENCES "public"."traffic_incidents"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "reoptimization_events" ADD CONSTRAINT "reoptimization_events_congestion_check_id_route_leg_congestion_checks_id_fk" FOREIGN KEY ("congestion_check_id") REFERENCES "public"."route_leg_congestion_checks"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "reoptimization_events" ADD CONSTRAINT "reoptimization_events_before_route_id_courier_routes_id_fk" FOREIGN KEY ("before_route_id") REFERENCES "public"."courier_routes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "reoptimization_events" ADD CONSTRAINT "reoptimization_events_after_route_id_courier_routes_id_fk" FOREIGN KEY ("after_route_id") REFERENCES "public"."courier_routes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "reoptimization_events" ADD CONSTRAINT "reoptimization_events_trigger_route_leg_id_route_legs_id_fk" FOREIGN KEY ("trigger_route_leg_id") REFERENCES "public"."route_legs"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "route_leg_congestion_check_incidents" ADD CONSTRAINT "route_leg_congestion_check_incidents_congestion_check_id_route_leg_congestion_checks_id_fk" FOREIGN KEY ("congestion_check_id") REFERENCES "public"."route_leg_congestion_checks"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "route_leg_congestion_check_incidents" ADD CONSTRAINT "route_leg_congestion_check_incidents_traffic_incident_id_traffic_incidents_id_fk" FOREIGN KEY ("traffic_incident_id") REFERENCES "public"."traffic_incidents"("id") ON DELETE cascade ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "route_leg_congestion_check_incidents" ADD CONSTRAINT "route_leg_congestion_check_incidents_congestion_check_id_fk" FOREIGN KEY ("congestion_check_id") REFERENCES "public"."route_leg_congestion_checks"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "route_leg_congestion_check_incidents" ADD CONSTRAINT "route_leg_congestion_check_incidents_traffic_incident_id_fk" FOREIGN KEY ("traffic_incident_id") REFERENCES "public"."traffic_incidents"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "route_leg_congestion_checks" ADD CONSTRAINT "route_leg_congestion_checks_simulation_id_simulations_id_fk" FOREIGN KEY ("simulation_id") REFERENCES "public"."simulations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "route_leg_congestion_checks" ADD CONSTRAINT "route_leg_congestion_checks_route_leg_id_route_legs_id_fk" FOREIGN KEY ("route_leg_id") REFERENCES "public"."route_legs"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "route_leg_congestion_checks" ADD CONSTRAINT "route_leg_congestion_checks_courier_id_couriers_id_fk" FOREIGN KEY ("courier_id") REFERENCES "public"."couriers"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "route_leg_congestion_checks" ADD CONSTRAINT "route_leg_congestion_checks_accepted_incident_id_traffic_incidents_id_fk" FOREIGN KEY ("accepted_incident_id") REFERENCES "public"."traffic_incidents"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "route_legs" ADD CONSTRAINT "route_legs_courier_route_id_courier_routes_id_fk" FOREIGN KEY ("courier_route_id") REFERENCES "public"."courier_routes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "route_legs" ADD CONSTRAINT "route_legs_from_node_id_nodes_id_fk" FOREIGN KEY ("from_node_id") REFERENCES "public"."nodes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "route_legs" ADD CONSTRAINT "route_legs_to_node_id_nodes_id_fk" FOREIGN KEY ("to_node_id") REFERENCES "public"."nodes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -378,6 +400,9 @@ CREATE INDEX "node_details_node_id_idx" ON "node_details" USING btree ("node_id"
 CREATE INDEX "nodes_simulation_id_idx" ON "nodes" USING btree ("simulation_id");--> statement-breakpoint
 CREATE INDEX "optimization_runs_simulation_id_idx" ON "optimization_runs" USING btree ("simulation_id");--> statement-breakpoint
 CREATE INDEX "optimization_runs_courier_route_id_idx" ON "optimization_runs" USING btree ("courier_route_id");--> statement-breakpoint
+CREATE INDEX "route_leg_congestion_check_incidents_congestion_check_id_idx" ON "route_leg_congestion_check_incidents" USING btree ("congestion_check_id");--> statement-breakpoint
+CREATE INDEX "route_leg_congestion_check_incidents_traffic_incident_id_idx" ON "route_leg_congestion_check_incidents" USING btree ("traffic_incident_id");--> statement-breakpoint
+CREATE INDEX "route_leg_congestion_check_incidents_valid_idx" ON "route_leg_congestion_check_incidents" USING btree ("congestion_check_id","is_valid_congestion");--> statement-breakpoint
 CREATE INDEX "route_legs_courier_route_id_idx" ON "route_legs" USING btree ("courier_route_id");--> statement-breakpoint
 CREATE INDEX "route_legs_origin_coordinates_idx" ON "route_legs" USING btree ("origin_latitude","origin_longitude");--> statement-breakpoint
 CREATE INDEX "route_legs_destination_coordinates_idx" ON "route_legs" USING btree ("destination_latitude","destination_longitude");--> statement-breakpoint

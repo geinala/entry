@@ -1,4 +1,4 @@
-import { TIncidentMatchDetail, TTrafficIncidentGeometry } from "@/types/database";
+import { TTrafficIncidentGeometry } from "@/types/database";
 import {
   boolean,
   doublePrecision,
@@ -613,35 +613,39 @@ export const trafficIncidentTable = pgTable("traffic_incidents", {
   lengthInMeters: integer("length_in_meters"), // Panjang area yang terdampak oleh insiden ini
   fromAddress: varchar("from_address"), // Alamat awal insiden
   toAddress: varchar("to_address"), // Alamat akhir insiden
+  incidentDescription: text("incident_description"), // Deskripsi insiden dari TomTom
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
+
+export const reoptimizationOutcomeEnum = pgEnum("reoptimization_outcome_enum", [
+  "resequencing_applied",
+  "duration_updated",
+  "no_improvement",
+]);
 
 export const reoptimizationEventTable = pgTable("reoptimization_events", {
   id: serial().primaryKey(),
   simulationId: uuid("simulation_id").references(() => simulationTable.id),
   courierRouteId: integer("courier_route_id").references(() => courierRouteTable.id),
-  trafficIncidentId: integer("traffic_incident_id").references(() => trafficIncidentTable.id),
-  reoptSequence: integer("reopt_sequence").notNull(), // Urutan reoptimasi yang terjadi pada route ini (1 untuk reopt pertama, 2 untuk reopt kedua, dst.)
-  triggeredAt: timestamp("triggered_at", { withTimezone: true }).notNull(), // Kapan reoptimasi ini dipicu
-  beforeRouteId: integer("before_route_id").references(() => courierRouteTable.id), // Route sebelum reoptimasi
+  congestionCheckId: integer("congestion_check_id").references(
+    () => routeLegCongestionCheckTable.id,
+  ),
+  reoptSequence: integer("reopt_sequence").notNull(),
+  triggeredAt: timestamp("triggered_at", { withTimezone: true }).notNull(),
+  beforeRouteId: integer("before_route_id").references(() => courierRouteTable.id),
   beforeTotalDistanceInMeters: integer("before_total_distance_in_meters").notNull(),
   beforeTotalTimeInSeconds: integer("before_total_time_in_seconds").notNull(),
-  afterRouteId: integer("after_route_id").references(() => courierRouteTable.id), // Route setelah reoptimasi
+  afterRouteId: integer("after_route_id").references(() => courierRouteTable.id),
   afterTotalDistanceInMeters: integer("after_total_distance_in_meters").notNull(),
   afterTotalTimeInSeconds: integer("after_total_time_in_seconds").notNull(),
-  improvementInDistanceInMeters: integer("improvement_in_distance_in_meters").notNull(), // Selisih jarak (m): before - after. Positif = re-opt berhasil mempersingkat rute.
-  improvementInTimeInSeconds: integer("improvement_in_time_in_seconds").notNull(), // Selisih waktu (s): before - after. Positif = re-opt berhasil menghemat waktu.
-  courierPosition: jsonb("courier_position").notNull(), // Posisi kurir saat reoptimasi dipicu, format: { latitude: number, longitude: number }
-  distanceSavedInMeters: integer("distance_saved_in_meters").notNull(), // Jarak yang berhasil dihemat dari reoptimasi ini
-  timeSavedInSeconds: integer("time_saved_in_seconds").notNull(), // Waktu yang berhasil dihemat dari reoptimasi ini
-  algorithmUsed: varchar("algorithm_used").notNull(), // Algoritma yang digunakan untuk reoptimasi ini
-  computationTimeInMs: real("computation_time_in_ms").notNull(), // Waktu yang dibutuhkan untuk melakukan reoptimasi ini
-  incidentCategory: smallint("incident_category"), // Kategori insiden yang memicu reoptimasi ini, jika ada
-  incidentDelayInSeconds: integer("incident_delay_in_seconds"), // Perkiraan delay yang disebabkan oleh insiden yang memicu reoptimasi ini, jika ada
-  incidentDetails: jsonb("incident_details"), // Detail insiden yang memicu reoptimasi ini, jika ada
-  incidentDescription: text("incident_description"), // Deskripsi insiden yang memicu reoptimasi ini, jika ada
-  outcome: varchar("outcome"), // Hasil dari reoptimasi ini, misalnya "resequence", "duration_updated", "failed", dll.
-  triggerRouteLegId: integer("trigger_route_leg_id").references(() => routeLegTable.id), // Route leg yang memicu reoptimasi ini, jika ada
+  distanceSavedInMeters: integer("distance_saved_in_meters").notNull(),
+  timeSavedInSeconds: integer("time_saved_in_seconds").notNull(),
+  courierPosition: jsonb("courier_position").notNull(),
+  algorithmUsed: varchar("algorithm_used").notNull(),
+  computationTimeInMs: real("computation_time_in_ms").notNull(),
+  totalIncidentDelayInSeconds: integer("total_incident_delay_in_seconds"), // sum delay semua incident valid dalam congestion check ini
+  outcome: reoptimizationOutcomeEnum("outcome").notNull(),
+  triggerRouteLegId: integer("trigger_route_leg_id").references(() => routeLegTable.id),
   createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
 });
 
@@ -651,14 +655,62 @@ export const routeLegCongestionCheckTable = pgTable("route_leg_congestion_checks
   routeLegId: integer("route_leg_id").references(() => routeLegTable.id),
   courierId: integer("courier_id").references(() => courierTable.id),
   checkedAt: timestamp("checked_at", { withTimezone: true }).notNull(),
-
   bboxMinLng: doublePrecision("bbox_min_lng").notNull(),
   bboxMinLat: doublePrecision("bbox_min_lat").notNull(),
   bboxMaxLng: doublePrecision("bbox_max_lng").notNull(),
   bboxMaxLat: doublePrecision("bbox_max_lat").notNull(),
-
-  incidents_found: integer("incidents_found").notNull().default(0), // Jumlah insiden yang ditemukan dalam bounding box pada saat pengecekan
-  accepted_incident_id: integer("accepted_incident_id").references(() => trafficIncidentTable.id), // Jika ada insiden yang ditemukan dan dianggap relevan, simpan ID-nya di sini
-
-  matchDetails: jsonb("match_details").$type<TIncidentMatchDetail>(), // Detail tentang bagaimana insiden yang ditemukan cocok dengan rute leg ini, termasuk alasan mengapa insiden tersebut dianggap relevan atau tidak relevan
+  incidentsFound: integer("incidents_found").notNull().default(0),
+  acceptedIncidentCount: integer("accepted_incident_count").notNull().default(0),
+  totalDelayInSeconds: integer("total_delay_in_seconds").notNull().default(0),
 });
+
+export const routeLegCongestionCheckIncidentTable = pgTable(
+  "route_leg_congestion_check_incidents",
+  {
+    id: serial().primaryKey(),
+    congestionCheckId: integer("congestion_check_id")
+      .notNull()
+      .references(() => routeLegCongestionCheckTable.id, { onDelete: "cascade" }),
+    trafficIncidentId: integer("traffic_incident_id")
+      .notNull()
+      .references(() => trafficIncidentTable.id, { onDelete: "cascade" }),
+    tomtomIncidentId: varchar("tomtom_incident_id", { length: 255 }).notNull(),
+    delayInSeconds: integer("delay_in_seconds").notNull(),
+    overlapRatio: real("overlap_ratio").notNull(),
+    rejectedReasons: jsonb("rejected_reasons").$type<string[]>().notNull().default([]),
+    routeIntersects: boolean("route_intersects").notNull().default(false),
+    isValidCongestion: boolean("is_valid_congestion").notNull().default(false),
+    directionMatches: boolean("direction_matches").notNull().default(false),
+    routePointCount: integer("route_point_count"),
+    incidentPointCount: integer("incident_point_count"),
+    clusterGroup: smallint("cluster_group"),
+    delayContributionInSeconds: integer("delay_contribution_in_seconds").notNull().default(0),
+    chosenForReopt: boolean("chosen_for_reopt").notNull().default(false),
+    delayThresholdInSeconds: integer("delay_threshold_in_seconds").notNull(), // Threshold untuk menentukan apakah delay dari insiden ini cukup signifikan untuk memicu re-optimisasi
+    overlapThreshold: real("overlap_threshold").notNull(), // Threshold untuk menentukan apakah overlap antara rute dan insiden cukup signifikan untuk memicu re-optimisasi
+    proximityThresholdInMeters: integer("proximity_threshold_in_meters").notNull(), // Threshold untuk menentukan apakah jarak antara rute dan insiden cukup dekat untuk memicu re-optimisasi
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.congestionCheckId],
+      foreignColumns: [routeLegCongestionCheckTable.id],
+      name: "route_leg_congestion_check_incidents_congestion_check_id_fk",
+    }),
+    foreignKey({
+      columns: [table.trafficIncidentId],
+      foreignColumns: [trafficIncidentTable.id],
+      name: "route_leg_congestion_check_incidents_traffic_incident_id_fk",
+    }),
+    index("route_leg_congestion_check_incidents_congestion_check_id_idx").on(
+      table.congestionCheckId,
+    ),
+    index("route_leg_congestion_check_incidents_traffic_incident_id_idx").on(
+      table.trafficIncidentId,
+    ),
+    index("route_leg_congestion_check_incidents_valid_idx").on(
+      table.congestionCheckId,
+      table.isValidCongestion,
+    ),
+  ],
+);
