@@ -5,6 +5,7 @@ import {
   getRouteSegmentAffectedIncidentsService,
   getRouteSegmentCongestionCheckMatchDetailsService,
   getRouteSegmentWithBoundingBoxService,
+  hasIncidentsService,
 } from "./event.service";
 import { responseFormatter } from "@/lib/response-formatter";
 import { BadRequestException } from "@/common/exception/bad-request.exception";
@@ -12,10 +13,12 @@ import { NextRequest } from "next/dist/server/web/spec-extension/request";
 
 export const getRouteSegmentWithBoundingBoxController = async (
   simulationId: string,
-  eventId: number,
+  congestionCheckId: number,
 ) => {
   try {
-    const result = await getRouteSegmentWithBoundingBoxService(simulationId, eventId);
+    await hasIncidentsService(congestionCheckId);
+
+    const result = await getRouteSegmentWithBoundingBoxService(simulationId, congestionCheckId);
 
     return responseFormatter.successWithData({
       data: result,
@@ -27,11 +30,12 @@ export const getRouteSegmentWithBoundingBoxController = async (
 };
 
 export const getRouteSegmentCongestionCheckMatchDetailsController = async (
-  simulationId: string,
-  eventId: number,
+  congestionCheckId: number,
 ) => {
   try {
-    const result = await getRouteSegmentCongestionCheckMatchDetailsService(simulationId, eventId);
+    await hasIncidentsService(congestionCheckId);
+
+    const result = await getRouteSegmentCongestionCheckMatchDetailsService(congestionCheckId);
 
     return responseFormatter.successWithData({
       data: result,
@@ -57,12 +61,15 @@ export const getIncidentRouteSegmentByTomTomIdsController = async (
       .map((tomTomSegmentId) => tomTomSegmentId.trim())
       .filter(Boolean);
 
-    const resolvedTomTomSegmentIds =
-      tomTomSegmentIds.length > 0
-        ? tomTomSegmentIds
-        : bracketedTomTomSegmentIds.length > 0
-          ? bracketedTomTomSegmentIds
-          : (commaSeparatedTomTomSegmentIds ?? []);
+    let resolvedTomTomSegmentIds = tomTomSegmentIds;
+
+    if (resolvedTomTomSegmentIds.length === 0 && bracketedTomTomSegmentIds.length > 0) {
+      resolvedTomTomSegmentIds = bracketedTomTomSegmentIds;
+    }
+
+    if (resolvedTomTomSegmentIds.length === 0 && commaSeparatedTomTomSegmentIds) {
+      resolvedTomTomSegmentIds = commaSeparatedTomTomSegmentIds;
+    }
 
     if (resolvedTomTomSegmentIds.length === 0) {
       throw new BadRequestException("Missing required query parameter: tomTomSegmentIds");
@@ -84,10 +91,12 @@ export const getIncidentRouteSegmentByTomTomIdsController = async (
 
 export const getRouteSegmentAffectedIncidentsController = async (
   simulationId: string,
-  eventId: number,
+  congestionCheckId: number,
 ) => {
   try {
-    const result = await getRouteSegmentAffectedIncidentsService(simulationId, eventId);
+    await hasIncidentsService(congestionCheckId);
+
+    const result = await getRouteSegmentAffectedIncidentsService(simulationId, congestionCheckId);
 
     return responseFormatter.successWithData({
       data: result,
@@ -98,9 +107,14 @@ export const getRouteSegmentAffectedIncidentsController = async (
   }
 };
 
-export const getFullRouteComparisonController = async (simulationId: string, eventId: number) => {
+export const getFullRouteComparisonController = async (
+  simulationId: string,
+  congestionCheckId: number,
+) => {
   try {
-    const result = await getFullRouteComparisonService(simulationId, eventId);
+    await hasIncidentsService(congestionCheckId);
+
+    const result = await getFullRouteComparisonService(simulationId, congestionCheckId);
 
     return responseFormatter.successWithData({
       data: result,

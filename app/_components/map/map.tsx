@@ -13,6 +13,8 @@ import { MapProvider, type MapContextType } from "./context";
 
 const DEFAULT_CENTER: [number, number] = [112.6156684, -7.9467136];
 const DEFAULT_ZOOM = 14;
+const DEFAULT_PITCH = 0;
+const DEFAULT_BEARING = 0;
 
 type MapStyleInclude = "hillshade" | "trafficIncidents" | "trafficFlow";
 type MapStyleId =
@@ -28,6 +30,8 @@ interface TomTomMapProps {
   children?: ReactNode;
   center?: [number, number];
   zoom?: number;
+  pitch?: number;
+  bearing?: number;
   showTrafficFlow?: boolean;
   showTrafficIncidents?: boolean;
   style?: MapStyleId;
@@ -41,6 +45,8 @@ const TomTomMapInner = ({
   children,
   center,
   zoom,
+  pitch,
+  bearing,
   showTrafficFlow = true,
   showTrafficIncidents = true,
   style = "monoLight",
@@ -51,10 +57,17 @@ const TomTomMapInner = ({
 }: TomTomMapProps) => {
   const targetCenter = center ?? DEFAULT_CENTER;
   const targetZoom = zoom ?? DEFAULT_ZOOM;
+  const targetPitch = pitch ?? DEFAULT_PITCH;
+  const targetBearing = bearing ?? DEFAULT_BEARING;
 
   const mapContainerRef = useRef<HTMLDivElement | null>(null);
   const mapInstanceRef = useRef<TTM | null>(null);
-  const lastViewportRef = useRef<{ center: [number, number]; zoom: number } | null>(null);
+  const lastViewportRef = useRef<{
+    center: [number, number];
+    zoom: number;
+    pitch: number;
+    bearing: number;
+  } | null>(null);
   const [mapContext, setMapContext] = useState<MapContextType>({
     map: null,
     mapLibreMap: null,
@@ -84,10 +97,17 @@ const TomTomMapInner = ({
         container: mapContainerRef.current,
         center: targetCenter,
         zoom: targetZoom,
+        pitch: targetPitch,
+        bearing: targetBearing,
       },
     });
 
-    lastViewportRef.current = { center: targetCenter, zoom: targetZoom };
+    lastViewportRef.current = {
+      center: targetCenter,
+      zoom: targetZoom,
+      pitch: targetPitch,
+      bearing: targetBearing,
+    };
 
     if (showTrafficFlow) {
       TrafficFlowModule.get(map, { visible: true });
@@ -156,19 +176,28 @@ const TomTomMapInner = ({
       previousViewport.center[0] !== targetCenter[0] ||
       previousViewport.center[1] !== targetCenter[1];
     const hasZoomChanged = !previousViewport || previousViewport.zoom !== targetZoom;
+    const hasPitchChanged = !previousViewport || previousViewport.pitch !== targetPitch;
+    const hasBearingChanged = !previousViewport || previousViewport.bearing !== targetBearing;
 
-    if (!hasCenterChanged && !hasZoomChanged) {
+    if (!hasCenterChanged && !hasZoomChanged && !hasPitchChanged && !hasBearingChanged) {
       return;
     }
 
     mapInstanceRef.current.mapLibreMap.flyTo({
       center: targetCenter,
       zoom: targetZoom,
+      pitch: targetPitch,
+      bearing: targetBearing,
       duration: 1000,
     });
 
-    lastViewportRef.current = { center: targetCenter, zoom: targetZoom };
-  }, [disablePan, targetCenter, targetZoom]);
+    lastViewportRef.current = {
+      center: targetCenter,
+      zoom: targetZoom,
+      pitch: targetPitch,
+      bearing: targetBearing,
+    };
+  }, [targetBearing, targetCenter, targetPitch, targetZoom]);
 
   return (
     <MapProvider value={mapContext}>

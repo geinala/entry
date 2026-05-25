@@ -2,12 +2,13 @@ import {
   courierRouteTable,
   nodeTable,
   reoptimizationEventTable,
+  routeLegCongestionCheckIncidentTable,
   routeLegCongestionCheckTable,
   routeLegTable,
   trafficIncidentTable,
 } from "@/drizzle/schema";
 import { db } from "@/lib/db";
-import { aliasedTable, and, asc, eq, getTableColumns, inArray } from "drizzle-orm";
+import { aliasedTable, and, asc, eq, getTableColumns, gt, inArray } from "drizzle-orm";
 import type { TRouteSegmentWithBoundingBox } from "@/types/database";
 
 const fromNodeTable = aliasedTable(nodeTable, "from_node");
@@ -15,7 +16,7 @@ const toNodeTable = aliasedTable(nodeTable, "to_node");
 
 export const getRouteSegmentWithBoundingBoxRepository = async (
   simulationId: string,
-  eventId: number,
+  congestionCheckId: number,
 ): Promise<TRouteSegmentWithBoundingBox | undefined> => {
   const [result] = await db
     .select({
@@ -28,54 +29,35 @@ export const getRouteSegmentWithBoundingBoxRepository = async (
       bboxMaxLon: routeLegCongestionCheckTable.bboxMaxLng,
       acceptedIncident: getTableColumns(trafficIncidentTable),
     })
-    .from(reoptimizationEventTable)
+    .from(routeLegCongestionCheckIncidentTable)
     .where(
       and(
-        eq(reoptimizationEventTable.simulationId, simulationId),
-        eq(reoptimizationEventTable.id, eventId),
+        eq(routeLegCongestionCheckIncidentTable.congestionCheckId, congestionCheckId),
+        eq(routeLegCongestionCheckTable.simulationId, simulationId),
       ),
     )
-    .innerJoin(routeLegTable, eq(reoptimizationEventTable.triggerRouteLegId, routeLegTable.id))
+    .innerJoin(
+      routeLegCongestionCheckTable,
+      eq(routeLegCongestionCheckTable.id, routeLegCongestionCheckIncidentTable.congestionCheckId),
+    )
+    .innerJoin(routeLegTable, eq(routeLegTable.id, routeLegCongestionCheckTable.routeLegId))
     .innerJoin(fromNodeTable, eq(routeLegTable.fromNodeId, fromNodeTable.id))
     .innerJoin(toNodeTable, eq(routeLegTable.toNodeId, toNodeTable.id))
     .innerJoin(
-      routeLegCongestionCheckTable,
-      eq(routeLegTable.id, routeLegCongestionCheckTable.routeLegId),
-    )
-    .leftJoin(
       trafficIncidentTable,
-      and(
-        eq(routeLegCongestionCheckTable.accepted_incident_id, trafficIncidentTable.id),
-        eq(trafficIncidentTable.simulationId, simulationId),
-      ),
+      eq(trafficIncidentTable.id, routeLegCongestionCheckIncidentTable.trafficIncidentId),
     );
 
   return result;
 };
 
 export const getRouteSegmentCongestionCheckMatchDetailsRepository = async (
-  simulationId: string,
-  eventId: number,
+  congestionCheckId: number,
 ) => {
-  const [result] = await db
-    .select({
-      matchDetails: routeLegCongestionCheckTable.matchDetails,
-    })
-    .from(reoptimizationEventTable)
-    .where(
-      and(
-        eq(reoptimizationEventTable.simulationId, simulationId),
-        eq(reoptimizationEventTable.id, eventId),
-      ),
-    )
-    .innerJoin(routeLegTable, eq(reoptimizationEventTable.triggerRouteLegId, routeLegTable.id))
-    .innerJoin(
-      routeLegCongestionCheckTable,
-      eq(routeLegTable.id, routeLegCongestionCheckTable.routeLegId),
-    )
-    .limit(1);
-
-  return result?.matchDetails;
+  return await db
+    .select()
+    .from(routeLegCongestionCheckIncidentTable)
+    .where(eq(routeLegCongestionCheckIncidentTable.congestionCheckId, congestionCheckId));
 };
 
 export const getIncidentRouteSegmentByTomTomIdsRepository = async (
@@ -104,7 +86,7 @@ const triggeredRouteLegTable = aliasedTable(routeLegTable, "triggered_route_leg"
 
 export const getRouteSegmentAffectedIncidentsRepository = async (
   simulationId: string,
-  eventId: number,
+  congestionCheckId: number,
 ) => {
   const [result] = await db
     .select({
@@ -112,12 +94,16 @@ export const getRouteSegmentAffectedIncidentsRepository = async (
       afterRoute: afterRouteLegTable,
       timeSavedInSeconds: reoptimizationEventTable.timeSavedInSeconds,
     })
-    .from(reoptimizationEventTable)
+    .from(routeLegCongestionCheckTable)
     .where(
       and(
-        eq(reoptimizationEventTable.simulationId, simulationId),
-        eq(reoptimizationEventTable.id, eventId),
+        eq(routeLegCongestionCheckTable.simulationId, simulationId),
+        eq(routeLegCongestionCheckTable.id, congestionCheckId),
       ),
+    )
+    .leftJoin(
+      reoptimizationEventTable,
+      eq(reoptimizationEventTable.congestionCheckId, routeLegCongestionCheckTable.id),
     )
     .innerJoin(
       triggeredRouteLegTable,
@@ -146,6 +132,8 @@ export const getRouteSegmentAffectedIncidentsRepository = async (
       ),
     );
 
+  console.log("getRouteSegmentAffectedIncidentsRepository result:", { result });
+
   return result;
 };
 
@@ -154,12 +142,16 @@ export const getFullRouteComparisonRepository = async (simulationId: string, eve
     .select({
       ...getTableColumns(reoptimizationEventTable),
     })
-    .from(reoptimizationEventTable)
+    .from(routeLegCongestionCheckTable)
     .where(
       and(
-        eq(reoptimizationEventTable.simulationId, simulationId),
-        eq(reoptimizationEventTable.id, eventId),
+        eq(routeLegCongestionCheckTable.simulationId, simulationId),
+        eq(routeLegCongestionCheckTable.id, eventId),
       ),
+    )
+    .leftJoin(
+      reoptimizationEventTable,
+      eq(reoptimizationEventTable.congestionCheckId, routeLegCongestionCheckTable.id),
     )
     .limit(1);
 
@@ -189,4 +181,16 @@ export const getFullRouteComparisonRepository = async (simulationId: string, eve
     beforeRoute,
     afterRoute,
   };
+};
+
+export const hasIncidentsRepository = async (congestionCheckId: number) => {
+  return await db
+    .select()
+    .from(routeLegCongestionCheckTable)
+    .where(
+      and(
+        eq(routeLegCongestionCheckTable.id, congestionCheckId),
+        gt(routeLegCongestionCheckTable.incidentsFound, 0),
+      ),
+    );
 };

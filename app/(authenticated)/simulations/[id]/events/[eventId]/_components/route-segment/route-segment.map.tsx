@@ -5,15 +5,14 @@ import { BoundingBox, Marker } from "@/app/_components/map";
 import { useParams } from "next/navigation";
 import {
   useGetIncidentRouteSegmentByTomTomIdsQuery,
-  useGetRouteSegmentCongestionCheckMatchDetailsQuery,
+  useGetRouteSegmentCongestionIncidentsQuery,
   useGetRouteSegmentCongestionQuery,
 } from "../../_hooks/use-queries";
 import { Skeleton } from "@/app/_components/ui/skeleton";
 import { Route } from "@/app/_components/map/route";
 import { useMemo } from "react";
-import { decodePolyline, geometryToCoordinates, getRouteCenter } from "@/lib/utils";
+import { decodePolyline, geometryToCoordinates, getAutoZoom, getRouteCenter } from "@/lib/utils";
 import { Badge } from "@/app/_components/ui/badge";
-import Image from "next/image";
 
 const TomTomMap = dynamic(
   () => import("@/app/_components/map").then((module) => module.TomTomMap),
@@ -24,14 +23,11 @@ export const RouteSegmentMap = () => {
   const { eventId, id } = useParams<{ id: string; eventId: string }>();
 
   const { data, isLoading } = useGetRouteSegmentCongestionQuery(id, Number(eventId));
-  const { data: matchDetails } = useGetRouteSegmentCongestionCheckMatchDetailsQuery(
-    id,
-    Number(eventId),
-  );
+  const { data: matchDetails } = useGetRouteSegmentCongestionIncidentsQuery(id, Number(eventId));
 
   const tomTomSegmentIds = useMemo(
-    () => (matchDetails?.incident_match_debugs ?? []).map((debug) => debug.incident_id),
-    [matchDetails?.incident_match_debugs],
+    () => matchDetails?.map((debug) => debug.tomtomIncidentId),
+    [matchDetails],
   );
 
   const { data: incidents } = useGetIncidentRouteSegmentByTomTomIdsQuery(id, tomTomSegmentIds);
@@ -41,6 +37,7 @@ export const RouteSegmentMap = () => {
     [data?.routeSegmentPolyline],
   );
   const routeCenter = useMemo(() => getRouteCenter(decodedRoutes), [decodedRoutes]);
+  const zoom = getAutoZoom(decodedRoutes);
   const acceptedIncidentId = data?.acceptedIncident?.id;
 
   if (isLoading) {
@@ -48,13 +45,12 @@ export const RouteSegmentMap = () => {
   }
 
   return (
-    <div className="w-full flex-col flex items-center justify-center gap-3 max-h-96">
-      <div className="w-full rounded-md overflow-hidden h-72">
+    <div className="w-full flex-col flex items-center justify-center gap-3 max-h-100">
+      <div className="w-full rounded-md overflow-hidden h-100">
         <TomTomMap
           center={routeCenter}
-          zoom={13.8}
+          zoom={zoom}
           containerClassName="w-full h-full"
-          disableInteractions
           showTrafficFlow={false}
           showTrafficIncidents={false}
         >
@@ -91,20 +87,7 @@ export const RouteSegmentMap = () => {
           ))}
           <Route coordinates={decodedRoutes} color="#3b82f6" width={2} opacity={0.4} />
           {data?.fromNode && (
-            <Marker
-              lat={data.fromNode.latitude}
-              lng={data.fromNode.longitude}
-              label="From"
-              icon={
-                <Image
-                  src="/images/courier.jpg"
-                  alt="From Node"
-                  width={24}
-                  height={24}
-                  className="rounded-full"
-                />
-              }
-            />
+            <Marker lat={data.fromNode.latitude} lng={data.fromNode.longitude} label="From" />
           )}
           {data?.toNode && (
             <Marker lat={data.toNode.latitude} lng={data.toNode.longitude} label="To" />

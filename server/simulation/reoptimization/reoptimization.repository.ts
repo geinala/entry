@@ -2,60 +2,68 @@ import {
   courierRouteTable,
   courierTable,
   reoptimizationEventTable,
+  routeLegCongestionCheckTable,
   routeLegTable,
 } from "@/drizzle/schema";
-import { buildCountQuery, buildPaginatedQuery } from "@/lib/query-builder";
+import { buildCountQuery, buildPaginatedQuery, TColumnsDefinition } from "@/lib/query-builder";
 import { TIndexQueryParams } from "@/types/query-params";
-import { eq, getTableColumns } from "drizzle-orm";
-
-const REOPTIMIZATION_EVENTS_COLUMNS = {};
-
-const REOPTIMIZATION_EVENTS_SELECT = {
-  ...getTableColumns(reoptimizationEventTable),
-  courierName: courierTable.name,
-  fromNodeId: routeLegTable.fromNodeId,
-  toNodeId: routeLegTable.toNodeId,
-};
+import { and, eq, getTableColumns, gt } from "drizzle-orm";
 
 export const getReoptimizationEventsWithPaginationRepository = async (
   simulationId: string,
   queryParams: TIndexQueryParams,
 ) => {
+  const REOPTIMIZATION_EVENTS_COLUMNS: TColumnsDefinition<typeof routeLegCongestionCheckTable> = {
+    checkedAt: { sortable: true },
+  };
+
   return await Promise.all([
     await buildPaginatedQuery({
-      table: reoptimizationEventTable,
+      table: routeLegCongestionCheckTable,
       columns: REOPTIMIZATION_EVENTS_COLUMNS,
       queryParams,
-      select: REOPTIMIZATION_EVENTS_SELECT,
-      baseConditions: [eq(reoptimizationEventTable.simulationId, simulationId)],
+      select: {
+        ...getTableColumns(reoptimizationEventTable),
+        ...getTableColumns(routeLegCongestionCheckTable),
+        courierName: courierTable.name,
+        fromNodeId: routeLegTable.fromNodeId,
+        toNodeId: routeLegTable.toNodeId,
+      },
+      baseConditions: [
+        and(
+          eq(routeLegCongestionCheckTable.simulationId, simulationId),
+          gt(routeLegCongestionCheckTable.incidentsFound, 0),
+        ),
+      ],
       applyJoins: (qb) => {
         return qb
-          .innerJoin(
-            courierRouteTable,
-            eq(courierRouteTable.id, reoptimizationEventTable.courierRouteId),
-          )
+          .innerJoin(routeLegTable, eq(routeLegTable.id, routeLegCongestionCheckTable.routeLegId))
+          .innerJoin(courierRouteTable, eq(courierRouteTable.id, routeLegTable.courierRouteId))
           .innerJoin(courierTable, eq(courierTable.id, courierRouteTable.courierId))
-          .innerJoin(
-            routeLegTable,
-            eq(routeLegTable.id, reoptimizationEventTable.triggerRouteLegId),
+          .leftJoin(
+            reoptimizationEventTable,
+            eq(reoptimizationEventTable.congestionCheckId, routeLegCongestionCheckTable.id),
           );
       },
     }),
     await buildCountQuery({
-      table: reoptimizationEventTable,
+      table: routeLegCongestionCheckTable,
       columns: REOPTIMIZATION_EVENTS_COLUMNS,
       queryParams,
-      baseConditions: [eq(reoptimizationEventTable.simulationId, simulationId)],
+      baseConditions: [
+        and(
+          eq(routeLegCongestionCheckTable.simulationId, simulationId),
+          gt(routeLegCongestionCheckTable.incidentsFound, 0),
+        ),
+      ],
       applyJoins: (qb) => {
         return qb
-          .innerJoin(
-            courierRouteTable,
-            eq(courierRouteTable.id, reoptimizationEventTable.courierRouteId),
-          )
+          .innerJoin(routeLegTable, eq(routeLegTable.id, routeLegCongestionCheckTable.routeLegId))
+          .innerJoin(courierRouteTable, eq(courierRouteTable.id, routeLegTable.courierRouteId))
           .innerJoin(courierTable, eq(courierTable.id, courierRouteTable.courierId))
-          .innerJoin(
-            routeLegTable,
-            eq(routeLegTable.id, reoptimizationEventTable.triggerRouteLegId),
+          .leftJoin(
+            reoptimizationEventTable,
+            eq(reoptimizationEventTable.congestionCheckId, routeLegCongestionCheckTable.id),
           );
       },
     }),

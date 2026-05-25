@@ -208,6 +208,8 @@ export default function SimulationDetailPage() {
           <Map
             center={[data.depot.longitude, data.depot.latitude]}
             zoom={18}
+            pitch={200}
+            bearing={-20}
             routes={visibleRoutes}
             vehicles={visibleVehicleTicks}
           />

@@ -10,6 +10,7 @@ import { Marker } from "@/app/_components/map";
 import { Route } from "@/app/_components/map/route";
 import { useMemo } from "react";
 import {
+  calculatePercentageChange,
   decodePolyline,
   formatSeconds,
   getAutoZoom,
@@ -19,8 +20,14 @@ import {
 import { getRouteNodeStyle } from "../../../../_utils/map-route-data";
 import type { TFullRouteComparison } from "@/types/database";
 import { Separator } from "@/app/_components/ui/separator";
-import { ArrowRight, Map } from "lucide-react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/app/_components/ui/card";
+import { EqualApproximately, Map, MoveRight, TrendingDown, TrendingUp } from "lucide-react";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/app/_components/ui/card";
 
 const TomTomMap = dynamic(
   () => import("@/app/_components/map").then((module) => module.TomTomMap),
@@ -99,6 +106,45 @@ export const FullRouteComparison = () => {
     [afterRouteCoordinates],
   );
   const afterZoom = useMemo(() => getAutoZoom(afterRouteCoordinates), [afterRouteCoordinates]);
+  const distanceDiff = useMemo(
+    () => (data?.beforeTotalDistanceInMeters ?? 0) - (data?.afterTotalDistanceInMeters ?? 0),
+    [data?.beforeTotalDistanceInMeters, data?.afterTotalDistanceInMeters],
+  );
+  const distanceState = useMemo(
+    () => (distanceDiff > 0 ? "saved" : distanceDiff < 0 ? "added" : "neutral"),
+    [distanceDiff],
+  );
+  const timeDiff = useMemo(
+    () => (data?.beforeTotalTimeInSeconds ?? 0) - (data?.afterTotalTimeInSeconds ?? 0),
+    [data?.beforeTotalTimeInSeconds, data?.afterTotalTimeInSeconds],
+  );
+  const timeState = useMemo(
+    () => (timeDiff > 0 ? "saved" : timeDiff < 0 ? "added" : "neutral"),
+    [timeDiff],
+  );
+
+  const classesForState = (
+    state: string,
+    savedClass: string,
+    addedClass: string,
+    neutralClass = "",
+  ) => {
+    if (state === "saved") return savedClass;
+    if (state === "added") return addedClass;
+    return neutralClass;
+  };
+
+  const iconForState = (state: string) => {
+    if (state === "saved") return <TrendingDown strokeWidth={1.5} />;
+    if (state === "added") return <TrendingUp strokeWidth={1.5} />;
+    return <EqualApproximately strokeWidth={1.5} />;
+  };
+
+  const labelForState = (state: string, type: string) => {
+    if (state === "saved") return `${type} Saved`;
+    if (state === "added") return `${type} Added`;
+    return `${type} Unchanged`;
+  };
 
   if (isLoading) {
     return (
@@ -118,21 +164,45 @@ export const FullRouteComparison = () => {
       icon={<Map className="text-primary w-full h-full" />}
     >
       <div className="grid grid-cols-4 gap-3">
-        <Card>
-          <CardHeader>
+        <Card
+          className={classesForState(
+            distanceState,
+            "text-emerald-600 bg-emerald-50 border-emerald-600",
+            "text-rose-600 bg-rose-50 border-rose-600",
+            "",
+          )}
+        >
+          <CardHeader className="flex justify-between items-start h-full">
             <CardTitle>Total Distance</CardTitle>
+            <CardDescription
+              className={`flex items-center gap-1 ${classesForState(distanceState, "text-emerald-600", "text-rose-600", "")}`}
+            >
+              {iconForState(distanceState)}
+              {calculatePercentageChange(
+                data?.beforeTotalDistanceInMeters ?? 0,
+                data?.afterTotalDistanceInMeters ?? 0,
+              ).toFixed(2)}
+              %
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div>
               <span>{metersToKm(data?.beforeTotalDistanceInMeters ?? 0)} km</span>
-              <ArrowRight className="inline mx-2" />
+              <MoveRight className="inline mx-2" />
               <span>{metersToKm(data?.afterTotalDistanceInMeters ?? 0)} km</span>
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader>
-            <CardTitle>Distance Saved</CardTitle>
+        <Card
+          className={classesForState(
+            distanceState,
+            "text-emerald-600 bg-emerald-50 border-emerald-600",
+            "text-rose-600 bg-rose-50 border-rose-600",
+            "",
+          )}
+        >
+          <CardHeader className="flex justify-between items-start h-full">
+            <CardTitle>{labelForState(distanceState, "Distance")}</CardTitle>
           </CardHeader>
           <CardContent>
             <div>
@@ -146,9 +216,26 @@ export const FullRouteComparison = () => {
             </div>
           </CardContent>
         </Card>
-        <Card>
-          <CardHeader>
+        <Card
+          className={classesForState(
+            timeState,
+            "text-emerald-600 bg-emerald-50 border-emerald-600",
+            "text-rose-600 bg-rose-50 border-rose-600",
+            "",
+          )}
+        >
+          <CardHeader className="flex justify-between items-start h-full">
             <CardTitle>Total Duration</CardTitle>
+            <CardDescription
+              className={`flex items-center gap-1 ${classesForState(timeState, "text-emerald-600", "text-rose-600", "")}`}
+            >
+              {iconForState(timeState)}
+              {calculatePercentageChange(
+                data?.beforeTotalTimeInSeconds ?? 0,
+                data?.afterTotalTimeInSeconds ?? 0,
+              ).toFixed(2)}
+              %
+            </CardDescription>
           </CardHeader>
           <CardContent>
             <div>
@@ -159,21 +246,36 @@ export const FullRouteComparison = () => {
                   "seconds",
                 ])}
               </span>
-              <ArrowRight className="inline mx-2" />
+              <MoveRight className="inline mx-2" />
               <span>
                 {formatSeconds(data?.afterTotalTimeInSeconds ?? 0, ["hours", "minutes", "seconds"])}
               </span>
             </div>
           </CardContent>
         </Card>
-        <Card>
+        <Card
+          className={classesForState(
+            timeState,
+            "border-emerald-600 bg-emerald-50",
+            "border-rose-600 bg-rose-50",
+            "border",
+          )}
+        >
           <CardHeader>
-            <CardTitle>Time Saved</CardTitle>
+            <CardTitle
+              className={classesForState(timeState, "text-emerald-600", "text-rose-600", "")}
+            >
+              {labelForState(timeState, "Time")}
+            </CardTitle>
           </CardHeader>
           <CardContent>
             <div>
-              <span>
-                {formatSeconds(data?.timeSavedInSeconds ?? 0, ["hours", "minutes", "seconds"])}
+              <span className={classesForState(timeState, "text-emerald-600", "text-rose-600", "")}>
+                {formatSeconds(Math.abs(data?.timeSavedInSeconds ?? 0), [
+                  "hours",
+                  "minutes",
+                  "seconds",
+                ])}
               </span>
             </div>
           </CardContent>

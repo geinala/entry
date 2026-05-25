@@ -2,36 +2,39 @@ import useAuthenticatedClient from "@/app/_hooks/use-authenticated-client";
 import { useQuery } from "@tanstack/react-query";
 import { REOPTIMIZATION_EVENT_QUERIES } from "../_api/queries";
 
-export const useGetRouteSegmentCongestionQuery = (simulationId: string, eventId: number) => {
+export const useGetRouteSegmentCongestionQuery = (
+  simulationId: string,
+  congestionCheckId: number,
+) => {
   const api = useAuthenticatedClient();
 
   return useQuery(
     REOPTIMIZATION_EVENT_QUERIES.getRouteSegmentCongestion({
       api,
       simulationId,
-      eventId,
+      congestionCheckId,
     }),
   );
 };
 
-export const useGetRouteSegmentCongestionCheckMatchDetailsQuery = (
+export const useGetRouteSegmentCongestionIncidentsQuery = (
   simulationId: string,
-  eventId: number,
+  congestionCheckId: number,
 ) => {
   const api = useAuthenticatedClient();
 
   return useQuery(
-    REOPTIMIZATION_EVENT_QUERIES.getRouteSegmentCongestionCheckMatchDetails({
+    REOPTIMIZATION_EVENT_QUERIES.getRouteSegmentCongestionIncidents({
       api,
       simulationId,
-      eventId,
+      congestionCheckId,
     }),
   );
 };
 
 export const useGetIncidentRouteSegmentByTomTomIdsQuery = (
   simulationId: string,
-  tomTomSegmentIds: string[],
+  tomTomSegmentIds?: string[],
 ) => {
   const api = useAuthenticatedClient();
 
@@ -44,26 +47,29 @@ export const useGetIncidentRouteSegmentByTomTomIdsQuery = (
   );
 };
 
-export const useGetRouteSegmentAffectedIncidentsQuery = (simulationId: string, eventId: number) => {
+export const useGetRouteSegmentAffectedIncidentsQuery = (
+  simulationId: string,
+  congestionCheckId: number,
+) => {
   const api = useAuthenticatedClient();
 
   return useQuery(
     REOPTIMIZATION_EVENT_QUERIES.getRouteSegmentAffectedIncidents({
       api,
       simulationId,
-      eventId,
+      congestionCheckId,
     }),
   );
 };
 
-export const useGetFullRouteComparisonQuery = (simulationId: string, eventId: number) => {
+export const useGetFullRouteComparisonQuery = (simulationId: string, congestionCheckId: number) => {
   const api = useAuthenticatedClient();
 
   return useQuery(
     REOPTIMIZATION_EVENT_QUERIES.getFullRouteComparison({
       api,
       simulationId,
-      eventId,
+      congestionCheckId,
     }),
   );
 };

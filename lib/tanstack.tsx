@@ -84,6 +84,10 @@ const handleGlobalError = (error: AxiosError) => {
   const { message } = response as { message?: string };
 
   switch (status) {
+    case 404:
+      window.location.replace("/not-found");
+      break;
+
     case 400:
       toast.error(message || "Bad Request");
       break;

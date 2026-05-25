@@ -1,5 +1,5 @@
 {
-  "id": "31a3c83e-662c-4bdf-b636-0f22bb2ee83d",
+  "id": "d709af2f-2097-4cfd-ab52-f2d089131063",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -123,8 +123,12 @@
           "name": "courier_routes_solution_id_solutions_id_fk",
           "tableFrom": "courier_routes",
           "tableTo": "solutions",
-          "columnsFrom": ["solution_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "solution_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -132,8 +136,12 @@
           "name": "courier_routes_courier_id_couriers_id_fk",
           "tableFrom": "courier_routes",
           "tableTo": "couriers",
-          "columnsFrom": ["courier_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "courier_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -141,8 +149,12 @@
           "name": "courier_routes_trigger_node_id_nodes_id_fk",
           "tableFrom": "courier_routes",
           "tableTo": "nodes",
-          "columnsFrom": ["trigger_node_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "trigger_node_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -150,8 +162,12 @@
           "name": "courier_routes_reoptimized_from_route_id_courier_routes_id_fk",
           "tableFrom": "courier_routes",
           "tableTo": "courier_routes",
-          "columnsFrom": ["reoptimized_from_route_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "reoptimized_from_route_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -214,8 +230,12 @@
           "name": "couriers_simulation_id_simulations_id_fk",
           "tableFrom": "couriers",
           "tableTo": "simulations",
-          "columnsFrom": ["simulation_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "simulation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -410,8 +430,12 @@
           "name": "matrix_batches_simulation_id_simulations_id_fk",
           "tableFrom": "matrix_batches",
           "tableTo": "simulations",
-          "columnsFrom": ["simulation_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "simulation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -519,8 +543,12 @@
           "name": "matrix_results_simulation_id_simulations_id_fk",
           "tableFrom": "matrix_results",
           "tableTo": "simulations",
-          "columnsFrom": ["simulation_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "simulation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -528,8 +556,12 @@
           "name": "matrix_results_matrix_batch_id_matrix_batches_id_fk",
           "tableFrom": "matrix_results",
           "tableTo": "matrix_batches",
-          "columnsFrom": ["matrix_batch_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "matrix_batch_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -603,8 +635,12 @@
           "name": "node_details_node_id_nodes_id_fk",
           "tableFrom": "node_details",
           "tableTo": "nodes",
-          "columnsFrom": ["node_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "node_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -703,8 +739,12 @@
           "name": "nodes_simulation_id_simulations_id_fk",
           "tableFrom": "nodes",
           "tableTo": "simulations",
-          "columnsFrom": ["simulation_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "simulation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -712,8 +752,12 @@
           "name": "nodes_courier_id_couriers_id_fk",
           "tableFrom": "nodes",
           "tableTo": "couriers",
-          "columnsFrom": ["courier_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "courier_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -721,8 +765,12 @@
           "name": "nodes_completed_by_couriers_id_fk",
           "tableFrom": "nodes",
           "tableTo": "couriers",
-          "columnsFrom": ["completed_by"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "completed_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -730,8 +778,12 @@
           "name": "nodes_completed_by_courier_id_couriers_id_fk",
           "tableFrom": "nodes",
           "tableTo": "couriers",
-          "columnsFrom": ["completed_by"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "completed_by"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -887,8 +939,12 @@
           "name": "optimization_runs_simulation_id_simulations_id_fk",
           "tableFrom": "optimization_runs",
           "tableTo": "simulations",
-          "columnsFrom": ["simulation_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "simulation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -896,8 +952,12 @@
           "name": "optimization_runs_traffic_incident_id_traffic_incidents_id_fk",
           "tableFrom": "optimization_runs",
           "tableTo": "traffic_incidents",
-          "columnsFrom": ["traffic_incident_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "traffic_incident_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -905,8 +965,12 @@
           "name": "optimization_runs_courier_route_id_courier_routes_id_fk",
           "tableFrom": "optimization_runs",
           "tableTo": "courier_routes",
-          "columnsFrom": ["courier_route_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "courier_route_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -939,8 +1003,8 @@
           "primaryKey": false,
           "notNull": false
         },
-        "traffic_incident_id": {
-          "name": "traffic_incident_id",
+        "congestion_check_id": {
+          "name": "congestion_check_id",
           "type": "integer",
           "primaryKey": false,
           "notNull": false
@@ -993,24 +1057,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "improvement_in_distance_in_meters": {
-          "name": "improvement_in_distance_in_meters",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "improvement_in_time_in_seconds": {
-          "name": "improvement_in_time_in_seconds",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "courier_position": {
-          "name": "courier_position",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": true
-        },
         "distance_saved_in_meters": {
           "name": "distance_saved_in_meters",
           "type": "integer",
@@ -1020,6 +1066,12 @@
         "time_saved_in_seconds": {
           "name": "time_saved_in_seconds",
           "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "courier_position": {
+          "name": "courier_position",
+          "type": "jsonb",
           "primaryKey": false,
           "notNull": true
         },
@@ -1035,35 +1087,18 @@
           "primaryKey": false,
           "notNull": true
         },
-        "incident_category": {
-          "name": "incident_category",
-          "type": "smallint",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "incident_delay_in_seconds": {
-          "name": "incident_delay_in_seconds",
+        "total_incident_delay_in_seconds": {
+          "name": "total_incident_delay_in_seconds",
           "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "incident_details": {
-          "name": "incident_details",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "incident_description": {
-          "name": "incident_description",
-          "type": "text",
           "primaryKey": false,
           "notNull": false
         },
         "outcome": {
           "name": "outcome",
-          "type": "varchar",
+          "type": "reoptimization_outcome_enum",
+          "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true
         },
         "trigger_route_leg_id": {
           "name": "trigger_route_leg_id",
@@ -1085,8 +1120,12 @@
           "name": "reoptimization_events_simulation_id_simulations_id_fk",
           "tableFrom": "reoptimization_events",
           "tableTo": "simulations",
-          "columnsFrom": ["simulation_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "simulation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1094,17 +1133,25 @@
           "name": "reoptimization_events_courier_route_id_courier_routes_id_fk",
           "tableFrom": "reoptimization_events",
           "tableTo": "courier_routes",
-          "columnsFrom": ["courier_route_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "courier_route_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
-        "reoptimization_events_traffic_incident_id_traffic_incidents_id_fk": {
-          "name": "reoptimization_events_traffic_incident_id_traffic_incidents_id_fk",
+        "reoptimization_events_congestion_check_id_route_leg_congestion_checks_id_fk": {
+          "name": "reoptimization_events_congestion_check_id_route_leg_congestion_checks_id_fk",
           "tableFrom": "reoptimization_events",
-          "tableTo": "traffic_incidents",
-          "columnsFrom": ["traffic_incident_id"],
-          "columnsTo": ["id"],
+          "tableTo": "route_leg_congestion_checks",
+          "columnsFrom": [
+            "congestion_check_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1112,8 +1159,12 @@
           "name": "reoptimization_events_before_route_id_courier_routes_id_fk",
           "tableFrom": "reoptimization_events",
           "tableTo": "courier_routes",
-          "columnsFrom": ["before_route_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "before_route_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1121,8 +1172,12 @@
           "name": "reoptimization_events_after_route_id_courier_routes_id_fk",
           "tableFrom": "reoptimization_events",
           "tableTo": "courier_routes",
-          "columnsFrom": ["after_route_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "after_route_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1130,8 +1185,251 @@
           "name": "reoptimization_events_trigger_route_leg_id_route_legs_id_fk",
           "tableFrom": "reoptimization_events",
           "tableTo": "route_legs",
-          "columnsFrom": ["trigger_route_leg_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "trigger_route_leg_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.route_leg_congestion_check_incidents": {
+      "name": "route_leg_congestion_check_incidents",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "congestion_check_id": {
+          "name": "congestion_check_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "traffic_incident_id": {
+          "name": "traffic_incident_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tomtom_incident_id": {
+          "name": "tomtom_incident_id",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "delay_in_seconds": {
+          "name": "delay_in_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "overlap_ratio": {
+          "name": "overlap_ratio",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rejected_reasons": {
+          "name": "rejected_reasons",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "route_intersects": {
+          "name": "route_intersects",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "is_valid_congestion": {
+          "name": "is_valid_congestion",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "direction_matches": {
+          "name": "direction_matches",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "route_point_count": {
+          "name": "route_point_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "incident_point_count": {
+          "name": "incident_point_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cluster_group": {
+          "name": "cluster_group",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "delay_contribution_in_seconds": {
+          "name": "delay_contribution_in_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "chosen_for_reopt": {
+          "name": "chosen_for_reopt",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "delay_threshold_in_seconds": {
+          "name": "delay_threshold_in_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "overlap_threshold": {
+          "name": "overlap_threshold",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "proximity_threshold_in_meters": {
+          "name": "proximity_threshold_in_meters",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "route_leg_congestion_check_incidents_congestion_check_id_idx": {
+          "name": "route_leg_congestion_check_incidents_congestion_check_id_idx",
+          "columns": [
+            {
+              "expression": "congestion_check_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "route_leg_congestion_check_incidents_traffic_incident_id_idx": {
+          "name": "route_leg_congestion_check_incidents_traffic_incident_id_idx",
+          "columns": [
+            {
+              "expression": "traffic_incident_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "route_leg_congestion_check_incidents_valid_idx": {
+          "name": "route_leg_congestion_check_incidents_valid_idx",
+          "columns": [
+            {
+              "expression": "congestion_check_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "is_valid_congestion",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "route_leg_congestion_check_incidents_congestion_check_id_route_leg_congestion_checks_id_fk": {
+          "name": "route_leg_congestion_check_incidents_congestion_check_id_route_leg_congestion_checks_id_fk",
+          "tableFrom": "route_leg_congestion_check_incidents",
+          "tableTo": "route_leg_congestion_checks",
+          "columnsFrom": [
+            "congestion_check_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "route_leg_congestion_check_incidents_traffic_incident_id_traffic_incidents_id_fk": {
+          "name": "route_leg_congestion_check_incidents_traffic_incident_id_traffic_incidents_id_fk",
+          "tableFrom": "route_leg_congestion_check_incidents",
+          "tableTo": "traffic_incidents",
+          "columnsFrom": [
+            "traffic_incident_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "route_leg_congestion_check_incidents_congestion_check_id_fk": {
+          "name": "route_leg_congestion_check_incidents_congestion_check_id_fk",
+          "tableFrom": "route_leg_congestion_check_incidents",
+          "tableTo": "route_leg_congestion_checks",
+          "columnsFrom": [
+            "congestion_check_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "route_leg_congestion_check_incidents_traffic_incident_id_fk": {
+          "name": "route_leg_congestion_check_incidents_traffic_incident_id_fk",
+          "tableFrom": "route_leg_congestion_check_incidents",
+          "tableTo": "traffic_incidents",
+          "columnsFrom": [
+            "traffic_incident_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1207,17 +1505,19 @@
           "notNull": true,
           "default": 0
         },
-        "accepted_incident_id": {
-          "name": "accepted_incident_id",
+        "accepted_incident_count": {
+          "name": "accepted_incident_count",
           "type": "integer",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": 0
         },
-        "match_details": {
-          "name": "match_details",
-          "type": "jsonb",
+        "total_delay_in_seconds": {
+          "name": "total_delay_in_seconds",
+          "type": "integer",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": 0
         }
       },
       "indexes": {},
@@ -1226,8 +1526,12 @@
           "name": "route_leg_congestion_checks_simulation_id_simulations_id_fk",
           "tableFrom": "route_leg_congestion_checks",
           "tableTo": "simulations",
-          "columnsFrom": ["simulation_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "simulation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1235,8 +1539,12 @@
           "name": "route_leg_congestion_checks_route_leg_id_route_legs_id_fk",
           "tableFrom": "route_leg_congestion_checks",
           "tableTo": "route_legs",
-          "columnsFrom": ["route_leg_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "route_leg_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1244,17 +1552,12 @@
           "name": "route_leg_congestion_checks_courier_id_couriers_id_fk",
           "tableFrom": "route_leg_congestion_checks",
           "tableTo": "couriers",
-          "columnsFrom": ["courier_id"],
-          "columnsTo": ["id"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        },
-        "route_leg_congestion_checks_accepted_incident_id_traffic_incidents_id_fk": {
-          "name": "route_leg_congestion_checks_accepted_incident_id_traffic_incidents_id_fk",
-          "tableFrom": "route_leg_congestion_checks",
-          "tableTo": "traffic_incidents",
-          "columnsFrom": ["accepted_incident_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "courier_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1506,8 +1809,12 @@
           "name": "route_legs_courier_route_id_courier_routes_id_fk",
           "tableFrom": "route_legs",
           "tableTo": "courier_routes",
-          "columnsFrom": ["courier_route_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "courier_route_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1515,8 +1822,12 @@
           "name": "route_legs_from_node_id_nodes_id_fk",
           "tableFrom": "route_legs",
           "tableTo": "nodes",
-          "columnsFrom": ["from_node_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "from_node_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1524,8 +1835,12 @@
           "name": "route_legs_to_node_id_nodes_id_fk",
           "tableFrom": "route_legs",
           "tableTo": "nodes",
-          "columnsFrom": ["to_node_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "to_node_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1799,8 +2114,12 @@
           "name": "simulation_jobs_user_id_users_user_id_fk",
           "tableFrom": "simulation_jobs",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["user_id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "user_id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1808,8 +2127,12 @@
           "name": "simulation_jobs_depot_id_depots_id_fk",
           "tableFrom": "simulation_jobs",
           "tableTo": "depots",
-          "columnsFrom": ["depot_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "depot_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1817,8 +2140,12 @@
           "name": "simulation_jobs_user_id_users_id_fk",
           "tableFrom": "simulation_jobs",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["user_id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "user_id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -1959,8 +2286,12 @@
           "name": "simulation_logs_simulation_id_simulations_id_fk",
           "tableFrom": "simulation_logs",
           "tableTo": "simulations",
-          "columnsFrom": ["simulation_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "simulation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1968,8 +2299,12 @@
           "name": "simulation_logs_courier_route_id_courier_routes_id_fk",
           "tableFrom": "simulation_logs",
           "tableTo": "courier_routes",
-          "columnsFrom": ["courier_route_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "courier_route_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -1977,8 +2312,12 @@
           "name": "simulation_logs_courier_id_couriers_id_fk",
           "tableFrom": "simulation_logs",
           "tableTo": "couriers",
-          "columnsFrom": ["courier_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "courier_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2227,8 +2566,12 @@
           "name": "simulations_user_id_users_user_id_fk",
           "tableFrom": "simulations",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["user_id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "user_id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2236,8 +2579,12 @@
           "name": "simulations_simulation_job_id_simulation_jobs_id_fk",
           "tableFrom": "simulations",
           "tableTo": "simulation_jobs",
-          "columnsFrom": ["simulation_job_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "simulation_job_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2245,8 +2592,12 @@
           "name": "simulations_depot_id_depots_id_fk",
           "tableFrom": "simulations",
           "tableTo": "depots",
-          "columnsFrom": ["depot_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "depot_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2254,8 +2605,12 @@
           "name": "simulations_user_id_users_id_fk",
           "tableFrom": "simulations",
           "tableTo": "users",
-          "columnsFrom": ["user_id"],
-          "columnsTo": ["user_id"],
+          "columnsFrom": [
+            "user_id"
+          ],
+          "columnsTo": [
+            "user_id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2456,8 +2811,12 @@
           "name": "simulation_uploaded_rows_simulation_job_id_simulation_jobs_id_fk",
           "tableFrom": "simulation_uploaded_rows",
           "tableTo": "simulation_jobs",
-          "columnsFrom": ["simulation_job_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "simulation_job_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2546,8 +2905,12 @@
           "name": "solutions_simulation_id_simulations_id_fk",
           "tableFrom": "solutions",
           "tableTo": "simulations",
-          "columnsFrom": ["simulation_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "simulation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         },
@@ -2555,8 +2918,12 @@
           "name": "solutions_courier_id_couriers_id_fk",
           "tableFrom": "solutions",
           "tableTo": "couriers",
-          "columnsFrom": ["courier_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "courier_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2643,6 +3010,12 @@
           "primaryKey": false,
           "notNull": false
         },
+        "incident_description": {
+          "name": "incident_description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
         "created_at": {
           "name": "created_at",
           "type": "timestamp with time zone",
@@ -2657,8 +3030,12 @@
           "name": "traffic_incidents_simulation_id_simulations_id_fk",
           "tableFrom": "traffic_incidents",
           "tableTo": "simulations",
-          "columnsFrom": ["simulation_id"],
-          "columnsTo": ["id"],
+          "columnsFrom": [
+            "simulation_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
           "onDelete": "no action",
           "onUpdate": "no action"
         }
@@ -2668,7 +3045,9 @@
         "traffic_incidents_tomtom_incident_id_unique": {
           "name": "traffic_incidents_tomtom_incident_id_unique",
           "nullsNotDistinct": false,
-          "columns": ["tomtom_incident_id"]
+          "columns": [
+            "tomtom_incident_id"
+          ]
         }
       },
       "policies": {},
@@ -2728,12 +3107,16 @@
         "users_user_id_unique": {
           "name": "users_user_id_unique",
           "nullsNotDistinct": false,
-          "columns": ["user_id"]
+          "columns": [
+            "user_id"
+          ]
         },
         "users_email_unique": {
           "name": "users_email_unique",
           "nullsNotDistinct": false,
-          "columns": ["email"]
+          "columns": [
+            "email"
+          ]
         }
       },
       "policies": {},
@@ -2745,47 +3128,106 @@
     "public.calculation_status_enum": {
       "name": "calculation_status_enum",
       "schema": "public",
-      "values": ["pending", "processing", "completed", "failed"]
+      "values": [
+        "pending",
+        "processing",
+        "completed",
+        "failed"
+      ]
     },
     "public.geocoding_status_enum": {
       "name": "geocoding_status_enum",
       "schema": "public",
-      "values": ["pending", "in_progress", "needed_review", "completed", "failed"]
+      "values": [
+        "pending",
+        "in_progress",
+        "needed_review",
+        "completed",
+        "failed"
+      ]
     },
     "public.matrix_batch_status_enum": {
       "name": "matrix_batch_status_enum",
       "schema": "public",
-      "values": ["submitted", "validated", "completed", "failed"]
+      "values": [
+        "submitted",
+        "validated",
+        "completed",
+        "failed"
+      ]
+    },
+    "public.reoptimization_outcome_enum": {
+      "name": "reoptimization_outcome_enum",
+      "schema": "public",
+      "values": [
+        "resequencing_applied",
+        "duration_updated",
+        "no_improvement"
+      ]
     },
     "public.resolution_status": {
       "name": "resolution_status",
       "schema": "public",
-      "values": ["pending", "auto_solved", "needed_review", "failed", "manual_override"]
+      "values": [
+        "pending",
+        "auto_solved",
+        "needed_review",
+        "failed",
+        "manual_override"
+      ]
     },
     "public.route_status_enum": {
       "name": "route_status_enum",
       "schema": "public",
-      "values": ["planned", "running", "completed", "cancelled"]
+      "values": [
+        "planned",
+        "running",
+        "completed",
+        "cancelled"
+      ]
     },
     "public.simulation_cleaning_status_enum": {
       "name": "simulation_cleaning_status_enum",
       "schema": "public",
-      "values": ["pending", "in_progress", "completed", "needed_review", "failed"]
+      "values": [
+        "pending",
+        "in_progress",
+        "completed",
+        "needed_review",
+        "failed"
+      ]
     },
     "public.simulation_file_validation_status_enum": {
       "name": "simulation_file_validation_status_enum",
       "schema": "public",
-      "values": ["uploaded", "validating", "validated", "needed_review", "completed", "failed"]
+      "values": [
+        "uploaded",
+        "validating",
+        "validated",
+        "needed_review",
+        "completed",
+        "failed"
+      ]
     },
     "public.simulation_job_status_enum": {
       "name": "simulation_job_status_enum",
       "schema": "public",
-      "values": ["uploaded", "processing", "completed", "failed"]
+      "values": [
+        "uploaded",
+        "processing",
+        "completed",
+        "failed"
+      ]
     },
     "public.simulation_status_enum": {
       "name": "simulation_status_enum",
       "schema": "public",
-      "values": ["optimizing", "running", "completed", "failed"]
+      "values": [
+        "optimizing",
+        "running",
+        "completed",
+        "failed"
+      ]
     }
   },
   "schemas": {},

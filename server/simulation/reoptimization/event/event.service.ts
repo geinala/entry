@@ -6,20 +6,19 @@ import {
   getRouteSegmentAffectedIncidentsRepository,
   getRouteSegmentCongestionCheckMatchDetailsRepository,
   getRouteSegmentWithBoundingBoxRepository,
+  hasIncidentsRepository,
 } from "./event.repository";
+import { NotFoundException } from "@/common/exception/not-found.exception";
 
 export const getRouteSegmentWithBoundingBoxService = async (
   simulationId: string,
-  eventId: number,
+  congestionCheckId: number,
 ) => {
-  return await getRouteSegmentWithBoundingBoxRepository(simulationId, eventId);
+  return await getRouteSegmentWithBoundingBoxRepository(simulationId, congestionCheckId);
 };
 
-export const getRouteSegmentCongestionCheckMatchDetailsService = async (
-  simulationId: string,
-  eventId: number,
-) => {
-  return await getRouteSegmentCongestionCheckMatchDetailsRepository(simulationId, eventId);
+export const getRouteSegmentCongestionCheckMatchDetailsService = async (eventId: number) => {
+  return await getRouteSegmentCongestionCheckMatchDetailsRepository(eventId);
 };
 
 export const getIncidentRouteSegmentByTomTomIdsService = async (
@@ -38,4 +37,16 @@ export const getRouteSegmentAffectedIncidentsService = async (
 
 export const getFullRouteComparisonService = async (simulationId: string, eventId: number) => {
   return await getFullRouteComparisonRepository(simulationId, eventId);
+};
+
+export const hasIncidentsService = async (congestionCheckId: number) => {
+  try {
+    const incidents = await hasIncidentsRepository(congestionCheckId);
+
+    if (incidents.length <= 0) {
+      throw new NotFoundException("No incidents found for the given congestion check ID");
+    }
+  } catch (error) {
+    throw error;
+  }
 };

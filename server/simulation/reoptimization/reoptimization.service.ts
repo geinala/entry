@@ -9,7 +9,10 @@ export const getReoptimizationEventsWithPaginationService = async (
 ) => {
   const [paginatedEvents, totalEvents] = await getReoptimizationEventsWithPaginationRepository(
     simulationId,
-    queryParams,
+    {
+      ...queryParams,
+      sort: [{ key: "checkedAt", direction: "desc" }],
+    },
   );
 
   return paginationResponseMapper<TReoptimizationEvent>(paginatedEvents, {
