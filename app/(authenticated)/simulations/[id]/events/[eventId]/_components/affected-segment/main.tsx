@@ -45,9 +45,11 @@ export const AffectedSegment = () => {
       description="The segment of the route that is affected by the accepted incident. The affected segment is determined based on the overlap between the route segment and the incident geometry."
       icon={<Map className="text-primary w-full h-full" />}
     >
-      {isLoading || isCongestionLoading ? (
-        <Skeleton className="w-full h-48" />
-      ) : (
+      {isLoading || (isCongestionLoading && <Skeleton className="w-full h-48" />)}
+      {!isLoading && !isCongestionLoading && !data && (
+        <p className="text-muted-foreground">No accepted incidents.</p>
+      )}
+      {!isLoading && !isCongestionLoading && data && (
         <div className="grid grid-cols-2 gap-3 h-96">
           <div className="w-full flex flex-col gap-3">
             <Badge variant="outline">Before</Badge>

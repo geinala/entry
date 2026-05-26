@@ -89,28 +89,22 @@ export const REOPTIMIZATION_EVENT_QUERIES = {
   }) => {
     return queryOptions({
       queryKey: ["route-segment-affected-incidents", simulationId, congestionCheckId],
-      queryFn: async (): Promise<
-        | {
+      queryFn: async (): Promise<{
+        beforeRoute: TRouteLeg;
+        afterRoute: TRouteLeg;
+        timeSavedInSeconds: number;
+      } | null> => {
+        const response: AxiosResponse<
+          TApiSuccessResponseWithData<{
             beforeRoute: TRouteLeg;
             afterRoute: TRouteLeg;
             timeSavedInSeconds: number;
-          }
-        | undefined
-      > => {
-        const response: AxiosResponse<
-          TApiSuccessResponseWithData<
-            | {
-                beforeRoute: TRouteLeg;
-                afterRoute: TRouteLeg;
-                timeSavedInSeconds: number;
-              }
-            | undefined
-          >
+          } | null>
         > = await api.get(
           `/simulations/${simulationId}/reoptimizations/events/${congestionCheckId}/routes/segments/congestions/affected`,
         );
 
-        return response.data.data || undefined;
+        return response.data.data || null;
       },
       enabled: !!simulationId && !!congestionCheckId,
     });
@@ -126,13 +120,13 @@ export const REOPTIMIZATION_EVENT_QUERIES = {
   }) => {
     return queryOptions({
       queryKey: ["full-route-comparison", simulationId, congestionCheckId],
-      queryFn: async (): Promise<TFullRouteComparison> => {
-        const response: AxiosResponse<TApiSuccessResponseWithData<TFullRouteComparison>> =
+      queryFn: async (): Promise<TFullRouteComparison | null> => {
+        const response: AxiosResponse<TApiSuccessResponseWithData<TFullRouteComparison | null>> =
           await api.get(
             `/simulations/${simulationId}/reoptimizations/events/${congestionCheckId}/routes`,
           );
 
-        return response.data.data;
+        return response.data.data || null;
       },
       enabled: !!simulationId && !!congestionCheckId,
     });
