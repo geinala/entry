@@ -88,7 +88,7 @@ export const AcceptedIncidentDetail = () => {
           );
         })
       ) : (
-        <div className="text-muted-foreground">No accepted incidents.</div>
+        <p className="text-muted-foreground">No accepted incidents.</p>
       )}
     </SummaryContainer>
   );

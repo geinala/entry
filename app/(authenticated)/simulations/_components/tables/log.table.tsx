@@ -59,9 +59,7 @@ export default function LogTable({ simulationId }: ILogTable) {
             cell: ({ row }) => {
               const createdAt = row.original.createdAt;
               return (
-                <div className="flex items-center gap-2">
-                  <span>[{format(new Date(createdAt), "HH:mm")}]</span>
-                </div>
+                <p className="flex items-center gap-2">{format(new Date(createdAt), "HH:mm")}</p>
               );
             },
           },
