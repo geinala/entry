@@ -191,3 +191,8 @@ export type TFullRouteComparison = {
   beforeRoute: TRouteLeg[];
   afterRoute: TRouteLeg[];
 } & InferSelectModel<typeof reoptimizationEventTable>;
+
+export type TRouteLegCongestionCheckIncidentWithIncidentDetails =
+  TRouteLegCongestionCheckIncident & {
+    trafficIncident: TTrafficIncident;
+  };

@@ -18,7 +18,7 @@ export const AcceptedIncidentDetail = () => {
 
   const acceptedIncidents = useMemo(() => data?.filter((d) => d.isValidCongestion) ?? [], [data]);
   const tomTomSegmentIds = useMemo(
-    () => data?.map((debug) => debug.tomtomIncidentId) ?? [],
+    () => data?.map((debug) => debug.trafficIncident.tomtomIncidentId) ?? [],
     [data],
   );
 
@@ -33,10 +33,11 @@ export const AcceptedIncidentDetail = () => {
       {acceptedIncidents.length > 0 ? (
         acceptedIncidents.map((acceptedIncident) => {
           const acceptedIncidentDetail = incidents?.find(
-            (incident) => incident.tomtomIncidentId === acceptedIncident.tomtomIncidentId,
+            (incident) =>
+              incident.tomtomIncidentId === acceptedIncident.trafficIncident.tomtomIncidentId,
           );
           const key =
-            acceptedIncident.tomtomIncidentId ??
+            acceptedIncident.trafficIncident.tomtomIncidentId ??
             `${acceptedIncident.delayInSeconds}-${acceptedIncident.overlapRatio}`;
 
           return (

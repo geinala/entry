@@ -67,7 +67,7 @@ export const IncidentsTable = () => {
                   key={congestionCheck.id}
                   className={congestionCheck.isValidCongestion ? "bg-green-200!" : ""}
                 >
-                  <TableCell>{congestionCheck.tomtomIncidentId}</TableCell>
+                  <TableCell>{congestionCheck.trafficIncident?.tomtomIncidentId}</TableCell>
                   <TableCell>
                     {formatSeconds(congestionCheck.delayInSeconds, ["hours", "minutes", "seconds"])}
                   </TableCell>
