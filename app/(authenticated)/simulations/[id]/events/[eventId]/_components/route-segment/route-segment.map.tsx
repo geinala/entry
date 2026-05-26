@@ -26,7 +26,7 @@ export const RouteSegmentMap = () => {
   const { data: matchDetails } = useGetRouteSegmentCongestionIncidentsQuery(id, Number(eventId));
 
   const tomTomSegmentIds = useMemo(
-    () => matchDetails?.map((debug) => debug.tomtomIncidentId),
+    () => matchDetails?.map((debug) => debug.trafficIncident?.tomtomIncidentId) ?? [],
     [matchDetails],
   );
 

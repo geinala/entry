@@ -510,11 +510,12 @@ export const optimizationRunTable = pgTable(
   {
     id: serial().primaryKey(),
     simulationId: uuid("simulation_id").references(() => simulationTable.id),
-    trafficIncidentId: integer("traffic_incident_id").references(() => trafficIncidentTable.id),
-    courierRouteId: integer("courier_route_id").references(() => courierRouteTable.id),
-    runType: varchar("run_type").notNull(), // e.g., "initial", "reoptimization", etc.
-    algorithm: varchar("algorithm").notNull(), // e.g., "OR-Tools", "Genetic Algorithm", etc.
-    triggerType: varchar("trigger_type").notNull(), // e.g., "initial", "periodic", "traffic_update", etc.
+    congestionCheckId: integer("congestion_check_id").references(
+      () => routeLegCongestionCheckTable.id,
+    ),
+    runType: varchar("run_type").notNull(),
+    algorithm: varchar("algorithm").notNull(),
+    triggerType: varchar("trigger_type").notNull(),
     totalDistanceInMeters: integer("total_distance_in_meters").notNull(),
     totalTravelTimeInSeconds: integer("total_travel_time_in_seconds").notNull(),
     computationTimeInMs: real("computation_time_in_ms").notNull(),
@@ -522,8 +523,6 @@ export const optimizationRunTable = pgTable(
     triggeredAt: timestamp("triggered_at", { withTimezone: true }).notNull(),
     beforeTotalDistanceInMeters: integer("before_total_distance_in_meters"),
     beforeTotalTravelTimeInSeconds: integer("before_total_travel_time_in_seconds"),
-    beforeComputationTimeInMs: real("before_computation_time_in_ms"),
-    beforeTotalNodesExplored: integer("before_total_nodes_explored"),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
@@ -533,12 +532,12 @@ export const optimizationRunTable = pgTable(
       name: "optimization_runs_simulation_id_simulations_id_fk",
     }),
     foreignKey({
-      columns: [table.courierRouteId],
-      foreignColumns: [courierRouteTable.id],
-      name: "optimization_runs_courier_route_id_courier_routes_id_fk",
+      columns: [table.congestionCheckId],
+      foreignColumns: [routeLegCongestionCheckTable.id],
+      name: "optimization_runs_congestion_check_id_route_leg_congestion_checks_id_fk",
     }),
     index("optimization_runs_simulation_id_idx").on(table.simulationId),
-    index("optimization_runs_courier_route_id_idx").on(table.courierRouteId),
+    index("optimization_runs_congestion_check_id_idx").on(table.congestionCheckId),
   ],
 );
 
@@ -623,46 +622,107 @@ export const reoptimizationOutcomeEnum = pgEnum("reoptimization_outcome_enum", [
   "no_improvement",
 ]);
 
-export const reoptimizationEventTable = pgTable("reoptimization_events", {
-  id: serial().primaryKey(),
-  simulationId: uuid("simulation_id").references(() => simulationTable.id),
-  courierRouteId: integer("courier_route_id").references(() => courierRouteTable.id),
-  congestionCheckId: integer("congestion_check_id").references(
-    () => routeLegCongestionCheckTable.id,
-  ),
-  reoptSequence: integer("reopt_sequence").notNull(),
-  triggeredAt: timestamp("triggered_at", { withTimezone: true }).notNull(),
-  beforeRouteId: integer("before_route_id").references(() => courierRouteTable.id),
-  beforeTotalDistanceInMeters: integer("before_total_distance_in_meters").notNull(),
-  beforeTotalTimeInSeconds: integer("before_total_time_in_seconds").notNull(),
-  afterRouteId: integer("after_route_id").references(() => courierRouteTable.id),
-  afterTotalDistanceInMeters: integer("after_total_distance_in_meters").notNull(),
-  afterTotalTimeInSeconds: integer("after_total_time_in_seconds").notNull(),
-  distanceSavedInMeters: integer("distance_saved_in_meters").notNull(),
-  timeSavedInSeconds: integer("time_saved_in_seconds").notNull(),
-  courierPosition: jsonb("courier_position").notNull(),
-  algorithmUsed: varchar("algorithm_used").notNull(),
-  computationTimeInMs: real("computation_time_in_ms").notNull(),
-  totalIncidentDelayInSeconds: integer("total_incident_delay_in_seconds"), // sum delay semua incident valid dalam congestion check ini
-  outcome: reoptimizationOutcomeEnum("outcome").notNull(),
-  triggerRouteLegId: integer("trigger_route_leg_id").references(() => routeLegTable.id),
-  createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-});
+export const reoptimizationEventTable = pgTable(
+  "reoptimization_events",
+  {
+    id: serial().primaryKey(),
+    simulationId: uuid("simulation_id").references(() => simulationTable.id),
+    optimizationRunId: integer("optimization_run_id").references(() => optimizationRunTable.id),
+    congestionCheckId: integer("congestion_check_id").references(
+      () => routeLegCongestionCheckTable.id,
+    ),
+    reoptSequence: integer("reopt_sequence").notNull(),
+    triggeredAt: timestamp("triggered_at", { withTimezone: true }).notNull(),
+    beforeRouteId: integer("before_route_id").references(() => courierRouteTable.id),
+    beforeTotalDistanceInMeters: integer("before_total_distance_in_meters").notNull(),
+    beforeTotalTimeInSeconds: integer("before_total_time_in_seconds").notNull(),
+    afterRouteId: integer("after_route_id").references(() => courierRouteTable.id),
+    afterTotalDistanceInMeters: integer("after_total_distance_in_meters").notNull(),
+    afterTotalTimeInSeconds: integer("after_total_time_in_seconds").notNull(),
+    distanceSavedInMeters: integer("distance_saved_in_meters").notNull(),
+    timeSavedInSeconds: integer("time_saved_in_seconds").notNull(),
+    courierPosition: jsonb("courier_position").notNull(),
+    algorithmUsed: varchar("algorithm_used").notNull(),
+    computationTimeInMs: real("computation_time_in_ms").notNull(),
+    totalIncidentDelayInSeconds: integer("total_incident_delay_in_seconds"), // sum delay semua incident valid dalam congestion check ini
+    outcome: reoptimizationOutcomeEnum("outcome").notNull(),
+    triggerRouteLegId: integer("trigger_route_leg_id").references(() => routeLegTable.id),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.simulationId],
+      foreignColumns: [simulationTable.id],
+      name: "reoptimization_events_simulation_id_simulations_id_fk",
+    }),
+    foreignKey({
+      columns: [table.optimizationRunId],
+      foreignColumns: [optimizationRunTable.id],
+      name: "reoptimization_events_optimization_run_id_optimization_runs_id_fk",
+    }),
+    foreignKey({
+      columns: [table.congestionCheckId],
+      foreignColumns: [routeLegCongestionCheckTable.id],
+      name: "reoptimization_events_congestion_check_id_route_leg_congestion_checks_id_fk",
+    }),
+    foreignKey({
+      columns: [table.beforeRouteId],
+      foreignColumns: [courierRouteTable.id],
+      name: "reoptimization_events_before_route_id_courier_routes_id_fk",
+    }),
+    foreignKey({
+      columns: [table.afterRouteId],
+      foreignColumns: [courierRouteTable.id],
+      name: "reoptimization_events_after_route_id_courier_routes_id_fk",
+    }),
+    foreignKey({
+      columns: [table.triggerRouteLegId],
+      foreignColumns: [routeLegTable.id],
+      name: "reoptimization_events_trigger_route_leg_id_route_legs_id_fk",
+    }),
+    index("reoptimization_events_simulation_id_idx").on(table.simulationId),
+    index("reoptimization_events_optimization_run_id_idx").on(table.optimizationRunId),
+    index("reoptimization_events_congestion_check_id_idx").on(table.congestionCheckId),
+  ],
+);
 
-export const routeLegCongestionCheckTable = pgTable("route_leg_congestion_checks", {
-  id: serial().primaryKey(),
-  simulationId: uuid("simulation_id").references(() => simulationTable.id),
-  routeLegId: integer("route_leg_id").references(() => routeLegTable.id),
-  courierId: integer("courier_id").references(() => courierTable.id),
-  checkedAt: timestamp("checked_at", { withTimezone: true }).notNull(),
-  bboxMinLng: doublePrecision("bbox_min_lng").notNull(),
-  bboxMinLat: doublePrecision("bbox_min_lat").notNull(),
-  bboxMaxLng: doublePrecision("bbox_max_lng").notNull(),
-  bboxMaxLat: doublePrecision("bbox_max_lat").notNull(),
-  incidentsFound: integer("incidents_found").notNull().default(0),
-  acceptedIncidentCount: integer("accepted_incident_count").notNull().default(0),
-  totalDelayInSeconds: integer("total_delay_in_seconds").notNull().default(0),
-});
+export const routeLegCongestionCheckTable = pgTable(
+  "route_leg_congestion_checks",
+  {
+    id: serial().primaryKey(),
+    simulationId: uuid("simulation_id").references(() => simulationTable.id),
+    routeLegId: integer("route_leg_id").references(() => routeLegTable.id),
+    courierId: integer("courier_id").references(() => courierTable.id),
+    checkedAt: timestamp("checked_at", { withTimezone: true }).notNull(),
+    bboxMinLng: doublePrecision("bbox_min_lng").notNull(),
+    bboxMinLat: doublePrecision("bbox_min_lat").notNull(),
+    bboxMaxLng: doublePrecision("bbox_max_lng").notNull(),
+    bboxMaxLat: doublePrecision("bbox_max_lat").notNull(),
+    incidentsFound: integer("incidents_found").notNull().default(0),
+    acceptedIncidentCount: integer("accepted_incident_count").notNull().default(0),
+    totalDelayInSeconds: integer("total_delay_in_seconds").notNull().default(0),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.simulationId],
+      foreignColumns: [simulationTable.id],
+      name: "route_leg_congestion_checks_simulation_id_simulations_id_fk",
+    }),
+    foreignKey({
+      columns: [table.routeLegId],
+      foreignColumns: [routeLegTable.id],
+      name: "route_leg_congestion_checks_route_leg_id_route_legs_id_fk",
+    }),
+    foreignKey({
+      columns: [table.courierId],
+      foreignColumns: [courierTable.id],
+      name: "route_leg_congestion_checks_courier_id_couriers_id_fk",
+    }),
+    index("route_leg_congestion_checks_simulation_id_idx").on(table.simulationId),
+    index("route_leg_congestion_checks_route_leg_id_idx").on(table.routeLegId),
+    index("route_leg_congestion_checks_courier_id_idx").on(table.courierId),
+  ],
+);
 
 export const routeLegCongestionCheckIncidentTable = pgTable(
   "route_leg_congestion_check_incidents",
@@ -674,7 +734,6 @@ export const routeLegCongestionCheckIncidentTable = pgTable(
     trafficIncidentId: integer("traffic_incident_id")
       .notNull()
       .references(() => trafficIncidentTable.id, { onDelete: "cascade" }),
-    tomtomIncidentId: varchar("tomtom_incident_id", { length: 255 }).notNull(),
     delayInSeconds: integer("delay_in_seconds").notNull(),
     overlapRatio: real("overlap_ratio").notNull(),
     rejectedReasons: jsonb("rejected_reasons").$type<string[]>().notNull().default([]),

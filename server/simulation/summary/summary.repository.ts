@@ -81,7 +81,7 @@ export const getGlobalSummaryAlgorithmRepository = async (
     .from(optimizationRunTable)
     .where(
       courierId
-        ? sql`${optimizationRunTable.simulationId} = ${simulationId} AND ${optimizationRunTable.courierRouteId} IN (SELECT id FROM courier_routes WHERE courier_id = ${Number(
+        ? sql`${optimizationRunTable.simulationId} = ${simulationId} AND ${optimizationRunTable.congestionCheckId} IN (SELECT id FROM courier_routes WHERE courier_id = ${Number(
             courierId,
           )})`
         : sql`${optimizationRunTable.simulationId} = ${simulationId}`,

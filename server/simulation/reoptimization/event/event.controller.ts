@@ -10,6 +10,7 @@ import {
 import { responseFormatter } from "@/lib/response-formatter";
 import { BadRequestException } from "@/common/exception/bad-request.exception";
 import { NextRequest } from "next/dist/server/web/spec-extension/request";
+import { TRouteLegCongestionCheckIncidentWithIncidentDetails } from "@/types/database";
 
 export const getRouteSegmentWithBoundingBoxController = async (
   simulationId: string,
@@ -37,10 +38,21 @@ export const getRouteSegmentCongestionCheckMatchDetailsController = async (
 
     const result = await getRouteSegmentCongestionCheckMatchDetailsService(congestionCheckId);
 
-    return responseFormatter.successWithData({
-      data: result,
-      message: "Route segment congestion check match details retrieved successfully",
-    });
+    const mappedResult: TRouteLegCongestionCheckIncidentWithIncidentDetails[] = result.map(
+      (item) => ({
+        ...item.route_leg_congestion_check_incidents,
+        trafficIncident: {
+          ...item.traffic_incidents,
+        },
+      }),
+    );
+
+    return responseFormatter.successWithData<TRouteLegCongestionCheckIncidentWithIncidentDetails[]>(
+      {
+        data: mappedResult,
+        message: "Route segment congestion check match details retrieved successfully",
+      },
+    );
   } catch (error) {
     return handleException(error);
   }

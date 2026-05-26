@@ -57,7 +57,11 @@ export const getRouteSegmentCongestionCheckMatchDetailsRepository = async (
   return await db
     .select()
     .from(routeLegCongestionCheckIncidentTable)
-    .where(eq(routeLegCongestionCheckIncidentTable.congestionCheckId, congestionCheckId));
+    .where(eq(routeLegCongestionCheckIncidentTable.congestionCheckId, congestionCheckId))
+    .innerJoin(
+      trafficIncidentTable,
+      eq(trafficIncidentTable.id, routeLegCongestionCheckIncidentTable.trafficIncidentId),
+    );
 };
 
 export const getIncidentRouteSegmentByTomTomIdsRepository = async (

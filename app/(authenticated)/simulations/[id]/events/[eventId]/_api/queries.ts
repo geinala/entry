@@ -1,7 +1,7 @@
 import {
   TFullRouteComparison,
   TRouteLeg,
-  TRouteLegCongestionCheckIncident,
+  TRouteLegCongestionCheckIncidentWithIncidentDetails,
   TRouteSegmentWithBoundingBox,
   TTrafficIncident,
 } from "@/types/database";
@@ -42,9 +42,9 @@ export const REOPTIMIZATION_EVENT_QUERIES = {
   }) => {
     return queryOptions({
       queryKey: ["route-segment-congestion-incidents", simulationId, congestionCheckId],
-      queryFn: async (): Promise<TRouteLegCongestionCheckIncident[]> => {
+      queryFn: async (): Promise<TRouteLegCongestionCheckIncidentWithIncidentDetails[]> => {
         const response: AxiosResponse<
-          TApiSuccessResponseWithData<TRouteLegCongestionCheckIncident[]>
+          TApiSuccessResponseWithData<TRouteLegCongestionCheckIncidentWithIncidentDetails[]>
         > = await api.get(
           `/simulations/${simulationId}/reoptimizations/events/${congestionCheckId}/routes/segments/congestions/detail`,
         );
