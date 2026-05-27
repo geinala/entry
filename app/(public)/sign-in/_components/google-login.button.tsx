@@ -10,15 +10,26 @@ export const GoogleLoginButton = () => {
   const { signIn } = useSignIn();
 
   const handleGoogleLogin = async () => {
-    setIsClicked(true);
-
     if (!signIn) return;
 
-    await signIn.authenticateWithRedirect({
-      strategy: "oauth_google",
-      redirectUrl: `${window.location.origin}/onboarding`,
-      redirectUrlComplete: `${window.location.origin}/onboarding`,
-    });
+    const popup = window.open("", "clerk-google-login", "width=520,height=720");
+
+    if (!popup) return;
+
+    setIsClicked(true);
+
+    try {
+      popup.focus();
+
+      await signIn.authenticateWithPopup({
+        popup,
+        strategy: "oauth_google",
+        redirectUrl: `${window.location.origin}/onboarding`,
+        redirectUrlComplete: `${window.location.origin}/onboarding`,
+      });
+    } finally {
+      setIsClicked(false);
+    }
   };
 
   return (
