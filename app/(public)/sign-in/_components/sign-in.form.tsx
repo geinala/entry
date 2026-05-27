@@ -5,6 +5,7 @@ import { Paragraph, Title } from "@/app/_components/typography";
 import { Card, CardContent, CardFooter, CardHeader } from "@/app/_components/ui/card";
 import { GoogleLoginButton } from "./google-login.button";
 import { Button } from "@/app/_components/ui/button";
+import Link from "next/link";
 
 export default function SignInForm() {
   return (
@@ -20,9 +21,11 @@ export default function SignInForm() {
       <CardFooter className="text-center justify-center">
         <Paragraph>
           Secured by{" "}
-          <Button variant={"link"} size={"none"}>
-            Clerk Auth
-          </Button>
+          <Link href="https://clerk.com" target="_blank" rel="noopener noreferrer">
+            <Button variant={"link"} size={"none"}>
+              Clerk Auth
+            </Button>
+          </Link>
         </Paragraph>
       </CardFooter>
     </Card>
