@@ -136,14 +136,13 @@ export const getRouteSegmentAffectedIncidentsRepository = async (
       ),
     );
 
-  console.log("getRouteSegmentAffectedIncidentsRepository result:", { result });
-
   return result;
 };
 
 export const getFullRouteComparisonRepository = async (simulationId: string, eventId: number) => {
   const [event] = await db
     .select({
+      courierId: routeLegCongestionCheckTable.courierId,
       ...getTableColumns(reoptimizationEventTable),
     })
     .from(routeLegCongestionCheckTable)
@@ -159,31 +158,58 @@ export const getFullRouteComparisonRepository = async (simulationId: string, eve
     )
     .limit(1);
 
-  if (!event) {
+  if (!event?.beforeRouteId || !event?.afterRouteId || !event?.courierId) {
     return undefined;
   }
 
-  if (event.beforeRouteId == null || event.afterRouteId == null) {
-    return undefined;
-  }
+  const [beforeRouteLegs, afterRouteLegs] = await Promise.all([
+    db
+      .select({ ...getTableColumns(routeLegTable) })
+      .from(routeLegTable)
+      .where(eq(routeLegTable.courierRouteId, event.beforeRouteId))
+      .orderBy(asc(routeLegTable.sequence)),
 
-  const [beforeRoute, afterRoute] = await Promise.all([
     db
-      .select()
-      .from(beforeRouteLegTable)
-      .where(eq(beforeRouteLegTable.courierRouteId, event.beforeRouteId))
-      .orderBy(asc(beforeRouteLegTable.sequence)),
-    db
-      .select()
-      .from(afterRouteLegTable)
-      .where(eq(afterRouteLegTable.courierRouteId, event.afterRouteId))
-      .orderBy(asc(afterRouteLegTable.sequence)),
+      .select({ ...getTableColumns(routeLegTable) })
+      .from(routeLegTable)
+      .where(eq(routeLegTable.courierRouteId, event.afterRouteId))
+      .orderBy(asc(routeLegTable.sequence)),
   ]);
+
+  let inheritedCompletedLegs: typeof beforeRouteLegs = [];
+  const firstAfterLeg = afterRouteLegs[0];
+
+  if (firstAfterLeg) {
+    let splitIndex = -1;
+    for (let i = beforeRouteLegs.length - 1; i >= 0; i--) {
+      const leg = beforeRouteLegs[i];
+      if (leg.routeStatus === "completed" && leg.toNodeId === firstAfterLeg.fromNodeId) {
+        splitIndex = i;
+        break;
+      }
+    }
+
+    if (splitIndex !== -1) {
+      inheritedCompletedLegs = beforeRouteLegs.slice(0, splitIndex + 1);
+    } else if (
+      beforeRouteLegs.length > 0 &&
+      firstAfterLeg.fromNodeId === beforeRouteLegs[0].fromNodeId
+    ) {
+      inheritedCompletedLegs = [];
+    } else {
+      inheritedCompletedLegs = beforeRouteLegs.filter(
+        (leg) => leg.sequence < firstAfterLeg.sequence && leg.routeStatus === "completed",
+      );
+    }
+  }
+
+  const sortBySequence = <T extends { sequence: number }>(arr: T[]) =>
+    arr.sort((a, b) => a.sequence - b.sequence);
 
   return {
     ...event,
-    beforeRoute,
-    afterRoute,
+    beforeRoute: sortBySequence([...beforeRouteLegs]),
+    afterRoute: sortBySequence([...inheritedCompletedLegs, ...afterRouteLegs]),
   };
 };
 

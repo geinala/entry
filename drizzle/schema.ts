@@ -513,6 +513,9 @@ export const optimizationRunTable = pgTable(
     congestionCheckId: integer("congestion_check_id").references(
       () => routeLegCongestionCheckTable.id,
     ),
+    courierId: integer("courier_id")
+      .references(() => courierTable.id)
+      .notNull(),
     runType: varchar("run_type").notNull(),
     algorithm: varchar("algorithm").notNull(),
     triggerType: varchar("trigger_type").notNull(),

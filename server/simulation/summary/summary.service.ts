@@ -1,11 +1,12 @@
 import { TGlobalAlgorithmSummary } from "@/types/database";
 import { getGlobalSummaryAlgorithmRepository } from "./summary.repository";
+import { TOptimizationSummaryParams } from "@/schemas/simulations/optimization-summary.schema";
 
 export const getGlobalSummaryAlgorithmService = async (
   simulationId: string,
-  courierId?: string,
+  queryParams: TOptimizationSummaryParams,
 ): Promise<TGlobalAlgorithmSummary> => {
-  const result = await getGlobalSummaryAlgorithmRepository(simulationId, courierId);
+  const result = await getGlobalSummaryAlgorithmRepository(simulationId, queryParams);
 
   const timeTravelImprovement =
     result.greedySummary.totalTimeTravelledInSeconds > 0

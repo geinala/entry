@@ -2,13 +2,31 @@ import { handleException } from "@/common/exception/helper";
 import { responseFormatter } from "@/lib/response-formatter";
 import "server-only";
 import { getGlobalSummaryAlgorithmService } from "./summary.service";
+import { NextRequest } from "next/server";
+import { validateSchema } from "@/lib/validation";
+import {
+  OptimizationSummarySchema,
+  TOptimizationSummaryParams,
+} from "@/schemas/simulations/optimization-summary.schema";
 
 export const getGlobalSummaryAlgorithmController = async (
   simulationId: string,
-  courierId?: string,
+  request: NextRequest,
 ) => {
   try {
-    const result = await getGlobalSummaryAlgorithmService(simulationId, courierId);
+    const { searchParams } = new URL(request.url);
+
+    const rawQueryParams = {
+      courierId: searchParams.get("courierId"),
+      summaryType: searchParams.get("summaryType"),
+    };
+
+    const { data } = validateSchema<TOptimizationSummaryParams>(
+      OptimizationSummarySchema,
+      rawQueryParams,
+    );
+
+    const result = await getGlobalSummaryAlgorithmService(simulationId, data);
 
     return responseFormatter.successWithData({
       message: "Global summary retrieved successfully",

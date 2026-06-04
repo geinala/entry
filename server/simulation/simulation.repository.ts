@@ -115,6 +115,19 @@ export const deleteSimulationWithRelationsRepository = async (
           ).map((route) => route.id)
         : [];
 
+    const optimizationRuns = await tx
+      .select({ id: optimizationRunTable.id })
+      .from(optimizationRunTable)
+      .where(eq(optimizationRunTable.simulationId, simulationId));
+
+    const optimizationRunIds = optimizationRuns.map((run) => run.id);
+
+    if (optimizationRunIds.length > 0) {
+      await tx
+        .delete(reoptimizationEventTable)
+        .where(inArray(reoptimizationEventTable.optimizationRunId, optimizationRunIds));
+    }
+
     await tx
       .delete(optimizationRunTable)
       .where(eq(optimizationRunTable.simulationId, simulationId));

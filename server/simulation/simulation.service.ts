@@ -24,7 +24,10 @@ export const getSimulationsWithPaginationService = async (
   }
 
   const [entries, total] = await Promise.all([
-    getSimulationsWithPaginationRepository(user.id, queryParams),
+    getSimulationsWithPaginationRepository(user.id, {
+      ...queryParams,
+      sort: [{ direction: "desc", key: "createdAt" }],
+    }),
     getSimulationsCountRepository(user.id, queryParams),
   ]);
 
