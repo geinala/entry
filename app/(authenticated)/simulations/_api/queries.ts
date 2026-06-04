@@ -2,6 +2,7 @@
 
 import { getNextPage } from "@/lib/infinite-scroll";
 import { TIndexSimulationQueryParams } from "@/schemas/simulation.schema";
+import { TOptimizationSummaryParams } from "@/schemas/simulations/optimization-summary.schema";
 import {
   TGlobalAlgorithmSummary,
   TReoptimizationEvent,
@@ -92,13 +93,23 @@ export const simulationQueries = {
       enabled: !!simulationId,
     });
   },
-  getGlobalSummaryAlgorithm: (api: AxiosInstance, simulationId?: string, courierId?: string) => {
+  getGlobalSummaryAlgorithm: (
+    api: AxiosInstance,
+    simulationId?: string,
+    queryParams?: TOptimizationSummaryParams,
+  ) => {
     return queryOptions({
-      queryKey: ["simulations", simulationId, "global-summary", courierId] as const,
+      queryKey: [
+        "simulations",
+        simulationId,
+        "global-summary",
+        queryParams?.courierId,
+        queryParams?.summaryType,
+      ] as const,
       queryFn: async (): Promise<TGlobalAlgorithmSummary> => {
         const response: AxiosResponse<TApiSuccessResponseWithData<TGlobalAlgorithmSummary>> =
           await api.get(`/simulations/${simulationId}/algorithms/summary`, {
-            params: { courierId },
+            params: { courierId: queryParams?.courierId, summaryType: queryParams?.summaryType },
           });
 
         return response.data.data;
@@ -116,7 +127,7 @@ export const simulationQueries = {
     simulationId?: string;
   }) => {
     return queryOptions({
-      queryKey: ["simulations", simulationId, "reoptimization-events"] as const,
+      queryKey: ["simulations", simulationId, "reoptimization-events", queryParams] as const,
       queryFn: async (): Promise<TPaginationResponse<TReoptimizationEvent>> => {
         const response: AxiosResponse<TApiSuccessResponseWithPagination<TReoptimizationEvent>> =
           await api.get(`/simulations/${simulationId}/reoptimizations`, {

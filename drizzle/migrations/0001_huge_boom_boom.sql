@@ -1,0 +1,2 @@
+ALTER TABLE "optimization_runs" ADD COLUMN "courier_id" integer NOT NULL;--> statement-breakpoint
+ALTER TABLE "optimization_runs" ADD CONSTRAINT "optimization_runs_courier_id_couriers_id_fk" FOREIGN KEY ("courier_id") REFERENCES "public"."couriers"("id") ON DELETE no action ON UPDATE no action;

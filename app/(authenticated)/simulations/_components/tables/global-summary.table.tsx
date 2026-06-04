@@ -8,6 +8,8 @@ import { formatSeconds, metersToKm } from "@/lib/utils";
 import { useGetAllCouriersQuery } from "../../[id]/_hooks/use-queries";
 import CourierSelect from "../courier.select";
 import SummaryContainer from "../summary-container";
+import { TOptimizationSummaryParams } from "@/schemas/simulations/optimization-summary.schema";
+import SummaryTypeSelect from "../summary-type.select";
 
 interface ILogTable {
   simulationId: string;
@@ -15,13 +17,22 @@ interface ILogTable {
 
 export default function GlobalSummaryTable({ simulationId }: ILogTable) {
   const [selectedCourierId, setSelectedCourierId] = useState<string>("all");
+  const [summaryType, setSummaryType] =
+    useState<TOptimizationSummaryParams["summaryType"]>("initial");
   const courierIdForQuery = selectedCourierId === "all" ? undefined : selectedCourierId;
 
-  const { data } = useGetGlobalSummaryAlgorithmQuery(simulationId, courierIdForQuery);
+  const { data } = useGetGlobalSummaryAlgorithmQuery(simulationId, {
+    courierId: Number(courierIdForQuery) || undefined,
+    summaryType,
+  });
   const { data: couriersData, isLoading } = useGetAllCouriersQuery(simulationId);
 
   const handleCourierChange = (courierId: string) => {
     setSelectedCourierId(courierId);
+  };
+
+  const handleSummaryTypeChange = (type: TOptimizationSummaryParams["summaryType"]) => {
+    setSummaryType(type);
   };
 
   const renderImprovement = (value?: number) => {
@@ -51,12 +62,15 @@ export default function GlobalSummaryTable({ simulationId }: ILogTable) {
       description="Summary of algorithm performance metrics."
       icon={<Calculator className="text-primary w-full h-full" />}
       headerRight={
-        <CourierSelect
-          couriers={couriersData ?? []}
-          isLoading={isLoading}
-          value={selectedCourierId}
-          onValueChange={handleCourierChange}
-        />
+        <div className="flex gap-2">
+          <SummaryTypeSelect onValueChange={handleSummaryTypeChange} value={summaryType} />
+          <CourierSelect
+            couriers={couriersData ?? []}
+            isLoading={isLoading}
+            value={selectedCourierId}
+            onValueChange={handleCourierChange}
+          />
+        </div>
       }
     >
       <Table>
@@ -124,13 +138,6 @@ export default function GlobalSummaryTable({ simulationId }: ILogTable) {
             <TableCell>
               {renderImprovement(data?.improvement?.computationTimeImprovementPercentage)}
             </TableCell>
-          </TableRow>
-          <TableRow>
-            <TableCell>Total Nodes Explored</TableCell>
-            <TableCell colSpan={2} className="text-center font-medium">
-              {data?.totalNodesExplored ?? "-"}
-            </TableCell>
-            <TableCell></TableCell>
           </TableRow>
         </TableBody>
       </Table>

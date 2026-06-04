@@ -300,11 +300,10 @@ export const FullRouteComparison = () => {
                   showTrafficFlow={false}
                   showTrafficIncidents={false}
                   zoom={beforeZoom}
-                  disableInteractions
                 >
                   {(data?.beforeRoute ?? []).map((routeLeg) => (
                     <Route
-                      key={routeLeg.id}
+                      key={`before-leg-${routeLeg.id}`}
                       coordinates={decodePolyline(
                         routeLeg.encodedPolyline,
                         routeLeg.encodedPolylinePrecision,
@@ -353,11 +352,10 @@ export const FullRouteComparison = () => {
                   showTrafficFlow={false}
                   showTrafficIncidents={false}
                   zoom={afterZoom}
-                  disableInteractions
                 >
                   {(data?.afterRoute ?? []).map((routeLeg) => (
                     <Route
-                      key={routeLeg.id}
+                      key={`after-leg-${routeLeg.id}`}
                       coordinates={decodePolyline(
                         routeLeg.encodedPolyline,
                         routeLeg.encodedPolylinePrecision,

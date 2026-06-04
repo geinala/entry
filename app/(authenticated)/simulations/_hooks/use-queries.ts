@@ -5,6 +5,7 @@ import { TIndexSimulationQueryParams } from "@/schemas/simulation.schema";
 import { simulationQueries } from "../_api/queries";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { TIndexQueryParams } from "@/types/query-params";
+import { TOptimizationSummaryParams } from "@/schemas/simulations/optimization-summary.schema";
 
 export const useGetInfiniteSimulationsQuery = (queryParams: TIndexSimulationQueryParams) => {
   const api = useAuthenticatedClient();
@@ -36,10 +37,13 @@ export const useGetSimulationLogsQuery = ({
   return useQuery(simulationQueries.getLogs(api, simulationId, queryParams));
 };
 
-export const useGetGlobalSummaryAlgorithmQuery = (simulationId?: string, courierId?: string) => {
+export const useGetGlobalSummaryAlgorithmQuery = (
+  simulationId?: string,
+  queryParams?: TOptimizationSummaryParams,
+) => {
   const api = useAuthenticatedClient();
 
-  return useQuery(simulationQueries.getGlobalSummaryAlgorithm(api, simulationId, courierId));
+  return useQuery(simulationQueries.getGlobalSummaryAlgorithm(api, simulationId, queryParams));
 };
 
 export const useGetReoptimizationEventsQuery = ({

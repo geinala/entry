@@ -37,7 +37,11 @@ export const AffectedSegment = () => {
   const afterRouteSegment = decodePolyline(data?.afterRoute.encodedPolyline || "");
   const afterCenterCoor = getRouteCenter(afterRouteSegment);
   const afterZoom = useMemo(() => getAutoZoom(afterRouteSegment), [afterRouteSegment]);
-  const timeSaved = data?.timeSavedInSeconds;
+  const timeSaved = data?.timeSavedInSeconds || 0;
+  const timeState = useMemo(
+    () => (timeSaved > 0 ? "saved" : timeSaved < 0 ? "added" : "neutral"),
+    [timeSaved],
+  );
 
   return (
     <SummaryContainer
@@ -56,7 +60,6 @@ export const AffectedSegment = () => {
             <div className="relative h-full">
               <TomTomMap
                 center={beforeCenterCoor}
-                disableInteractions
                 showTrafficFlow={false}
                 showTrafficIncidents={false}
                 zoom={beforeZoom}
@@ -76,13 +79,23 @@ export const AffectedSegment = () => {
           <div className="w-full flex flex-col gap-3">
             <Badge variant="outline">After</Badge>
             <div className="relative h-full">
-              <Badge variant="success" className="absolute top-4 left-4 z-10">
-                Time Saved:{" "}
-                {timeSaved ? formatSeconds(timeSaved, ["hours", "minutes", "seconds"]) : "N/A"}
+              <Badge
+                variant={
+                  timeState === "saved"
+                    ? "success"
+                    : timeState === "added"
+                      ? "destructive"
+                      : "default"
+                }
+                className="absolute top-4 left-4 z-10"
+              >
+                Time {timeState}:{" "}
+                {timeSaved
+                  ? formatSeconds(Math.abs(timeSaved), ["hours", "minutes", "seconds"])
+                  : "N/A"}
               </Badge>
               <TomTomMap
                 center={afterCenterCoor}
-                disableInteractions
                 showTrafficFlow={false}
                 showTrafficIncidents={false}
                 zoom={afterZoom}

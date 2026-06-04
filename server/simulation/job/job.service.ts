@@ -1,5 +1,6 @@
 import "server-only";
 
+import { BadRequestException } from "@/common/exception/bad-request.exception";
 import { TCreateSimulationJobSchema } from "@/schemas/simulations/create-simulation.schema";
 import { uploadFileService } from "@/server/files/file.service";
 import {
@@ -12,14 +13,104 @@ import {
 import { server } from "@/lib/axios";
 import { TSimulationJobStatusSchema } from "@/schemas/simulations/jobs/job-status.schema";
 import { TUpdateSimulationJobSchema } from "@/schemas/simulations/jobs/update-simulation-job.schema";
-import { countCsvRows } from "@/lib/utils";
 import { InternalServerErrorException } from "@/common/exception/internal_server_error.exception";
+
+const EXPECTED_CUSTOMER_TEMPLATE_HEADERS = [
+  "Nosi",
+  "Start_Datetime",
+  "End_Datetime",
+  "Courier",
+  "Customer_Name",
+  "Address",
+  "City",
+  "Weight",
+];
+
+const normalizeCsvValue = (value: string) => value.replace(/^\uFEFF/, "").trim();
+
+const parseCsvLine = (line: string) => {
+  const values: string[] = [];
+  let currentValue = "";
+  let insideQuotes = false;
+
+  for (let index = 0; index < line.length; index += 1) {
+    const character = line[index];
+
+    if (character === '"') {
+      const nextCharacter = line[index + 1];
+
+      if (insideQuotes && nextCharacter === '"') {
+        currentValue += '"';
+        index += 1;
+        continue;
+      }
+
+      insideQuotes = !insideQuotes;
+      continue;
+    }
+
+    if (character === "," && !insideQuotes) {
+      values.push(normalizeCsvValue(currentValue));
+      currentValue = "";
+      continue;
+    }
+
+    currentValue += character;
+  }
+
+  values.push(normalizeCsvValue(currentValue));
+
+  return values;
+};
+
+const getCsvLines = (content: string) => {
+  return content
+    .replace(/^\uFEFF/, "")
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line.length > 0);
+};
+
+const validateCustomersFileTemplate = (content: string) => {
+  const [headerLine] = getCsvLines(content);
+
+  if (!headerLine) {
+    throw new BadRequestException(
+      "Customers file does not match the template. Please use the downloaded template.",
+    );
+  }
+
+  const headers = parseCsvLine(headerLine);
+  const isTemplateMatch =
+    headers.length === EXPECTED_CUSTOMER_TEMPLATE_HEADERS.length &&
+    headers.every((header, index) => header === EXPECTED_CUSTOMER_TEMPLATE_HEADERS[index]);
+
+  if (!isTemplateMatch) {
+    throw new BadRequestException(
+      "Customers file does not match the template. Please use the downloaded template.",
+    );
+  }
+};
+
+const countCsvRowsFromContent = (content: string) => {
+  const lines = getCsvLines(content);
+
+  if (lines.length <= 1) {
+    return 0;
+  }
+
+  return lines.length - 1;
+};
 
 export const createSimulationJobService = async (
   clerkUserId: string,
   data: TCreateSimulationJobSchema,
 ) => {
-  const fileTotalRows = await countCsvRows(data.customersFile);
+  const fileContent = await data.customersFile.text();
+
+  validateCustomersFileTemplate(fileContent);
+
+  const fileTotalRows = countCsvRowsFromContent(fileContent);
   const minioUploadedFile = await uploadFileService(data.customersFile, `dataset/raw`);
 
   const result = await createSimulationJobRepository(
