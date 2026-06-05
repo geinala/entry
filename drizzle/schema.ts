@@ -449,6 +449,9 @@ export const courierRouteTable = pgTable(
 );
 
 export const routeStatusEnum = pgEnum("route_status_enum", [
+  "baseline_planned",
+  "baseline_running",
+  "baseline_completed",
   "planned",
   "running",
   "completed",
@@ -517,7 +520,7 @@ export const optimizationRunTable = pgTable(
       .references(() => courierTable.id)
       .notNull(),
     runType: varchar("run_type").notNull(),
-    algorithm: varchar("algorithm").notNull(),
+    algorithm: varchar("algorithm"),
     triggerType: varchar("trigger_type").notNull(),
     totalDistanceInMeters: integer("total_distance_in_meters").notNull(),
     totalTravelTimeInSeconds: integer("total_travel_time_in_seconds").notNull(),

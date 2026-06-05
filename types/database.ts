@@ -76,8 +76,13 @@ export type TLatestRouteBySimulationRow = {
   no_traffic_travel_time_in_seconds: TRouteLeg["noTrafficTravelTimeInSeconds"];
   historic_traffic_travel_time_in_seconds: TRouteLeg["historicTrafficTravelTimeInSeconds"];
   live_traffic_incidents_travel_time_in_seconds: TRouteLeg["liveTrafficIncidentsTravelTimeInSeconds"];
-  route_status: TRouteLeg["routeStatus"];
+  route_status: TRouteStatus;
 };
+
+export type TRouteStatus = Exclude<
+  TRouteLeg["routeStatus"],
+  "baseline_planned" | "baseline_running" | "baseline_completed"
+>;
 
 // Simulation Job Summary Types
 export type TSimulationJobDatasetSummary = {

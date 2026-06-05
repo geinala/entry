@@ -1,5 +1,5 @@
 import { decodePolyline } from "@/lib/utils";
-import { TLatestRouteBySimulationRow } from "@/types/database";
+import { TLatestRouteBySimulationRow, TRouteStatus } from "@/types/database";
 import { TCoordinate } from "@/types/route";
 
 export type DecodedRoute = {
@@ -7,7 +7,7 @@ export type DecodedRoute = {
   courierId: string;
   sequence: number;
   travelTimeMs: number;
-  routeStatus: TLatestRouteBySimulationRow["route_status"];
+  routeStatus: TRouteStatus;
   coordinates: TCoordinate[];
 };
 
@@ -22,7 +22,13 @@ export type RouteNode = {
 
 export type RouteNodeVisitState = "visited" | "running-origin" | "running-destination" | "pending";
 
-const ROUTE_STATUS_PRIORITY: Record<TLatestRouteBySimulationRow["route_status"], number> = {
+const ROUTE_STATUS_PRIORITY: Record<
+  Exclude<
+    TLatestRouteBySimulationRow["route_status"],
+    "baseline_planned" | "baseline_running" | "baseline_completed"
+  >,
+  number
+> = {
   planned: 0,
   completed: 1,
   cancelled: 2,
@@ -48,10 +54,7 @@ const ROUTE_NODE_STYLE: Record<RouteNodeVisitState, { borderColor: string; textC
   },
 };
 
-const getNodeVisitState = (
-  routeStatus: TLatestRouteBySimulationRow["route_status"],
-  isOrigin: boolean,
-): RouteNodeVisitState => {
+const getNodeVisitState = (routeStatus: TRouteStatus, isOrigin: boolean): RouteNodeVisitState => {
   if (routeStatus === "completed") {
     return "visited";
   }
@@ -87,7 +90,7 @@ export const decodeRoutes = (routes: TLatestRouteBySimulationRow[]): DecodedRout
     .filter((route) => route.coordinates.length > 1);
 };
 
-export const getRouteStatusColor = (routeStatus: TLatestRouteBySimulationRow["route_status"]) => {
+export const getRouteStatusColor = (routeStatus: TRouteStatus) => {
   switch (routeStatus) {
     case "completed":
       return "#22c55e";

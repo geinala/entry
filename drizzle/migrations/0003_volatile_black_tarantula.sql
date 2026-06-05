@@ -1,0 +1,1 @@
+ALTER TABLE "optimization_runs" ALTER COLUMN "algorithm" DROP NOT NULL;
