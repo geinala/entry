@@ -9,7 +9,11 @@ import {
   TotalTimeTravelCard,
 } from "./_components/card";
 import Page from "@/app/_components/page";
-import { DeleteSimulationButton, OpenSimulationButton } from "./_components/button";
+import {
+  DeleteSimulationButton,
+  OpenSimulationButton,
+  RefreshSimulationDetailsButton,
+} from "./_components/button";
 import SimulationStatus from "./_components/status";
 import SimulationsLayoutShell from "./_components/layout-shell";
 import { SimulationHistorySidebar } from "./_components/sidebar";
@@ -76,6 +80,7 @@ export default function HistoryPage() {
               <Link href={`/simulations/${selectedSimulationId}`}>
                 <OpenSimulationButton />
               </Link>
+              <RefreshSimulationDetailsButton />
               <SimulationStatus status={data.status} />
             </div>
           }

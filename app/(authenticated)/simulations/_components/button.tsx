@@ -11,9 +11,10 @@ import {
   DialogTrigger,
 } from "@/app/_components/ui/dialog";
 import { useDeleteSimulationByIdMutation } from "../_hooks/use-mutations";
-import { Map, Trash } from "lucide-react";
+import { Map, RotateCw, Trash } from "lucide-react";
 import { useState } from "react";
 import { toast } from "sonner";
+import { useQueryClient } from "@tanstack/react-query";
 
 interface IDeleteSimulationButton {
   simulationId: string;
@@ -82,4 +83,32 @@ const OpenSimulationButton = () => {
   );
 };
 
-export { DeleteSimulationButton, OpenSimulationButton };
+const RefreshSimulationDetailsButton = () => {
+  const queryClient = useQueryClient();
+  const [isRefreshing, setIsRefreshing] = useState(false);
+
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+
+    await queryClient.invalidateQueries({
+      refetchType: "all",
+    });
+
+    setIsRefreshing(false);
+  };
+
+  return (
+    <Button
+      size="sm"
+      variant="outline"
+      onClick={handleRefresh}
+      disabled={isRefreshing}
+      isLoading={isRefreshing}
+    >
+      <RotateCw className="text-primary" />
+      {isRefreshing ? "Refreshing..." : "Refresh"}
+    </Button>
+  );
+};
+
+export { DeleteSimulationButton, OpenSimulationButton, RefreshSimulationDetailsButton };
