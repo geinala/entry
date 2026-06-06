@@ -3,6 +3,7 @@
 import { getNextPage } from "@/lib/infinite-scroll";
 import { TIndexSimulationQueryParams } from "@/schemas/simulation.schema";
 import { TOptimizationSummaryParams } from "@/schemas/simulations/optimization-summary.schema";
+import { TReoptimizationEventTableIndexQueryParams } from "@/schemas/simulations/reoptimization-event.schema";
 import {
   TComparisonChartDataItem,
   TGlobalAlgorithmSummary,
@@ -125,19 +126,29 @@ export const simulationQueries = {
     simulationId,
   }: {
     api: AxiosInstance;
-    queryParams: TIndexQueryParams;
+    queryParams: TReoptimizationEventTableIndexQueryParams;
     simulationId?: string;
   }) => {
     return queryOptions({
       queryKey: ["simulations", simulationId, "reoptimization-events", queryParams] as const,
       queryFn: async (): Promise<TPaginationResponse<TReoptimizationEvent>> => {
+        const cleanedParams = Object.fromEntries(
+          Object.entries(queryParams).filter(
+            ([_, value]) =>
+              value !== undefined &&
+              value !== null &&
+              !(typeof value === "number" && Number.isNaN(value)),
+          ),
+        );
+
         const response: AxiosResponse<TApiSuccessResponseWithPagination<TReoptimizationEvent>> =
           await api.get(`/simulations/${simulationId}/reoptimizations`, {
-            params: queryParams,
+            params: cleanedParams,
           });
 
         return response.data.data;
       },
+
       enabled: !!simulationId,
     });
   },

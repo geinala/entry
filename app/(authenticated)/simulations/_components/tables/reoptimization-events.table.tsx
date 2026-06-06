@@ -4,7 +4,6 @@ import { Route } from "lucide-react";
 import { useGetReoptimizationEventsQuery } from "../../_hooks/use-queries";
 import { convertUtcToLocalTime, snakeToText } from "@/lib/utils";
 import { useFilters } from "@/app/_hooks/use-filters";
-import { IndexQueryParams } from "@/types/query-params";
 import DataTable from "@/app/_components/data-table";
 import { ColumnDef } from "@tanstack/react-table";
 import { TReoptimizationEvent } from "@/types/database";
@@ -12,13 +11,17 @@ import Link from "next/link";
 import { Button } from "@/app/_components/ui/button";
 import { useEffect, useState } from "react";
 import SummaryContainer from "../summary-container";
+import CourierSelect from "../courier.select";
+import { useGetAllCouriersQuery } from "../../[id]/_hooks/use-queries";
+import { ReoptimizationEventTableIndexQueryParams } from "@/schemas/simulations/reoptimization-event.schema";
 
 interface ILogTable {
   simulationId: string;
 }
 
 export default function ReoptimizationEventsTable({ simulationId }: ILogTable) {
-  const { handleChange, pagination } = useFilters(IndexQueryParams);
+  const { handleChange, pagination } = useFilters(ReoptimizationEventTableIndexQueryParams);
+  const [selectedCourierId, setSelectedCourierId] = useState<string | null>(null);
 
   const [localPagination, setLocalPagination] = useState(() => ({
     page: pagination.page,
@@ -41,8 +44,17 @@ export default function ReoptimizationEventsTable({ simulationId }: ILogTable) {
     simulationId,
     queryParams: {
       ...localPagination,
+      ...(selectedCourierId && {
+        courierId: Number(selectedCourierId),
+      }),
     },
   });
+
+  const { data: couriersData, isLoading: isCouriersLoading } = useGetAllCouriersQuery(simulationId);
+
+  const handleCourierChange = (courierId: string) => {
+    setSelectedCourierId(courierId);
+  };
 
   const columns: ColumnDef<TReoptimizationEvent>[] = [
     {
@@ -126,6 +138,14 @@ export default function ReoptimizationEventsTable({ simulationId }: ILogTable) {
       title="Reoptimization Events"
       description="Details of reoptimization events during the simulation."
       icon={<Route className="text-primary w-full h-full" />}
+      headerRight={
+        <CourierSelect
+          couriers={couriersData ?? []}
+          isLoading={isCouriersLoading}
+          value={selectedCourierId ?? ""}
+          onValueChange={handleCourierChange}
+        />
+      }
     >
       <DataTable
         columns={columns}

@@ -192,5 +192,5 @@ export const getComparisonChartRepository = async (simulationId: string) => {
     }
   }
 
-  return Array.from(resultsMap.values());
+  return Array.from(resultsMap.values()).sort((a, b) => a.courierName.localeCompare(b.courierName));
 };

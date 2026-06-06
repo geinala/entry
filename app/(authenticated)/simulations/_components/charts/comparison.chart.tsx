@@ -7,7 +7,7 @@ import {
 import SummaryContainer from "../summary-container";
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import { useGetComparisonChartQuery } from "../../_hooks/use-queries";
-import { formatSeconds } from "@/lib/utils";
+import { formatSeconds, truncateText } from "@/lib/utils";
 
 const chartConfig = {
   greedyInitial: {
@@ -43,7 +43,13 @@ export const ComparisonChart = ({ simulationId }: { simulationId?: string }) => 
           margin={{ top: 20, right: 30, left: 20, bottom: 5 }}
         >
           <CartesianGrid vertical />
-          <XAxis dataKey="courierName" tickLine={false} tickMargin={10} axisLine={false} />
+          <XAxis
+            dataKey="courierName"
+            tickLine={false}
+            tickMargin={10}
+            axisLine={false}
+            tickFormatter={(value) => truncateText(value, 15)}
+          />
           <ChartTooltip
             cursor
             content={
@@ -83,8 +89,8 @@ export const ComparisonChart = ({ simulationId }: { simulationId?: string }) => 
             }
           />
           <Bar dataKey="greedyBaselineTime" fill="var(--color-greedy-baseline)" radius={4} />
-          <Bar dataKey="tabuBaselineTime" fill="var(--color-tabu-search-baseline)" radius={4} />
           <Bar dataKey="greedyFinalTime" fill="var(--color-greedy-final)" radius={4} />
+          <Bar dataKey="tabuBaselineTime" fill="var(--color-tabu-search-baseline)" radius={4} />
           <Bar dataKey="tabuFinalTime" fill="var(--color-tabu-search-final)" radius={4} />
         </BarChart>
       </ChartContainer>

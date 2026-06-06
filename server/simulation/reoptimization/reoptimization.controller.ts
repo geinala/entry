@@ -4,10 +4,10 @@ import { NextRequest } from "next/server";
 import { handleException } from "@/common/exception/helper";
 import { parseQueryParams } from "@/lib/validation";
 import { BadRequestException } from "@/common/exception/bad-request.exception";
-import { IndexQueryParams } from "@/types/query-params";
 import { getReoptimizationEventsWithPaginationService } from "./reoptimization.service";
 import { TReoptimizationEvent } from "@/types/database";
 import { responseFormatter } from "@/lib/response-formatter";
+import { ReoptimizationEventTableIndexQueryParams } from "@/schemas/simulations/reoptimization-event.schema";
 
 export const getReoptimizationEventsWithPaginationController = async (
   request: NextRequest,
@@ -19,9 +19,10 @@ export const getReoptimizationEventsWithPaginationController = async (
     const rawQueryParams = {
       page: searchParams.get("page"),
       pageSize: searchParams.get("pageSize"),
+      courierId: searchParams.get("courierId"),
     };
 
-    const result = parseQueryParams(IndexQueryParams, rawQueryParams);
+    const result = parseQueryParams(ReoptimizationEventTableIndexQueryParams, rawQueryParams);
 
     if (!result.success) {
       throw new BadRequestException("Invalid query parameters");

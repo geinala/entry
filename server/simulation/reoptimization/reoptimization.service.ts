@@ -1,11 +1,11 @@
-import { TIndexQueryParams } from "@/types/query-params";
 import { getReoptimizationEventsWithPaginationRepository } from "./reoptimization.repository";
 import { paginationResponseMapper } from "@/lib/pagination";
 import { TReoptimizationEvent } from "@/types/database";
+import { TReoptimizationEventTableIndexQueryParams } from "@/schemas/simulations/reoptimization-event.schema";
 
 export const getReoptimizationEventsWithPaginationService = async (
   simulationId: string,
-  queryParams: TIndexQueryParams,
+  queryParams: TReoptimizationEventTableIndexQueryParams,
 ) => {
   const [paginatedEvents, totalEvents] = await getReoptimizationEventsWithPaginationRepository(
     simulationId,

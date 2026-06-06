@@ -6,15 +6,16 @@ import {
   routeLegTable,
 } from "@/drizzle/schema";
 import { buildCountQuery, buildPaginatedQuery, TColumnsDefinition } from "@/lib/query-builder";
-import { TIndexQueryParams } from "@/types/query-params";
+import { TReoptimizationEventTableIndexQueryParams } from "@/schemas/simulations/reoptimization-event.schema";
 import { and, eq, getTableColumns, gt } from "drizzle-orm";
 
 export const getReoptimizationEventsWithPaginationRepository = async (
   simulationId: string,
-  queryParams: TIndexQueryParams,
+  queryParams: TReoptimizationEventTableIndexQueryParams,
 ) => {
   const REOPTIMIZATION_EVENTS_COLUMNS: TColumnsDefinition<typeof routeLegCongestionCheckTable> = {
     checkedAt: { sortable: true },
+    ...(queryParams.courierId && { courierId: { filterable: true } }),
   };
 
   return await Promise.all([
