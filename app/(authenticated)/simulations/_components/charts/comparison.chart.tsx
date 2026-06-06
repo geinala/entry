@@ -5,7 +5,7 @@ import {
   ChartTooltipContent,
 } from "@/app/_components/ui/chart";
 import SummaryContainer from "../summary-container";
-import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis } from "recharts";
 import { useGetComparisonChartQuery } from "../../_hooks/use-queries";
 import { formatSeconds, truncateText } from "@/lib/utils";
 import { ChartBar } from "lucide-react";
@@ -38,7 +38,7 @@ export const ComparisonChart = ({ simulationId }: { simulationId?: string }) => 
       description="Comparison of initial and final travel times for Greedy and Tabu Search across couriers."
       icon={<ChartBar className="text-primary" />}
     >
-      <ChartContainer config={chartConfig}>
+      <ChartContainer config={chartConfig} className="w-full max-h-175">
         <BarChart
           accessibilityLayer
           data={data}
@@ -52,6 +52,7 @@ export const ComparisonChart = ({ simulationId }: { simulationId?: string }) => 
             axisLine={false}
             tickFormatter={(value) => truncateText(value, 15)}
           />
+          <YAxis tickFormatter={(value) => formatSeconds(value)} />
           <ChartTooltip
             cursor
             content={

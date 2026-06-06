@@ -63,7 +63,7 @@ export const TimeTravelChart = ({ simulationId }: Props) => {
         />
       }
     >
-      <ChartContainer config={chartConfig} className="w-full max-h-125">
+      <ChartContainer config={chartConfig} className="w-full max-h-175">
         <LineChart
           accessibilityLayer
           data={mappedData}
