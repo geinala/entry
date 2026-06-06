@@ -648,7 +648,7 @@ export const reoptimizationEventTable = pgTable(
     distanceSavedInMeters: integer("distance_saved_in_meters").notNull(),
     timeSavedInSeconds: integer("time_saved_in_seconds").notNull(),
     courierPosition: jsonb("courier_position").notNull(),
-    algorithmUsed: varchar("algorithm_used").notNull(),
+    algorithmUsed: varchar("algorithm_used"),
     computationTimeInMs: real("computation_time_in_ms").notNull(),
     totalIncidentDelayInSeconds: integer("total_incident_delay_in_seconds"), // sum delay semua incident valid dalam congestion check ini
     outcome: reoptimizationOutcomeEnum("outcome").notNull(),
