@@ -14,6 +14,7 @@ import { format } from "date-fns";
 import { formatSeconds } from "@/lib/utils";
 import CourierSelect from "../courier.select";
 import { useGetAllCouriersQuery } from "../../[id]/_hooks/use-queries";
+import { ChartLine } from "lucide-react";
 
 const chartConfig = {} satisfies ChartConfig;
 
@@ -49,8 +50,9 @@ export const TimeTravelChart = ({ simulationId }: Props) => {
 
   return (
     <SummaryContainer
-      title="Time Travel Chart"
-      description="Chart showing time travel data"
+      title="Courier Travel Time Timeline"
+      description="Travel time progression for Greedy and Tabu Search after each reoptimization event"
+      icon={<ChartLine className="text-primary" />}
       headerRight={
         <CourierSelect
           couriers={couriersData ?? []}

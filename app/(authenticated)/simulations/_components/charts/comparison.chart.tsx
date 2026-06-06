@@ -8,6 +8,7 @@ import SummaryContainer from "../summary-container";
 import { Bar, BarChart, CartesianGrid, XAxis } from "recharts";
 import { useGetComparisonChartQuery } from "../../_hooks/use-queries";
 import { formatSeconds, truncateText } from "@/lib/utils";
+import { ChartBar } from "lucide-react";
 
 const chartConfig = {
   greedyInitial: {
@@ -33,8 +34,9 @@ export const ComparisonChart = ({ simulationId }: { simulationId?: string }) => 
 
   return (
     <SummaryContainer
-      title="Comparison Chart"
-      description="This chart compares the performance of the Tabu Search and Greedy algorithms over time. It shows how the solution quality evolves as the algorithms progress, allowing you to visually assess their convergence behavior and effectiveness in finding optimal or near-optimal solutions."
+      title="Baseline vs Optimized Travel Time"
+      description="Comparison of initial and final travel times for Greedy and Tabu Search across couriers."
+      icon={<ChartBar className="text-primary" />}
     >
       <ChartContainer config={chartConfig}>
         <BarChart
