@@ -13,7 +13,11 @@ const SIMULATION_DETAIL_QUERY_KEYS = {
 };
 
 export const simulationDetailQueries = {
-  getAllCouriers: (api: AxiosInstance, simulationId?: string) => {
+  getAllCouriers: (
+    api: AxiosInstance,
+    simulationId?: string,
+    onSuccess?: (data: TCourier[]) => void,
+  ) => {
     return queryOptions({
       queryKey: SIMULATION_DETAIL_QUERY_KEYS.getAllActiveVehicles(simulationId),
       queryFn: async (): Promise<TCourier[]> => {
@@ -21,7 +25,13 @@ export const simulationDetailQueries = {
           `/simulations/${simulationId}/couriers`,
         );
 
-        return response.data.data;
+        const data = response.data.data;
+
+        if (onSuccess) {
+          onSuccess(data);
+        }
+
+        return data;
       },
       enabled: !!simulationId,
     });

@@ -25,8 +25,9 @@ import { Paragraph } from "@/app/_components/typography";
 import { Clock } from "lucide-react";
 import { formatDistanceToNow } from "date-fns";
 import GlobalSummaryTable from "./_components/tables/global-summary.table";
-import LogTable from "./_components/tables/log.table";
 import ReoptimizationEventsTable from "./_components/tables/reoptimization-events.table";
+import { TimeTravelChart } from "./_components/charts/time-travel.chart";
+import { ComparisonChart } from "./_components/charts/comparison.chart";
 
 const SHORTCUT_KEY_TO_REMOVE_DETAILS = "Escape";
 
@@ -158,7 +159,8 @@ export default function HistoryPage() {
               <section className="w-full h-full flex flex-col gap-3">
                 <GlobalSummaryTable simulationId={selectedSimulationId} />
                 <ReoptimizationEventsTable simulationId={selectedSimulationId} />
-                <LogTable simulationId={selectedSimulationId} />
+                <TimeTravelChart simulationId={selectedSimulationId} />
+                <ComparisonChart simulationId={selectedSimulationId} />
               </section>
             </div>
           </main>

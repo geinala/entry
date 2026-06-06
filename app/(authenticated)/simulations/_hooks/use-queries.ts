@@ -25,18 +25,6 @@ export const useGetDraftSimulationJobQuery = () => {
   return useQuery(simulationQueries.getDraftSimulationJob(api));
 };
 
-export const useGetSimulationLogsQuery = ({
-  queryParams,
-  simulationId,
-}: {
-  queryParams: TIndexQueryParams;
-  simulationId?: string;
-}) => {
-  const api = useAuthenticatedClient();
-
-  return useQuery(simulationQueries.getLogs(api, simulationId, queryParams));
-};
-
 export const useGetGlobalSummaryAlgorithmQuery = (
   simulationId?: string,
   queryParams?: TOptimizationSummaryParams,
@@ -44,6 +32,21 @@ export const useGetGlobalSummaryAlgorithmQuery = (
   const api = useAuthenticatedClient();
 
   return useQuery(simulationQueries.getGlobalSummaryAlgorithm(api, simulationId, queryParams));
+};
+
+export const useGetTimeSeriesSummaryQuery = (
+  simulationId?: string,
+  queryParams?: TOptimizationSummaryParams,
+) => {
+  const api = useAuthenticatedClient();
+
+  return useQuery(simulationQueries.getTimeSeriesSummary(api, simulationId, queryParams));
+};
+
+export const useGetComparisonChartQuery = (simulationId?: string) => {
+  const api = useAuthenticatedClient();
+
+  return useQuery(simulationQueries.getComparisonChartData(api, simulationId));
 };
 
 export const useGetReoptimizationEventsQuery = ({

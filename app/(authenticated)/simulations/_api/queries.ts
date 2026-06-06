@@ -4,12 +4,14 @@ import { getNextPage } from "@/lib/infinite-scroll";
 import { TIndexSimulationQueryParams } from "@/schemas/simulation.schema";
 import { TOptimizationSummaryParams } from "@/schemas/simulations/optimization-summary.schema";
 import {
+  TComparisonChartDataItem,
   TGlobalAlgorithmSummary,
   TReoptimizationEvent,
   TSimulation,
   TSimulationJob,
   TSimulationLog,
   TSimulationWithDepot,
+  TTimeSeriesSummary,
 } from "@/types/database";
 import { TPaginationResponse } from "@/types/meta";
 import { TIndexQueryParams } from "@/types/query-params";
@@ -133,6 +135,36 @@ export const simulationQueries = {
           await api.get(`/simulations/${simulationId}/reoptimizations`, {
             params: queryParams,
           });
+
+        return response.data.data;
+      },
+      enabled: !!simulationId,
+    });
+  },
+  getTimeSeriesSummary: (
+    api: AxiosInstance,
+    simulationId?: string,
+    queryParams?: TOptimizationSummaryParams,
+  ) => {
+    return queryOptions({
+      queryKey: ["simulations", simulationId, "time-series-summary", queryParams] as const,
+      queryFn: async (): Promise<TTimeSeriesSummary[]> => {
+        const response: AxiosResponse<TApiSuccessResponseWithData<TTimeSeriesSummary[]>> =
+          await api.get(`/simulations/${simulationId}/algorithms/summary/time-series-summary`, {
+            params: queryParams,
+          });
+
+        return response.data.data;
+      },
+      enabled: !!simulationId,
+    });
+  },
+  getComparisonChartData: (api: AxiosInstance, simulationId?: string) => {
+    return queryOptions({
+      queryKey: ["simulations", simulationId, "comparison-chart"] as const,
+      queryFn: async (): Promise<TComparisonChartDataItem[]> => {
+        const response: AxiosResponse<TApiSuccessResponseWithData<TComparisonChartDataItem[]>> =
+          await api.get(`/simulations/${simulationId}/algorithms/comparison`);
 
         return response.data.data;
       },

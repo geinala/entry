@@ -19,10 +19,12 @@ interface CourierSelectProps {
   couriers?: Courier[];
   isLoading?: boolean;
   className?: string;
+  isWithAllOption?: boolean;
 }
 
 export default function CourierSelect({
   value,
+  isWithAllOption = true,
   onValueChange,
   couriers = [],
   isLoading = false,
@@ -37,7 +39,9 @@ export default function CourierSelect({
       </SelectTrigger>
 
       <SelectContent position="popper">
-        <SelectItem value="all">All couriers</SelectItem>
+        <SelectItem value="all" hidden={!isWithAllOption}>
+          All couriers
+        </SelectItem>
 
         {couriers.map((courier) => (
           <SelectItem key={courier.id} value={courier.id.toString()}>

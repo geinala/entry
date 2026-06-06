@@ -148,7 +148,6 @@ export type TGlobalAlgorithmSummary = {
     totalTimeTravelledInSeconds: number;
     computationTimeInMs: number;
   };
-  totalNodesExplored: number;
   improvement: {
     totalDistanceImprovementPercentage: number;
     totalTimeTravelledImprovementPercentage: number;
@@ -201,3 +200,17 @@ export type TRouteLegCongestionCheckIncidentWithIncidentDetails =
   TRouteLegCongestionCheckIncident & {
     trafficIncident: TTrafficIncident;
   };
+
+export type TTimeSeriesSummary = {
+  triggeredAt: Date;
+  greedyTime: number;
+  tabuTime: number;
+};
+export type TComparisonChartDataItem = {
+  courierId: number;
+  courierName: string;
+  greedyBaselineTime: number;
+  greedyFinalTime: number;
+  tabuBaselineTime: number;
+  tabuFinalTime: number;
+};
