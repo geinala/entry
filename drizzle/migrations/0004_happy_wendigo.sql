@@ -1,1 +1,0 @@
-ALTER TABLE "reoptimization_events" ALTER COLUMN "algorithm_used" DROP NOT NULL;

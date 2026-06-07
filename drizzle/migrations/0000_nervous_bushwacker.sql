@@ -1,13 +1,14 @@
 CREATE TYPE "public"."calculation_status_enum" AS ENUM('pending', 'processing', 'completed', 'failed');--> statement-breakpoint
 CREATE TYPE "public"."geocoding_status_enum" AS ENUM('pending', 'in_progress', 'needed_review', 'completed', 'failed');--> statement-breakpoint
 CREATE TYPE "public"."matrix_batch_status_enum" AS ENUM('submitted', 'validated', 'completed', 'failed');--> statement-breakpoint
+CREATE TYPE "public"."optimization_algorithm_enum" AS ENUM('manual_without_optimization', 'manual_with_optimization', 'google_or_tools');--> statement-breakpoint
 CREATE TYPE "public"."reoptimization_outcome_enum" AS ENUM('resequencing_applied', 'duration_updated', 'no_improvement');--> statement-breakpoint
 CREATE TYPE "public"."resolution_status" AS ENUM('pending', 'auto_solved', 'needed_review', 'failed', 'manual_override');--> statement-breakpoint
-CREATE TYPE "public"."route_status_enum" AS ENUM('planned', 'running', 'completed', 'cancelled');--> statement-breakpoint
+CREATE TYPE "public"."route_status_enum" AS ENUM('baseline_planned', 'baseline_running', 'baseline_completed', 'planned', 'running', 'completed', 'cancelled');--> statement-breakpoint
 CREATE TYPE "public"."simulation_cleaning_status_enum" AS ENUM('pending', 'in_progress', 'completed', 'needed_review', 'failed');--> statement-breakpoint
 CREATE TYPE "public"."simulation_file_validation_status_enum" AS ENUM('uploaded', 'validating', 'validated', 'needed_review', 'completed', 'failed');--> statement-breakpoint
 CREATE TYPE "public"."simulation_job_status_enum" AS ENUM('uploaded', 'processing', 'completed', 'failed');--> statement-breakpoint
-CREATE TYPE "public"."simulation_status_enum" AS ENUM('optimizing', 'running', 'completed', 'failed');--> statement-breakpoint
+CREATE TYPE "public"."simulation_status_enum" AS ENUM('pending', 'stopped', 'optimizing', 'running', 'completed', 'failed');--> statement-breakpoint
 CREATE TABLE "courier_routes" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"solution_id" integer,
@@ -87,12 +88,40 @@ CREATE TABLE "nodes" (
 	"demand" real NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "optimization_iterations" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"simulation_id" uuid,
+	"event_type" varchar(100),
+	"iteration" integer NOT NULL,
+	"elapsed_ms" double precision,
+	"timestamp" timestamp,
+	"current_distance_in_meters" double precision,
+	"current_duration_in_seconds" double precision,
+	"best_distance_in_meters" double precision,
+	"best_duration_in_seconds" double precision,
+	"distance_improvement_in_meters" double precision,
+	"duration_improvement_in_seconds" double precision,
+	"improvement_percent" double precision,
+	"iterations_without_improvement" integer,
+	"objective_value" double precision,
+	"operator_used" varchar(100),
+	"is_new_best" boolean DEFAULT false,
+	"triggered_diversification" boolean DEFAULT false,
+	"used_aspiration_criteria" boolean DEFAULT false,
+	"active_routes_count" integer,
+	"unassigned_nodes_count" integer,
+	"message" text,
+	"intermediate_tour" jsonb,
+	"created_at" timestamp DEFAULT now()
+);
+--> statement-breakpoint
 CREATE TABLE "optimization_runs" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"simulation_id" uuid,
 	"congestion_check_id" integer,
+	"courier_id" integer NOT NULL,
 	"run_type" varchar NOT NULL,
-	"algorithm" varchar NOT NULL,
+	"algorithm" varchar,
 	"trigger_type" varchar NOT NULL,
 	"total_distance_in_meters" integer NOT NULL,
 	"total_travel_time_in_seconds" integer NOT NULL,
@@ -120,7 +149,7 @@ CREATE TABLE "reoptimization_events" (
 	"distance_saved_in_meters" integer NOT NULL,
 	"time_saved_in_seconds" integer NOT NULL,
 	"courier_position" jsonb NOT NULL,
-	"algorithm_used" varchar NOT NULL,
+	"algorithm_used" varchar,
 	"computation_time_in_ms" real NOT NULL,
 	"total_incident_delay_in_seconds" integer,
 	"outcome" "reoptimization_outcome_enum" NOT NULL,
@@ -193,14 +222,34 @@ CREATE TABLE "simulation_jobs" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
 	"user_id" varchar NOT NULL,
 	"title" varchar(300) NOT NULL,
+	"status" "simulation_job_status_enum" DEFAULT 'uploaded' NOT NULL,
+	"current_step" integer DEFAULT 0 NOT NULL,
+	"started_at" timestamp with time zone,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"updated_at" timestamp with time zone DEFAULT now() NOT NULL,
 	"depot_id" integer NOT NULL,
 	"depot_location_address" varchar NOT NULL,
 	"depot_location_latitude" double precision NOT NULL,
 	"depot_location_longitude" double precision NOT NULL,
-	"max_computation_time_in_seconds" integer DEFAULT 600 NOT NULL,
-	"started_at" timestamp with time zone,
-	"status" "simulation_job_status_enum" DEFAULT 'uploaded' NOT NULL,
-	"current_step" integer DEFAULT 0 NOT NULL,
+	"algorithm" "optimization_algorithm_enum",
+	"computation_time_limit_in_seconds" integer DEFAULT 600 NOT NULL,
+	"random_seed" integer DEFAULT 42 NOT NULL,
+	"enable_resequence" boolean DEFAULT true NOT NULL,
+	"enable_aspiration" boolean DEFAULT true NOT NULL,
+	"resequence_improvement_threshold_percent" real DEFAULT 5,
+	"congestion_delay_threshold_in_seconds" integer DEFAULT 300,
+	"early_stop_no_improvement_iterations" integer DEFAULT 100,
+	"tabu_iterations" integer,
+	"tabu_tenure" integer,
+	"max_neighbors_2opt" integer,
+	"max_neighbors_oropt" integer,
+	"diversify_after_iterations" integer,
+	"diversification_strength" integer,
+	"use_oropt_neighborhood" boolean,
+	"total_demand_in_kilograms" real DEFAULT 0 NOT NULL,
+	"total_couriers" integer DEFAULT 0 NOT NULL,
+	"total_active_couriers" integer DEFAULT 0 NOT NULL,
+	"total_nodes" integer DEFAULT 0 NOT NULL,
 	"file_path" varchar,
 	"file_validation_status" "simulation_file_validation_status_enum" DEFAULT 'uploaded' NOT NULL,
 	"file_total_rows" integer,
@@ -210,24 +259,22 @@ CREATE TABLE "simulation_jobs" (
 	"file_progress_percentage" integer DEFAULT 0,
 	"file_validation_started_at" timestamp with time zone,
 	"file_validation_completed_at" timestamp with time zone,
+	"cleaning_status" "simulation_cleaning_status_enum" DEFAULT 'pending' NOT NULL,
 	"cleaning_total_rows" integer DEFAULT 0,
 	"cleaning_processed_rows" integer DEFAULT 0,
 	"cleaning_progress_percentage" integer DEFAULT 0,
-	"cleaning_status" "simulation_cleaning_status_enum" DEFAULT 'pending' NOT NULL,
 	"cleaning_started_at" timestamp with time zone,
 	"cleaning_completed_at" timestamp with time zone,
+	"geocoding_status" "geocoding_status_enum" DEFAULT 'pending' NOT NULL,
 	"geocoding_total_rows" integer DEFAULT 0,
 	"geocoding_processed_rows" integer DEFAULT 0,
 	"geocoding_progress_percentage" integer DEFAULT 0,
 	"geocoding_estimated_completion_time" timestamp with time zone,
-	"geocoding_status" "geocoding_status_enum" DEFAULT 'pending' NOT NULL,
 	"geocoding_started_at" timestamp with time zone,
 	"geocoded_at" timestamp with time zone,
 	"calculation_status" "calculation_status_enum" DEFAULT 'pending' NOT NULL,
 	"calculation_started_at" timestamp with time zone,
-	"calculated_at" timestamp with time zone,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"updated_at" timestamp with time zone DEFAULT now() NOT NULL
+	"calculated_at" timestamp with time zone
 );
 --> statement-breakpoint
 CREATE TABLE "simulation_logs" (
@@ -253,7 +300,21 @@ CREATE TABLE "simulations" (
 	"status" "simulation_status_enum" DEFAULT 'optimizing' NOT NULL,
 	"started_at" timestamp with time zone,
 	"completed_at" timestamp with time zone,
+	"algorithm" "optimization_algorithm_enum" NOT NULL,
 	"computation_time_limit_in_seconds" integer DEFAULT 600 NOT NULL,
+	"random_seed" integer DEFAULT 42 NOT NULL,
+	"enable_resequence" boolean DEFAULT true NOT NULL,
+	"enable_aspiration" boolean DEFAULT true NOT NULL,
+	"resequence_improvement_threshold_percent" real DEFAULT 5,
+	"congestion_delay_threshold_in_seconds" integer DEFAULT 300,
+	"early_stop_no_improvement_iterations" integer DEFAULT 100,
+	"tabu_iterations" integer,
+	"tabu_tenure" integer,
+	"max_neighbors_2opt" integer,
+	"max_neighbors_oropt" integer,
+	"diversify_after_iterations" integer,
+	"diversification_strength" integer,
+	"use_oropt_neighborhood" boolean,
 	"depot_id" integer NOT NULL,
 	"depot_location_address" varchar NOT NULL,
 	"depot_location_latitude" double precision NOT NULL,
@@ -351,8 +412,10 @@ ALTER TABLE "nodes" ADD CONSTRAINT "nodes_simulation_id_simulations_id_fk" FOREI
 ALTER TABLE "nodes" ADD CONSTRAINT "nodes_courier_id_couriers_id_fk" FOREIGN KEY ("courier_id") REFERENCES "public"."couriers"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "nodes" ADD CONSTRAINT "nodes_completed_by_couriers_id_fk" FOREIGN KEY ("completed_by") REFERENCES "public"."couriers"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "nodes" ADD CONSTRAINT "nodes_completed_by_courier_id_couriers_id_fk" FOREIGN KEY ("completed_by") REFERENCES "public"."couriers"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "optimization_iterations" ADD CONSTRAINT "optimization_iterations_simulation_id_simulations_id_fk" FOREIGN KEY ("simulation_id") REFERENCES "public"."simulations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "optimization_runs" ADD CONSTRAINT "optimization_runs_simulation_id_simulations_id_fk" FOREIGN KEY ("simulation_id") REFERENCES "public"."simulations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "optimization_runs" ADD CONSTRAINT "optimization_runs_congestion_check_id_route_leg_congestion_checks_id_fk" FOREIGN KEY ("congestion_check_id") REFERENCES "public"."route_leg_congestion_checks"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "optimization_runs" ADD CONSTRAINT "optimization_runs_courier_id_couriers_id_fk" FOREIGN KEY ("courier_id") REFERENCES "public"."couriers"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "reoptimization_events" ADD CONSTRAINT "reoptimization_events_simulation_id_simulations_id_fk" FOREIGN KEY ("simulation_id") REFERENCES "public"."simulations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "reoptimization_events" ADD CONSTRAINT "reoptimization_events_optimization_run_id_optimization_runs_id_fk" FOREIGN KEY ("optimization_run_id") REFERENCES "public"."optimization_runs"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "reoptimization_events" ADD CONSTRAINT "reoptimization_events_congestion_check_id_route_leg_congestion_checks_id_fk" FOREIGN KEY ("congestion_check_id") REFERENCES "public"."route_leg_congestion_checks"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -393,6 +456,8 @@ CREATE INDEX "matrix_results_simulation_id_idx" ON "matrix_results" USING btree 
 CREATE INDEX "matrix_results_matrix_batch_id_idx" ON "matrix_results" USING btree ("matrix_batch_id");--> statement-breakpoint
 CREATE INDEX "node_details_node_id_idx" ON "node_details" USING btree ("node_id");--> statement-breakpoint
 CREATE INDEX "nodes_simulation_id_idx" ON "nodes" USING btree ("simulation_id");--> statement-breakpoint
+CREATE INDEX "optimization_iterations_simulation_id_idx" ON "optimization_iterations" USING btree ("simulation_id");--> statement-breakpoint
+CREATE INDEX "optimization_iterations_event_type_idx" ON "optimization_iterations" USING btree ("event_type");--> statement-breakpoint
 CREATE INDEX "optimization_runs_simulation_id_idx" ON "optimization_runs" USING btree ("simulation_id");--> statement-breakpoint
 CREATE INDEX "optimization_runs_congestion_check_id_idx" ON "optimization_runs" USING btree ("congestion_check_id");--> statement-breakpoint
 CREATE INDEX "reoptimization_events_simulation_id_idx" ON "reoptimization_events" USING btree ("simulation_id");--> statement-breakpoint
@@ -409,6 +474,9 @@ CREATE INDEX "route_legs_origin_coordinates_idx" ON "route_legs" USING btree ("o
 CREATE INDEX "route_legs_destination_coordinates_idx" ON "route_legs" USING btree ("destination_latitude","destination_longitude");--> statement-breakpoint
 CREATE UNIQUE INDEX "route_legs_courier_route_sequence_unique" ON "route_legs" USING btree ("courier_route_id","sequence");--> statement-breakpoint
 CREATE INDEX "route_legs_sequence_idx" ON "route_legs" USING btree ("sequence");--> statement-breakpoint
+CREATE INDEX "simulation_jobs_user_id_idx" ON "simulation_jobs" USING btree ("user_id");--> statement-breakpoint
+CREATE INDEX "simulation_jobs_status_idx" ON "simulation_jobs" USING btree ("status");--> statement-breakpoint
+CREATE INDEX "simulation_jobs_depot_id_idx" ON "simulation_jobs" USING btree ("depot_id");--> statement-breakpoint
 CREATE INDEX "simulation_logs_simulation_id_idx" ON "simulation_logs" USING btree ("simulation_id");--> statement-breakpoint
 CREATE INDEX "simulation_logs_courier_route_id_idx" ON "simulation_logs" USING btree ("courier_route_id");--> statement-breakpoint
 CREATE INDEX "simulation_logs_courier_id_idx" ON "simulation_logs" USING btree ("courier_id");--> statement-breakpoint

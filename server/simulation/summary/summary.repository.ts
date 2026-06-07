@@ -24,7 +24,7 @@ export const getGlobalSummaryAlgorithmRepository = async (
       FROM optimization_runs o
       WHERE
         o.simulation_id = ${simulationId}
-        AND o.run_type IN ('initial', 'baseline_tracking', 'duration_update')
+        AND o.run_type IN ('initial')
         ${courierId !== null ? sql`AND o.courier_id = ${courierId}` : sql``}
       ORDER BY o.courier_id, o.algorithm, o.triggered_at DESC
     `;

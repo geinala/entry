@@ -14,6 +14,8 @@ const SIMULATION_STATUS_COLOR_MAP = {
   running: { color: "blue", label: "Running" },
   completed: { color: "green", label: "Completed" },
   failed: { color: "red", label: "Failed" },
+  pending: { color: "amber", label: "Pending" },
+  stopped: { color: "red", label: "Stopped" },
 } as const satisfies Record<TSimulationStatus, { color: string; label: string }>;
 
 const getStatusConfig = (status: TSimulationStatus) => {

@@ -16,19 +16,18 @@ export const createSimulationJobRepository = async (
   const [simulationJob] = await db
     .insert(simulationJobTable)
     .values({
+      ...data,
       filePath,
       userId,
       depotLocationAddress: data.depotLocationAddress,
       depotLocationLatitude: data.depotLatitude,
       depotLocationLongitude: data.depotLongitude,
-      title: data.title,
       currentStep: 1,
-      maxComputationTimeInSeconds: data.computationTimeLimit,
+      computationTimeLimitInSeconds: data.computationTimeLimit,
       startedAt: new Date(data.startDatetime),
       fileTotalRows,
       fileValidationStatus: "uploaded",
       fileValidationStartedAt: new Date(),
-      depotId: data.depotId,
     })
     .returning();
 

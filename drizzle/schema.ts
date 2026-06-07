@@ -64,29 +64,65 @@ export const simulationJobCleaningStatusEnum = pgEnum("simulation_cleaning_statu
   "failed",
 ]);
 
+export const optimizationAlgorithmEnum = pgEnum("optimization_algorithm_enum", [
+  "manual_without_optimization",
+  "manual_with_optimization",
+  "google_or_tools",
+]);
+
 export const simulationJobTable = pgTable(
   "simulation_jobs",
   {
-    // Basic info
     id: uuid().primaryKey().defaultRandom(),
     userId: varchar("user_id")
       .references(() => userTable.id)
       .notNull(),
     title: varchar("title", { length: 300 }).notNull(),
+    status: simulationJobStatusEnum("status").notNull().default("uploaded"),
+    currentStep: integer("current_step").notNull().default(0),
+    startedAt: timestamp("started_at", {
+      withTimezone: true,
+    }),
+    createdAt: timestamp("created_at", {
+      withTimezone: true,
+    })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", {
+      withTimezone: true,
+    })
+      .notNull()
+      .defaultNow(),
     depotId: integer("depot_id")
       .references(() => depotTable.id)
       .notNull(),
     depotLocationAddress: varchar("depot_location_address").notNull(),
     depotLocationLatitude: doublePrecision("depot_location_latitude").notNull(),
     depotLocationLongitude: doublePrecision("depot_location_longitude").notNull(),
-    maxComputationTimeInSeconds: integer("max_computation_time_in_seconds").notNull().default(600), // in seconds
-    startedAt: timestamp("started_at", { withTimezone: true }),
-
-    // State tracking
-    status: simulationJobStatusEnum("status").notNull().default("uploaded"),
-    currentStep: integer("current_step").notNull().default(0),
-
-    // Progress tracking
+    algorithm: optimizationAlgorithmEnum("algorithm").notNull().default("google_or_tools"),
+    computationTimeLimitInSeconds: integer("computation_time_limit_in_seconds")
+      .notNull()
+      .default(600),
+    randomSeed: integer("random_seed").notNull().default(42),
+    enableResequence: boolean("enable_resequence").notNull().default(true),
+    enableAspiration: boolean("enable_aspiration").notNull().default(true),
+    resequenceImprovementThresholdPercent: real("resequence_improvement_threshold_percent").default(
+      5,
+    ),
+    congestionDelayThresholdInSeconds: integer("congestion_delay_threshold_in_seconds").default(
+      300,
+    ),
+    earlyStopNoImprovementIterations: integer("early_stop_no_improvement_iterations").default(100),
+    tabuIterations: integer("tabu_iterations"),
+    tabuTenure: integer("tabu_tenure"),
+    maxNeighbors2Opt: integer("max_neighbors_2opt"),
+    maxNeighborsOrOpt: integer("max_neighbors_oropt"),
+    diversifyAfterIterations: integer("diversify_after_iterations"),
+    diversificationStrength: integer("diversification_strength"),
+    totalDemandInKilograms: real("total_demand_in_kilograms").notNull().default(0),
+    totalCouriers: integer("total_couriers").notNull().default(0),
+    totalActiveCouriers: integer("total_active_couriers").notNull().default(0),
+    totalNodes: integer("total_nodes").notNull().default(0),
     filePath: varchar("file_path"),
     fileValidationStatus: simulationJobFileValidationStatusEnum("file_validation_status")
       .notNull()
@@ -96,35 +132,42 @@ export const simulationJobTable = pgTable(
     fileInvalidRows: integer("file_invalid_rows").notNull().default(0),
     fileProcessedRows: integer("file_processed_rows"),
     fileProgressPercentage: integer("file_progress_percentage").default(0),
-    fileValidationStartedAt: timestamp("file_validation_started_at", { withTimezone: true }), // Timestamp when file validation starts
-    fileValidationCompletedAt: timestamp("file_validation_completed_at", { withTimezone: true }), // Timestamp when file validation is completed
-
-    // Cleaning tracking
+    fileValidationStartedAt: timestamp("file_validation_started_at", {
+      withTimezone: true,
+    }),
+    fileValidationCompletedAt: timestamp("file_validation_completed_at", {
+      withTimezone: true,
+    }),
+    cleaningStatus: simulationJobCleaningStatusEnum("cleaning_status").notNull().default("pending"),
     cleaningTotalRows: integer("cleaning_total_rows").default(0),
     cleaningProcessedRows: integer("cleaning_processed_rows").default(0),
     cleaningProgressPercentage: integer("cleaning_progress_percentage").default(0),
-    cleaningStatus: simulationJobCleaningStatusEnum("cleaning_status").notNull().default("pending"),
-    cleaningStartedAt: timestamp("cleaning_started_at", { withTimezone: true }), // Timestamp when cleaning starts
-    cleaningCompletedAt: timestamp("cleaning_completed_at", { withTimezone: true }), // Timestamp when cleaning is completed
-
-    // Result tracking
+    cleaningStartedAt: timestamp("cleaning_started_at", {
+      withTimezone: true,
+    }),
+    cleaningCompletedAt: timestamp("cleaning_completed_at", {
+      withTimezone: true,
+    }),
+    geocodingStatus: geocodingStatusEnum("geocoding_status").notNull().default("pending"),
     geocodingTotalRows: integer("geocoding_total_rows").default(0),
     geocodingProcessedRows: integer("geocoding_processed_rows").default(0),
     geocodingProgressPercentage: integer("geocoding_progress_percentage").default(0),
     geocodingEstimatedCompletionTime: timestamp("geocoding_estimated_completion_time", {
       withTimezone: true,
     }),
-    geocodingStatus: geocodingStatusEnum("geocoding_status").notNull().default("pending"),
-    geocodingStartedAt: timestamp("geocoding_started_at", { withTimezone: true }), // Timestamp when geocoding starts
-    geocodedAt: timestamp("geocoded_at", { withTimezone: true }), // Timestamp when geocoding is completed
-
-    // Calculation tracking
+    geocodingStartedAt: timestamp("geocoding_started_at", {
+      withTimezone: true,
+    }),
+    geocodedAt: timestamp("geocoded_at", {
+      withTimezone: true,
+    }),
     calculationStatus: calculationStatusEnum("calculation_status").notNull().default("pending"),
-    calculationStartedAt: timestamp("calculation_started_at", { withTimezone: true }), // Timestamp when calculation starts
-    calculatedAt: timestamp("calculated_at", { withTimezone: true }), // Timestamp when calculation is completed
-
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
+    calculationStartedAt: timestamp("calculation_started_at", {
+      withTimezone: true,
+    }),
+    calculatedAt: timestamp("calculated_at", {
+      withTimezone: true,
+    }),
   },
   (table) => [
     foreignKey({
@@ -132,6 +175,14 @@ export const simulationJobTable = pgTable(
       foreignColumns: [userTable.id],
       name: "simulation_jobs_user_id_users_id_fk",
     }),
+    foreignKey({
+      columns: [table.depotId],
+      foreignColumns: [depotTable.id],
+      name: "simulation_jobs_depot_id_depots_id_fk",
+    }),
+    index("simulation_jobs_user_id_idx").on(table.userId),
+    index("simulation_jobs_status_idx").on(table.status),
+    index("simulation_jobs_depot_id_idx").on(table.depotId),
   ],
 );
 
@@ -183,6 +234,8 @@ export const simulationUploadedRows = pgTable(
 );
 
 export const simulationStatusEnum = pgEnum("simulation_status_enum", [
+  "pending",
+  "stopped",
   "optimizing",
   "running",
   "completed",
@@ -201,11 +254,32 @@ export const simulationTable = pgTable(
       .notNull(),
     title: varchar("title", { length: 300 }).notNull(),
     status: simulationStatusEnum("status").notNull().default("optimizing"),
-    startedAt: timestamp("started_at", { withTimezone: true }),
-    completedAt: timestamp("completed_at", { withTimezone: true }),
+    startedAt: timestamp("started_at", {
+      withTimezone: true,
+    }),
+    completedAt: timestamp("completed_at", {
+      withTimezone: true,
+    }),
+    algorithm: optimizationAlgorithmEnum("algorithm").notNull(),
     computationTimeLimitInSeconds: integer("computation_time_limit_in_seconds")
       .notNull()
-      .default(600), // in seconds
+      .default(600),
+    randomSeed: integer("random_seed").notNull().default(42),
+    enableResequence: boolean("enable_resequence").notNull().default(true),
+    enableAspiration: boolean("enable_aspiration").notNull().default(true),
+    resequenceImprovementThresholdPercent: real("resequence_improvement_threshold_percent").default(
+      5,
+    ),
+    congestionDelayThresholdInSeconds: integer("congestion_delay_threshold_in_seconds").default(
+      300,
+    ),
+    earlyStopNoImprovementIterations: integer("early_stop_no_improvement_iterations").default(100),
+    tabuIterations: integer("tabu_iterations"),
+    tabuTenure: integer("tabu_tenure"),
+    maxNeighbors2Opt: integer("max_neighbors_2opt"),
+    maxNeighborsOrOpt: integer("max_neighbors_oropt"),
+    diversifyAfterIterations: integer("diversify_after_iterations"),
+    diversificationStrength: integer("diversification_strength"),
     depotId: integer("depot_id")
       .references(() => depotTable.id)
       .notNull(),
@@ -217,16 +291,16 @@ export const simulationTable = pgTable(
     totalActiveCouriers: integer("total_active_couriers").notNull().default(0),
     totalCompletedNodes: integer("total_completed_nodes").notNull().default(0),
     totalNodes: integer("total_nodes").notNull().default(0),
-    initialTotalDistanceInMeters: integer("initial_total_distance_in_meters").notNull().default(0), // Total jarak semua rute saat pertama kali dibuat (sebelum ada re-optimisasi)
+    initialTotalDistanceInMeters: integer("initial_total_distance_in_meters").notNull().default(0),
     initialTotalDurationInSeconds: integer("initial_total_duration_in_seconds")
       .notNull()
-      .default(0), // Total estimasi durasi semua rute saat pertama kali dibuat
-    finalTotalDistanceInMeters: integer("final_total_distance_in_meters").notNull().default(0), // Total jarak semua rute setelah semua re-optimisasi selesai
-    finalTotalDurationInSeconds: integer("final_total_duration_in_seconds").notNull().default(0), // Total estimasi durasi semua rute di akhir simulasi
-    distanceImprovementInMeters: integer("distance_improvement_in_meters").notNull().default(0), // Selisih jarak (m): initial - final. Positif = re-opt berhasil mempersingkat rute.
-    durationImprovementInSeconds: integer("duration_improvement_in_seconds").notNull().default(0), // Selisih durasi (s): initial - final. Positif = re-opt berhasil menghemat waktu.
-    totalReoptimizedRoutes: integer("total_reoptimized_routes").notNull().default(0), // Total jumlah reoptimasi selama simulasi berjalan
-    totalIncidentsAffectingRoutes: integer("total_incidents_affecting_routes").notNull().default(0), // Total jumlah insiden lalu lintas yang pernah mempengaruhi rute selama simulasi berjalan
+      .default(0),
+    finalTotalDistanceInMeters: integer("final_total_distance_in_meters").notNull().default(0),
+    finalTotalDurationInSeconds: integer("final_total_duration_in_seconds").notNull().default(0),
+    distanceImprovementInMeters: integer("distance_improvement_in_meters").notNull().default(0),
+    durationImprovementInSeconds: integer("duration_improvement_in_seconds").notNull().default(0),
+    totalReoptimizedRoutes: integer("total_reoptimized_routes").notNull().default(0),
+    totalIncidentsAffectingRoutes: integer("total_incidents_affecting_routes").notNull().default(0),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
     updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
   },
@@ -777,5 +851,44 @@ export const routeLegCongestionCheckIncidentTable = pgTable(
       table.congestionCheckId,
       table.isValidCongestion,
     ),
+  ],
+);
+
+export const optimizationIterationTable = pgTable(
+  "optimization_iterations",
+  {
+    id: serial("id").primaryKey(),
+    simulationId: uuid("simulation_id").references(() => simulationTable.id),
+    eventType: varchar("event_type", { length: 100 }),
+    iteration: integer("iteration").notNull(),
+    elapsedMs: doublePrecision("elapsed_ms"),
+    timestamp: timestamp("timestamp"),
+    currentDistanceInMeters: doublePrecision("current_distance_in_meters"),
+    currentDurationInSeconds: doublePrecision("current_duration_in_seconds"),
+    bestDistanceInMeters: doublePrecision("best_distance_in_meters"),
+    bestDurationInSeconds: doublePrecision("best_duration_in_seconds"),
+    distanceImprovementInMeters: doublePrecision("distance_improvement_in_meters"),
+    durationImprovementInSeconds: doublePrecision("duration_improvement_in_seconds"),
+    improvementPercent: doublePrecision("improvement_percent"),
+    iterationsWithoutImprovement: integer("iterations_without_improvement"),
+    objectiveValue: doublePrecision("objective_value"),
+    operatorUsed: varchar("operator_used", { length: 100 }),
+    isNewBest: boolean("is_new_best").default(false),
+    triggeredDiversification: boolean("triggered_diversification").default(false),
+    usedAspirationCriteria: boolean("used_aspiration_criteria").default(false),
+    activeRoutesCount: integer("active_routes_count"),
+    unassignedNodesCount: integer("unassigned_nodes_count"),
+    message: text("message"),
+    intermediateTour: jsonb("intermediate_tour").$type<number[]>(),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.simulationId],
+      foreignColumns: [simulationTable.id],
+      name: "optimization_iterations_simulation_id_simulations_id_fk",
+    }),
+    index("optimization_iterations_simulation_id_idx").on(table.simulationId),
+    index("optimization_iterations_event_type_idx").on(table.eventType),
   ],
 );

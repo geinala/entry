@@ -6,6 +6,7 @@ const colorMap: Record<string, { bg: string; dot: string }> = {
   red: { bg: "bg-red-500/20", dot: "bg-red-500" },
   yellow: { bg: "bg-yellow-500/20", dot: "bg-yellow-500" },
   purple: { bg: "bg-purple-500/20", dot: "bg-purple-500" },
+  amber: { bg: "bg-amber-500/20", dot: "bg-amber-500" },
 };
 
 export const Indicator = ({ color = "blue" }: { color?: string }) => {

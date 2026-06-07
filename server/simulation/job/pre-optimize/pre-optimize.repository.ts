@@ -38,13 +38,15 @@ export const createSimulationFromJobRepository = async (jobId: string) => {
   const [created] = await db
     .insert(simulationTable)
     .values({
+      ...simulationJob,
+      status: "optimizing",
       simulationJobId: jobId,
       userId: simulationJob.userId,
       title: simulationJob.title,
       depotLocationAddress: simulationJob.depotLocationAddress,
       depotLocationLatitude: simulationJob.depotLocationLatitude,
       depotLocationLongitude: simulationJob.depotLocationLongitude,
-      computationTimeLimitInSeconds: simulationJob.maxComputationTimeInSeconds,
+      computationTimeLimitInSeconds: simulationJob.computationTimeLimitInSeconds,
       startedAt: simulationJob.startedAt,
       depotId: simulationJob.depotId,
     })

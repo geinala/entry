@@ -28,6 +28,16 @@ const statusConfig: Record<
     icon: Clock,
     colorClass: "text-blue-600",
   },
+  pending: {
+    label: "Pending",
+    icon: Clock,
+    colorClass: "text-amber-600",
+  },
+  stopped: {
+    label: "Stopped",
+    icon: X,
+    colorClass: "text-red-600",
+  },
 };
 
 interface ISimulationStatusProps {

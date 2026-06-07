@@ -36,6 +36,7 @@ export const createSimulationJobMutations = {
 
         queryClient.invalidateQueries({ queryKey: ["simulations", "draft-job"] as const });
       },
+      retry: false,
     });
   },
   updateSimulationJob: (api: AxiosInstance, queryClient: QueryClient) => {

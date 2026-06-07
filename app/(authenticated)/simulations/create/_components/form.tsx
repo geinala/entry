@@ -14,7 +14,10 @@ import {
   SelectValue,
 } from "@/app/_components/ui/select";
 import { useForm } from "@tanstack/react-form";
-import { CreateSimulationJobSchema } from "@/schemas/simulations/create-simulation.schema";
+import {
+  CreateSimulationJobSchema,
+  TCreateSimulationJobSchema,
+} from "@/schemas/simulations/create-simulation.schema";
 import { formatDate } from "date-fns";
 import { useCreateSimulationJobMutations } from "../_hooks/use-mutations";
 import DownloadTemplateButton from "@/app/(authenticated)/_components/download-template.button";
@@ -37,9 +40,22 @@ const CreateSimulationForm = () => {
       startDatetime: new Date().toISOString(),
       title: "Simulation Job - " + formatDate(new Date(), "yyyy-MM-dd"),
       depotId: 0,
-    },
+      algorithm: "google_or_tools",
+      congestionDelayThresholdInSeconds: 300,
+      diversificationStrength: 0.5,
+      diversifyAfterIterations: 100,
+      earlyStopNoImprovementIterations: 200,
+      enableAspiration: true,
+      enableResequence: true,
+      maxNeighbors2Opt: 10,
+      maxNeighborsOrOpt: 10,
+      randomSeed: 42,
+      resequenceImprovementThresholdPercent: 5,
+      tabuIterations: 100,
+      tabuTenure: 10,
+    } as TCreateSimulationJobSchema,
     validators: {
-      onSubmit: CreateSimulationJobSchema,
+      onSubmit: CreateSimulationJobSchema.parse,
     },
     onSubmit: async ({ value }) => {
       await mutateAsync({
