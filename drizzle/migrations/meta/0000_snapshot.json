@@ -1,5 +1,5 @@
 {
-  "id": "eff34ee5-5430-468a-af80-9938da2ee145",
+  "id": "9862351c-1360-4f48-8784-ae73b447dbc0",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -2086,7 +2086,8 @@
           "type": "optimization_algorithm_enum",
           "typeSchema": "public",
           "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": "'google_or_tools'"
         },
         "computation_time_limit_in_seconds": {
           "name": "computation_time_limit_in_seconds",
@@ -2170,12 +2171,6 @@
         "diversification_strength": {
           "name": "diversification_strength",
           "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "use_oropt_neighborhood": {
-          "name": "use_oropt_neighborhood",
-          "type": "boolean",
           "primaryKey": false,
           "notNull": false
         },
@@ -2755,12 +2750,6 @@
         "diversification_strength": {
           "name": "diversification_strength",
           "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "use_oropt_neighborhood": {
-          "name": "use_oropt_neighborhood",
-          "type": "boolean",
           "primaryKey": false,
           "notNull": false
         },
