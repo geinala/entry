@@ -116,7 +116,6 @@ export const simulationJobTable = pgTable(
     tabuIterations: integer("tabu_iterations"),
     tabuTenure: integer("tabu_tenure"),
     maxNeighbors2Opt: integer("max_neighbors_2opt"),
-    maxNeighborsOrOpt: integer("max_neighbors_oropt"),
     diversifyAfterIterations: integer("diversify_after_iterations"),
     diversificationStrength: integer("diversification_strength"),
     totalDemandInKilograms: real("total_demand_in_kilograms").notNull().default(0),
@@ -277,7 +276,6 @@ export const simulationTable = pgTable(
     tabuIterations: integer("tabu_iterations"),
     tabuTenure: integer("tabu_tenure"),
     maxNeighbors2Opt: integer("max_neighbors_2opt"),
-    maxNeighborsOrOpt: integer("max_neighbors_oropt"),
     diversifyAfterIterations: integer("diversify_after_iterations"),
     diversificationStrength: integer("diversification_strength"),
     depotId: integer("depot_id")
