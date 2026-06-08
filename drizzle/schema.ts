@@ -857,6 +857,8 @@ export const optimizationIterationTable = pgTable(
   {
     id: serial("id").primaryKey(),
     simulationId: uuid("simulation_id").references(() => simulationTable.id),
+    solutionId: integer("solution_id").references(() => solutionTable.id),
+    courierId: integer("courier_id").references(() => courierTable.id),
     eventType: varchar("event_type", { length: 100 }),
     iteration: integer("iteration").notNull(),
     elapsedMs: doublePrecision("elapsed_ms"),
@@ -885,6 +887,16 @@ export const optimizationIterationTable = pgTable(
       columns: [table.simulationId],
       foreignColumns: [simulationTable.id],
       name: "optimization_iterations_simulation_id_simulations_id_fk",
+    }),
+    foreignKey({
+      columns: [table.solutionId],
+      foreignColumns: [solutionTable.id],
+      name: "optimization_iterations_solution_id_solutions_id_fk",
+    }),
+    foreignKey({
+      columns: [table.courierId],
+      foreignColumns: [courierTable.id],
+      name: "optimization_iterations_courier_id_couriers_id_fk",
     }),
     index("optimization_iterations_simulation_id_idx").on(table.simulationId),
     index("optimization_iterations_event_type_idx").on(table.eventType),

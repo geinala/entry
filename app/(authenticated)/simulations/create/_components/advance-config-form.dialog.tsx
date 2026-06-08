@@ -127,7 +127,7 @@ export const AdvanceConfigFormDialog = ({ form, onSave }: AdvanceConfigFormDialo
                   onChange={(e) =>
                     updateDraft("congestionDelayThresholdInSeconds", Number(e.target.value))
                   }
-                  className="w-full"
+                  className="w-full mt-auto"
                   disabled={!isResequenceEnabled}
                 />
                 <FieldError errors={field.state.meta.errors} />
