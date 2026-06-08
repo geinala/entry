@@ -15,6 +15,7 @@ import {
   trafficIncidentTable,
   routeLegCongestionCheckTable,
   routeLegCongestionCheckIncidentTable,
+  tuningExperimentDatasetTable,
 } from "@/drizzle/schema";
 
 // User Types
@@ -214,3 +215,5 @@ export type TComparisonChartDataItem = {
   tabuBaselineTime: number;
   tabuFinalTime: number;
 };
+
+export type TTuningExperimentDataset = InferSelectModel<typeof tuningExperimentDatasetTable>;
