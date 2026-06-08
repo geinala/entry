@@ -1,0 +1,1 @@
+ALTER TABLE "solutions" ADD COLUMN "distance_in_meters" integer NOT NULL;

@@ -1,0 +1,3557 @@
+{
+  "id": "1cdf36b3-3f7d-4ccd-9e01-9d831e0a8a2d",
+  "prevId": "b9480231-8ce5-416d-b772-c9a7451fe10e",
+  "version": "7",
+  "dialect": "postgresql",
+  "tables": {
+    "public.courier_routes": {
+      "name": "courier_routes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "solution_id": {
+          "name": "solution_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "courier_id": {
+          "name": "courier_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "route_version": {
+          "name": "route_version",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 1
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "total_distance_in_meters": {
+          "name": "total_distance_in_meters",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "total_time_in_seconds": {
+          "name": "total_time_in_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "reoptimized_from_route_id": {
+          "name": "reoptimized_from_route_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "trigger_node_id": {
+          "name": "trigger_node_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "triggered_by_traffic": {
+          "name": "triggered_by_traffic",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "is_initial_route": {
+          "name": "is_initial_route",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "courier_routes_solution_id_idx": {
+          "name": "courier_routes_solution_id_idx",
+          "columns": [
+            {
+              "expression": "solution_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "courier_routes_courier_id_idx": {
+          "name": "courier_routes_courier_id_idx",
+          "columns": [
+            {
+              "expression": "courier_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "courier_routes_solution_id_solutions_id_fk": {
+          "name": "courier_routes_solution_id_solutions_id_fk",
+          "tableFrom": "courier_routes",
+          "tableTo": "solutions",
+          "columnsFrom": ["solution_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "courier_routes_courier_id_couriers_id_fk": {
+          "name": "courier_routes_courier_id_couriers_id_fk",
+          "tableFrom": "courier_routes",
+          "tableTo": "couriers",
+          "columnsFrom": ["courier_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "courier_routes_trigger_node_id_nodes_id_fk": {
+          "name": "courier_routes_trigger_node_id_nodes_id_fk",
+          "tableFrom": "courier_routes",
+          "tableTo": "nodes",
+          "columnsFrom": ["trigger_node_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "courier_routes_reoptimized_from_route_id_courier_routes_id_fk": {
+          "name": "courier_routes_reoptimized_from_route_id_courier_routes_id_fk",
+          "tableFrom": "courier_routes",
+          "tableTo": "courier_routes",
+          "columnsFrom": ["reoptimized_from_route_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.couriers": {
+      "name": "couriers",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "simulation_id": {
+          "name": "simulation_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        }
+      },
+      "indexes": {
+        "couriers_simulation_id_idx": {
+          "name": "couriers_simulation_id_idx",
+          "columns": [
+            {
+              "expression": "simulation_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "couriers_simulation_id_simulations_id_fk": {
+          "name": "couriers_simulation_id_simulations_id_fk",
+          "tableFrom": "couriers",
+          "tableTo": "simulations",
+          "columnsFrom": ["simulation_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.depots": {
+      "name": "depots",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "address": {
+          "name": "address",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "latitude": {
+          "name": "latitude",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "longitude": {
+          "name": "longitude",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "depots_name_idx": {
+          "name": "depots_name_idx",
+          "columns": [
+            {
+              "expression": "name",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "depots_coordinates_idx": {
+          "name": "depots_coordinates_idx",
+          "columns": [
+            {
+              "expression": "latitude",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "longitude",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.matrix_batches": {
+      "name": "matrix_batches",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "simulation_id": {
+          "name": "simulation_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "origin_start_index": {
+          "name": "origin_start_index",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "origin_end_index": {
+          "name": "origin_end_index",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "destination_start_index": {
+          "name": "destination_start_index",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "destination_end_index": {
+          "name": "destination_end_index",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tomtom_job_id": {
+          "name": "tomtom_job_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "matrix_batch_status_enum",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'submitted'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "completed_at": {
+          "name": "completed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "matrix_batches_simulation_id_idx": {
+          "name": "matrix_batches_simulation_id_idx",
+          "columns": [
+            {
+              "expression": "simulation_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "matrix_batches_simulation_id_simulations_id_fk": {
+          "name": "matrix_batches_simulation_id_simulations_id_fk",
+          "tableFrom": "matrix_batches",
+          "tableTo": "simulations",
+          "columnsFrom": ["simulation_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.matrix_results": {
+      "name": "matrix_results",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "simulation_id": {
+          "name": "simulation_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "origin_index": {
+          "name": "origin_index",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "destination_index": {
+          "name": "destination_index",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "length_in_meters": {
+          "name": "length_in_meters",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "travel_time_in_seconds": {
+          "name": "travel_time_in_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "traffic_delay_in_seconds": {
+          "name": "traffic_delay_in_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "matrix_batch_id": {
+          "name": "matrix_batch_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "matrix_results_simulation_id_idx": {
+          "name": "matrix_results_simulation_id_idx",
+          "columns": [
+            {
+              "expression": "simulation_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "matrix_results_matrix_batch_id_idx": {
+          "name": "matrix_results_matrix_batch_id_idx",
+          "columns": [
+            {
+              "expression": "matrix_batch_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "matrix_results_simulation_id_simulations_id_fk": {
+          "name": "matrix_results_simulation_id_simulations_id_fk",
+          "tableFrom": "matrix_results",
+          "tableTo": "simulations",
+          "columnsFrom": ["simulation_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "matrix_results_matrix_batch_id_matrix_batches_id_fk": {
+          "name": "matrix_results_matrix_batch_id_matrix_batches_id_fk",
+          "tableFrom": "matrix_results",
+          "tableTo": "matrix_batches",
+          "columnsFrom": ["matrix_batch_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.node_details": {
+      "name": "node_details",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "node_id": {
+          "name": "node_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "name": {
+          "name": "name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "address": {
+          "name": "address",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "city": {
+          "name": "city",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "weight": {
+          "name": "weight",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "node_details_node_id_idx": {
+          "name": "node_details_node_id_idx",
+          "columns": [
+            {
+              "expression": "node_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "node_details_node_id_nodes_id_fk": {
+          "name": "node_details_node_id_nodes_id_fk",
+          "tableFrom": "node_details",
+          "tableTo": "nodes",
+          "columnsFrom": ["node_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.nodes": {
+      "name": "nodes",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "simulation_id": {
+          "name": "simulation_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "courier_id": {
+          "name": "courier_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "matrix_index": {
+          "name": "matrix_index",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "latitude": {
+          "name": "latitude",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "longitude": {
+          "name": "longitude",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_completed": {
+          "name": "is_completed",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "completed_at": {
+          "name": "completed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "completed_by": {
+          "name": "completed_by",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "demand": {
+          "name": "demand",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "nodes_simulation_id_idx": {
+          "name": "nodes_simulation_id_idx",
+          "columns": [
+            {
+              "expression": "simulation_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "nodes_simulation_id_simulations_id_fk": {
+          "name": "nodes_simulation_id_simulations_id_fk",
+          "tableFrom": "nodes",
+          "tableTo": "simulations",
+          "columnsFrom": ["simulation_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "nodes_courier_id_couriers_id_fk": {
+          "name": "nodes_courier_id_couriers_id_fk",
+          "tableFrom": "nodes",
+          "tableTo": "couriers",
+          "columnsFrom": ["courier_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "nodes_completed_by_couriers_id_fk": {
+          "name": "nodes_completed_by_couriers_id_fk",
+          "tableFrom": "nodes",
+          "tableTo": "couriers",
+          "columnsFrom": ["completed_by"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "nodes_completed_by_courier_id_couriers_id_fk": {
+          "name": "nodes_completed_by_courier_id_couriers_id_fk",
+          "tableFrom": "nodes",
+          "tableTo": "couriers",
+          "columnsFrom": ["completed_by"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.optimization_iterations": {
+      "name": "optimization_iterations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "simulation_id": {
+          "name": "simulation_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "solution_id": {
+          "name": "solution_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "courier_id": {
+          "name": "courier_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "event_type": {
+          "name": "event_type",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "iteration": {
+          "name": "iteration",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "elapsed_ms": {
+          "name": "elapsed_ms",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "timestamp": {
+          "name": "timestamp",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "current_distance_in_meters": {
+          "name": "current_distance_in_meters",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "current_duration_in_seconds": {
+          "name": "current_duration_in_seconds",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "best_distance_in_meters": {
+          "name": "best_distance_in_meters",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "best_duration_in_seconds": {
+          "name": "best_duration_in_seconds",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "distance_improvement_in_meters": {
+          "name": "distance_improvement_in_meters",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "duration_improvement_in_seconds": {
+          "name": "duration_improvement_in_seconds",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "improvement_percent": {
+          "name": "improvement_percent",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "iterations_without_improvement": {
+          "name": "iterations_without_improvement",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "objective_value": {
+          "name": "objective_value",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "operator_used": {
+          "name": "operator_used",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_new_best": {
+          "name": "is_new_best",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "triggered_diversification": {
+          "name": "triggered_diversification",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "used_aspiration_criteria": {
+          "name": "used_aspiration_criteria",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": false,
+          "default": false
+        },
+        "active_routes_count": {
+          "name": "active_routes_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "unassigned_nodes_count": {
+          "name": "unassigned_nodes_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "message": {
+          "name": "message",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "intermediate_tour": {
+          "name": "intermediate_tour",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "optimization_iterations_simulation_id_idx": {
+          "name": "optimization_iterations_simulation_id_idx",
+          "columns": [
+            {
+              "expression": "simulation_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "optimization_iterations_event_type_idx": {
+          "name": "optimization_iterations_event_type_idx",
+          "columns": [
+            {
+              "expression": "event_type",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "optimization_iterations_simulation_id_simulations_id_fk": {
+          "name": "optimization_iterations_simulation_id_simulations_id_fk",
+          "tableFrom": "optimization_iterations",
+          "tableTo": "simulations",
+          "columnsFrom": ["simulation_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "optimization_iterations_solution_id_solutions_id_fk": {
+          "name": "optimization_iterations_solution_id_solutions_id_fk",
+          "tableFrom": "optimization_iterations",
+          "tableTo": "solutions",
+          "columnsFrom": ["solution_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "optimization_iterations_courier_id_couriers_id_fk": {
+          "name": "optimization_iterations_courier_id_couriers_id_fk",
+          "tableFrom": "optimization_iterations",
+          "tableTo": "couriers",
+          "columnsFrom": ["courier_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.optimization_runs": {
+      "name": "optimization_runs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "simulation_id": {
+          "name": "simulation_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "congestion_check_id": {
+          "name": "congestion_check_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "courier_id": {
+          "name": "courier_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "run_type": {
+          "name": "run_type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "algorithm": {
+          "name": "algorithm",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "trigger_type": {
+          "name": "trigger_type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "total_distance_in_meters": {
+          "name": "total_distance_in_meters",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "total_travel_time_in_seconds": {
+          "name": "total_travel_time_in_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "computation_time_in_ms": {
+          "name": "computation_time_in_ms",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "total_nodes_explored": {
+          "name": "total_nodes_explored",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "triggered_at": {
+          "name": "triggered_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "before_total_distance_in_meters": {
+          "name": "before_total_distance_in_meters",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "before_total_travel_time_in_seconds": {
+          "name": "before_total_travel_time_in_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "optimization_runs_simulation_id_idx": {
+          "name": "optimization_runs_simulation_id_idx",
+          "columns": [
+            {
+              "expression": "simulation_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "optimization_runs_congestion_check_id_idx": {
+          "name": "optimization_runs_congestion_check_id_idx",
+          "columns": [
+            {
+              "expression": "congestion_check_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "optimization_runs_simulation_id_simulations_id_fk": {
+          "name": "optimization_runs_simulation_id_simulations_id_fk",
+          "tableFrom": "optimization_runs",
+          "tableTo": "simulations",
+          "columnsFrom": ["simulation_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "optimization_runs_congestion_check_id_route_leg_congestion_checks_id_fk": {
+          "name": "optimization_runs_congestion_check_id_route_leg_congestion_checks_id_fk",
+          "tableFrom": "optimization_runs",
+          "tableTo": "route_leg_congestion_checks",
+          "columnsFrom": ["congestion_check_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "optimization_runs_courier_id_couriers_id_fk": {
+          "name": "optimization_runs_courier_id_couriers_id_fk",
+          "tableFrom": "optimization_runs",
+          "tableTo": "couriers",
+          "columnsFrom": ["courier_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.reoptimization_events": {
+      "name": "reoptimization_events",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "simulation_id": {
+          "name": "simulation_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "optimization_run_id": {
+          "name": "optimization_run_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "congestion_check_id": {
+          "name": "congestion_check_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "reopt_sequence": {
+          "name": "reopt_sequence",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "triggered_at": {
+          "name": "triggered_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "before_route_id": {
+          "name": "before_route_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "before_total_distance_in_meters": {
+          "name": "before_total_distance_in_meters",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "before_total_time_in_seconds": {
+          "name": "before_total_time_in_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "after_route_id": {
+          "name": "after_route_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "after_total_distance_in_meters": {
+          "name": "after_total_distance_in_meters",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "after_total_time_in_seconds": {
+          "name": "after_total_time_in_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "distance_saved_in_meters": {
+          "name": "distance_saved_in_meters",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "time_saved_in_seconds": {
+          "name": "time_saved_in_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "courier_position": {
+          "name": "courier_position",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "algorithm_used": {
+          "name": "algorithm_used",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "computation_time_in_ms": {
+          "name": "computation_time_in_ms",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "total_incident_delay_in_seconds": {
+          "name": "total_incident_delay_in_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "outcome": {
+          "name": "outcome",
+          "type": "reoptimization_outcome_enum",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "trigger_route_leg_id": {
+          "name": "trigger_route_leg_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "reoptimization_events_simulation_id_idx": {
+          "name": "reoptimization_events_simulation_id_idx",
+          "columns": [
+            {
+              "expression": "simulation_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "reoptimization_events_optimization_run_id_idx": {
+          "name": "reoptimization_events_optimization_run_id_idx",
+          "columns": [
+            {
+              "expression": "optimization_run_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "reoptimization_events_congestion_check_id_idx": {
+          "name": "reoptimization_events_congestion_check_id_idx",
+          "columns": [
+            {
+              "expression": "congestion_check_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "reoptimization_events_simulation_id_simulations_id_fk": {
+          "name": "reoptimization_events_simulation_id_simulations_id_fk",
+          "tableFrom": "reoptimization_events",
+          "tableTo": "simulations",
+          "columnsFrom": ["simulation_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "reoptimization_events_optimization_run_id_optimization_runs_id_fk": {
+          "name": "reoptimization_events_optimization_run_id_optimization_runs_id_fk",
+          "tableFrom": "reoptimization_events",
+          "tableTo": "optimization_runs",
+          "columnsFrom": ["optimization_run_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "reoptimization_events_congestion_check_id_route_leg_congestion_checks_id_fk": {
+          "name": "reoptimization_events_congestion_check_id_route_leg_congestion_checks_id_fk",
+          "tableFrom": "reoptimization_events",
+          "tableTo": "route_leg_congestion_checks",
+          "columnsFrom": ["congestion_check_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "reoptimization_events_before_route_id_courier_routes_id_fk": {
+          "name": "reoptimization_events_before_route_id_courier_routes_id_fk",
+          "tableFrom": "reoptimization_events",
+          "tableTo": "courier_routes",
+          "columnsFrom": ["before_route_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "reoptimization_events_after_route_id_courier_routes_id_fk": {
+          "name": "reoptimization_events_after_route_id_courier_routes_id_fk",
+          "tableFrom": "reoptimization_events",
+          "tableTo": "courier_routes",
+          "columnsFrom": ["after_route_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "reoptimization_events_trigger_route_leg_id_route_legs_id_fk": {
+          "name": "reoptimization_events_trigger_route_leg_id_route_legs_id_fk",
+          "tableFrom": "reoptimization_events",
+          "tableTo": "route_legs",
+          "columnsFrom": ["trigger_route_leg_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.route_leg_congestion_check_incidents": {
+      "name": "route_leg_congestion_check_incidents",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "congestion_check_id": {
+          "name": "congestion_check_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "traffic_incident_id": {
+          "name": "traffic_incident_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "delay_in_seconds": {
+          "name": "delay_in_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "overlap_ratio": {
+          "name": "overlap_ratio",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "rejected_reasons": {
+          "name": "rejected_reasons",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'[]'::jsonb"
+        },
+        "route_intersects": {
+          "name": "route_intersects",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "is_valid_congestion": {
+          "name": "is_valid_congestion",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "direction_matches": {
+          "name": "direction_matches",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "route_point_count": {
+          "name": "route_point_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "incident_point_count": {
+          "name": "incident_point_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cluster_group": {
+          "name": "cluster_group",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "delay_contribution_in_seconds": {
+          "name": "delay_contribution_in_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "chosen_for_reopt": {
+          "name": "chosen_for_reopt",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "delay_threshold_in_seconds": {
+          "name": "delay_threshold_in_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "overlap_threshold": {
+          "name": "overlap_threshold",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "proximity_threshold_in_meters": {
+          "name": "proximity_threshold_in_meters",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "route_leg_congestion_check_incidents_congestion_check_id_idx": {
+          "name": "route_leg_congestion_check_incidents_congestion_check_id_idx",
+          "columns": [
+            {
+              "expression": "congestion_check_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "route_leg_congestion_check_incidents_traffic_incident_id_idx": {
+          "name": "route_leg_congestion_check_incidents_traffic_incident_id_idx",
+          "columns": [
+            {
+              "expression": "traffic_incident_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "route_leg_congestion_check_incidents_valid_idx": {
+          "name": "route_leg_congestion_check_incidents_valid_idx",
+          "columns": [
+            {
+              "expression": "congestion_check_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "is_valid_congestion",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "route_leg_congestion_check_incidents_congestion_check_id_route_leg_congestion_checks_id_fk": {
+          "name": "route_leg_congestion_check_incidents_congestion_check_id_route_leg_congestion_checks_id_fk",
+          "tableFrom": "route_leg_congestion_check_incidents",
+          "tableTo": "route_leg_congestion_checks",
+          "columnsFrom": ["congestion_check_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "route_leg_congestion_check_incidents_traffic_incident_id_traffic_incidents_id_fk": {
+          "name": "route_leg_congestion_check_incidents_traffic_incident_id_traffic_incidents_id_fk",
+          "tableFrom": "route_leg_congestion_check_incidents",
+          "tableTo": "traffic_incidents",
+          "columnsFrom": ["traffic_incident_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "route_leg_congestion_check_incidents_congestion_check_id_fk": {
+          "name": "route_leg_congestion_check_incidents_congestion_check_id_fk",
+          "tableFrom": "route_leg_congestion_check_incidents",
+          "tableTo": "route_leg_congestion_checks",
+          "columnsFrom": ["congestion_check_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "route_leg_congestion_check_incidents_traffic_incident_id_fk": {
+          "name": "route_leg_congestion_check_incidents_traffic_incident_id_fk",
+          "tableFrom": "route_leg_congestion_check_incidents",
+          "tableTo": "traffic_incidents",
+          "columnsFrom": ["traffic_incident_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.route_leg_congestion_checks": {
+      "name": "route_leg_congestion_checks",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "simulation_id": {
+          "name": "simulation_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "route_leg_id": {
+          "name": "route_leg_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "courier_id": {
+          "name": "courier_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "checked_at": {
+          "name": "checked_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "bbox_min_lng": {
+          "name": "bbox_min_lng",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "bbox_min_lat": {
+          "name": "bbox_min_lat",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "bbox_max_lng": {
+          "name": "bbox_max_lng",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "bbox_max_lat": {
+          "name": "bbox_max_lat",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "incidents_found": {
+          "name": "incidents_found",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "accepted_incident_count": {
+          "name": "accepted_incident_count",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "total_delay_in_seconds": {
+          "name": "total_delay_in_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        }
+      },
+      "indexes": {
+        "route_leg_congestion_checks_simulation_id_idx": {
+          "name": "route_leg_congestion_checks_simulation_id_idx",
+          "columns": [
+            {
+              "expression": "simulation_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "route_leg_congestion_checks_route_leg_id_idx": {
+          "name": "route_leg_congestion_checks_route_leg_id_idx",
+          "columns": [
+            {
+              "expression": "route_leg_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "route_leg_congestion_checks_courier_id_idx": {
+          "name": "route_leg_congestion_checks_courier_id_idx",
+          "columns": [
+            {
+              "expression": "courier_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "route_leg_congestion_checks_simulation_id_simulations_id_fk": {
+          "name": "route_leg_congestion_checks_simulation_id_simulations_id_fk",
+          "tableFrom": "route_leg_congestion_checks",
+          "tableTo": "simulations",
+          "columnsFrom": ["simulation_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "route_leg_congestion_checks_route_leg_id_route_legs_id_fk": {
+          "name": "route_leg_congestion_checks_route_leg_id_route_legs_id_fk",
+          "tableFrom": "route_leg_congestion_checks",
+          "tableTo": "route_legs",
+          "columnsFrom": ["route_leg_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "route_leg_congestion_checks_courier_id_couriers_id_fk": {
+          "name": "route_leg_congestion_checks_courier_id_couriers_id_fk",
+          "tableFrom": "route_leg_congestion_checks",
+          "tableTo": "couriers",
+          "columnsFrom": ["courier_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.route_legs": {
+      "name": "route_legs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "courier_route_id": {
+          "name": "courier_route_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "from_node_id": {
+          "name": "from_node_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "to_node_id": {
+          "name": "to_node_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "origin_latitude": {
+          "name": "origin_latitude",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "origin_longitude": {
+          "name": "origin_longitude",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "destination_latitude": {
+          "name": "destination_latitude",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "destination_longitude": {
+          "name": "destination_longitude",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "sequence": {
+          "name": "sequence",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "encoded_polyline": {
+          "name": "encoded_polyline",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "encoded_polyline_precision": {
+          "name": "encoded_polyline_precision",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 5
+        },
+        "distance_in_meters": {
+          "name": "distance_in_meters",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "travel_time_in_seconds": {
+          "name": "travel_time_in_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "traffic_delay_in_seconds": {
+          "name": "traffic_delay_in_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "traffic_distance_in_meters": {
+          "name": "traffic_distance_in_meters",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "departure_time": {
+          "name": "departure_time",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "arrival_time": {
+          "name": "arrival_time",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "no_traffic_travel_time_in_seconds": {
+          "name": "no_traffic_travel_time_in_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "historic_traffic_travel_time_in_seconds": {
+          "name": "historic_traffic_travel_time_in_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "live_traffic_incidents_travel_time_in_seconds": {
+          "name": "live_traffic_incidents_travel_time_in_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "route_status": {
+          "name": "route_status",
+          "type": "route_status_enum",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'planned'"
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "route_legs_courier_route_id_idx": {
+          "name": "route_legs_courier_route_id_idx",
+          "columns": [
+            {
+              "expression": "courier_route_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "route_legs_origin_coordinates_idx": {
+          "name": "route_legs_origin_coordinates_idx",
+          "columns": [
+            {
+              "expression": "origin_latitude",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "origin_longitude",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "route_legs_destination_coordinates_idx": {
+          "name": "route_legs_destination_coordinates_idx",
+          "columns": [
+            {
+              "expression": "destination_latitude",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "destination_longitude",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "route_legs_courier_route_sequence_unique": {
+          "name": "route_legs_courier_route_sequence_unique",
+          "columns": [
+            {
+              "expression": "courier_route_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            },
+            {
+              "expression": "sequence",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": true,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "route_legs_sequence_idx": {
+          "name": "route_legs_sequence_idx",
+          "columns": [
+            {
+              "expression": "sequence",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "route_legs_courier_route_id_courier_routes_id_fk": {
+          "name": "route_legs_courier_route_id_courier_routes_id_fk",
+          "tableFrom": "route_legs",
+          "tableTo": "courier_routes",
+          "columnsFrom": ["courier_route_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "route_legs_from_node_id_nodes_id_fk": {
+          "name": "route_legs_from_node_id_nodes_id_fk",
+          "tableFrom": "route_legs",
+          "tableTo": "nodes",
+          "columnsFrom": ["from_node_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "route_legs_to_node_id_nodes_id_fk": {
+          "name": "route_legs_to_node_id_nodes_id_fk",
+          "tableFrom": "route_legs",
+          "tableTo": "nodes",
+          "columnsFrom": ["to_node_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.simulation_jobs": {
+      "name": "simulation_jobs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(300)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "simulation_job_status_enum",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'uploaded'"
+        },
+        "current_step": {
+          "name": "current_step",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "started_at": {
+          "name": "started_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "depot_id": {
+          "name": "depot_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "depot_location_address": {
+          "name": "depot_location_address",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "depot_location_latitude": {
+          "name": "depot_location_latitude",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "depot_location_longitude": {
+          "name": "depot_location_longitude",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "algorithm": {
+          "name": "algorithm",
+          "type": "optimization_algorithm_enum",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'google_or_tools'"
+        },
+        "computation_time_limit_in_seconds": {
+          "name": "computation_time_limit_in_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 600
+        },
+        "random_seed": {
+          "name": "random_seed",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 42
+        },
+        "enable_resequence": {
+          "name": "enable_resequence",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "enable_aspiration": {
+          "name": "enable_aspiration",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "resequence_improvement_threshold_percent": {
+          "name": "resequence_improvement_threshold_percent",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 5
+        },
+        "congestion_delay_threshold_in_seconds": {
+          "name": "congestion_delay_threshold_in_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 300
+        },
+        "early_stop_no_improvement_iterations": {
+          "name": "early_stop_no_improvement_iterations",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 100
+        },
+        "tabu_iterations": {
+          "name": "tabu_iterations",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tabu_tenure": {
+          "name": "tabu_tenure",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "max_neighbors_2opt": {
+          "name": "max_neighbors_2opt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "diversify_after_iterations": {
+          "name": "diversify_after_iterations",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "diversification_strength": {
+          "name": "diversification_strength",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "total_demand_in_kilograms": {
+          "name": "total_demand_in_kilograms",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "total_couriers": {
+          "name": "total_couriers",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "total_active_couriers": {
+          "name": "total_active_couriers",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "total_nodes": {
+          "name": "total_nodes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "file_path": {
+          "name": "file_path",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "file_validation_status": {
+          "name": "file_validation_status",
+          "type": "simulation_file_validation_status_enum",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'uploaded'"
+        },
+        "file_total_rows": {
+          "name": "file_total_rows",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "file_valid_rows": {
+          "name": "file_valid_rows",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "file_invalid_rows": {
+          "name": "file_invalid_rows",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "file_processed_rows": {
+          "name": "file_processed_rows",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "file_progress_percentage": {
+          "name": "file_progress_percentage",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "file_validation_started_at": {
+          "name": "file_validation_started_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "file_validation_completed_at": {
+          "name": "file_validation_completed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cleaning_status": {
+          "name": "cleaning_status",
+          "type": "simulation_cleaning_status_enum",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "cleaning_total_rows": {
+          "name": "cleaning_total_rows",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "cleaning_processed_rows": {
+          "name": "cleaning_processed_rows",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "cleaning_progress_percentage": {
+          "name": "cleaning_progress_percentage",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "cleaning_started_at": {
+          "name": "cleaning_started_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "cleaning_completed_at": {
+          "name": "cleaning_completed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "geocoding_status": {
+          "name": "geocoding_status",
+          "type": "geocoding_status_enum",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "geocoding_total_rows": {
+          "name": "geocoding_total_rows",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "geocoding_processed_rows": {
+          "name": "geocoding_processed_rows",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "geocoding_progress_percentage": {
+          "name": "geocoding_progress_percentage",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 0
+        },
+        "geocoding_estimated_completion_time": {
+          "name": "geocoding_estimated_completion_time",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "geocoding_started_at": {
+          "name": "geocoding_started_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "geocoded_at": {
+          "name": "geocoded_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculation_status": {
+          "name": "calculation_status",
+          "type": "calculation_status_enum",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "calculation_started_at": {
+          "name": "calculation_started_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "calculated_at": {
+          "name": "calculated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "simulation_jobs_user_id_idx": {
+          "name": "simulation_jobs_user_id_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "simulation_jobs_status_idx": {
+          "name": "simulation_jobs_status_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "simulation_jobs_depot_id_idx": {
+          "name": "simulation_jobs_depot_id_idx",
+          "columns": [
+            {
+              "expression": "depot_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "simulation_jobs_user_id_users_user_id_fk": {
+          "name": "simulation_jobs_user_id_users_user_id_fk",
+          "tableFrom": "simulation_jobs",
+          "tableTo": "users",
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["user_id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "simulation_jobs_depot_id_depots_id_fk": {
+          "name": "simulation_jobs_depot_id_depots_id_fk",
+          "tableFrom": "simulation_jobs",
+          "tableTo": "depots",
+          "columnsFrom": ["depot_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "simulation_jobs_user_id_users_id_fk": {
+          "name": "simulation_jobs_user_id_users_id_fk",
+          "tableFrom": "simulation_jobs",
+          "tableTo": "users",
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["user_id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.simulation_logs": {
+      "name": "simulation_logs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "simulation_id": {
+          "name": "simulation_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "courier_route_id": {
+          "name": "courier_route_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "courier_id": {
+          "name": "courier_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "log_level": {
+          "name": "log_level",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "event_type": {
+          "name": "event_type",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "description": {
+          "name": "description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "latitude": {
+          "name": "latitude",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "longitude": {
+          "name": "longitude",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "metadata": {
+          "name": "metadata",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "simulation_logs_simulation_id_idx": {
+          "name": "simulation_logs_simulation_id_idx",
+          "columns": [
+            {
+              "expression": "simulation_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "simulation_logs_courier_route_id_idx": {
+          "name": "simulation_logs_courier_route_id_idx",
+          "columns": [
+            {
+              "expression": "courier_route_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "simulation_logs_courier_id_idx": {
+          "name": "simulation_logs_courier_id_idx",
+          "columns": [
+            {
+              "expression": "courier_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "simulation_logs_simulation_id_simulations_id_fk": {
+          "name": "simulation_logs_simulation_id_simulations_id_fk",
+          "tableFrom": "simulation_logs",
+          "tableTo": "simulations",
+          "columnsFrom": ["simulation_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "simulation_logs_courier_route_id_courier_routes_id_fk": {
+          "name": "simulation_logs_courier_route_id_courier_routes_id_fk",
+          "tableFrom": "simulation_logs",
+          "tableTo": "courier_routes",
+          "columnsFrom": ["courier_route_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "simulation_logs_courier_id_couriers_id_fk": {
+          "name": "simulation_logs_courier_id_couriers_id_fk",
+          "tableFrom": "simulation_logs",
+          "tableTo": "couriers",
+          "columnsFrom": ["courier_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.simulations": {
+      "name": "simulations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "user_id": {
+          "name": "user_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "simulation_job_id": {
+          "name": "simulation_job_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "title": {
+          "name": "title",
+          "type": "varchar(300)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "simulation_status_enum",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'optimizing'"
+        },
+        "started_at": {
+          "name": "started_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "completed_at": {
+          "name": "completed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "algorithm": {
+          "name": "algorithm",
+          "type": "optimization_algorithm_enum",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "computation_time_limit_in_seconds": {
+          "name": "computation_time_limit_in_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 600
+        },
+        "random_seed": {
+          "name": "random_seed",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 42
+        },
+        "enable_resequence": {
+          "name": "enable_resequence",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "enable_aspiration": {
+          "name": "enable_aspiration",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "resequence_improvement_threshold_percent": {
+          "name": "resequence_improvement_threshold_percent",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 5
+        },
+        "congestion_delay_threshold_in_seconds": {
+          "name": "congestion_delay_threshold_in_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 300
+        },
+        "early_stop_no_improvement_iterations": {
+          "name": "early_stop_no_improvement_iterations",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "default": 100
+        },
+        "tabu_iterations": {
+          "name": "tabu_iterations",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tabu_tenure": {
+          "name": "tabu_tenure",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "max_neighbors_2opt": {
+          "name": "max_neighbors_2opt",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "diversify_after_iterations": {
+          "name": "diversify_after_iterations",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "diversification_strength": {
+          "name": "diversification_strength",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "depot_id": {
+          "name": "depot_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "depot_location_address": {
+          "name": "depot_location_address",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "depot_location_latitude": {
+          "name": "depot_location_latitude",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "depot_location_longitude": {
+          "name": "depot_location_longitude",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "total_demand_in_kilograms": {
+          "name": "total_demand_in_kilograms",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "total_couriers": {
+          "name": "total_couriers",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "total_active_couriers": {
+          "name": "total_active_couriers",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "total_completed_nodes": {
+          "name": "total_completed_nodes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "total_nodes": {
+          "name": "total_nodes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "initial_total_distance_in_meters": {
+          "name": "initial_total_distance_in_meters",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "initial_total_duration_in_seconds": {
+          "name": "initial_total_duration_in_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "final_total_distance_in_meters": {
+          "name": "final_total_distance_in_meters",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "final_total_duration_in_seconds": {
+          "name": "final_total_duration_in_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "distance_improvement_in_meters": {
+          "name": "distance_improvement_in_meters",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "duration_improvement_in_seconds": {
+          "name": "duration_improvement_in_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "total_reoptimized_routes": {
+          "name": "total_reoptimized_routes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "total_incidents_affecting_routes": {
+          "name": "total_incidents_affecting_routes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 0
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "simulations_user_id_idx": {
+          "name": "simulations_user_id_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "simulations_depot_id_idx": {
+          "name": "simulations_depot_id_idx",
+          "columns": [
+            {
+              "expression": "depot_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "simulations_status_idx": {
+          "name": "simulations_status_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "simulations_user_id_users_user_id_fk": {
+          "name": "simulations_user_id_users_user_id_fk",
+          "tableFrom": "simulations",
+          "tableTo": "users",
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["user_id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "simulations_simulation_job_id_simulation_jobs_id_fk": {
+          "name": "simulations_simulation_job_id_simulation_jobs_id_fk",
+          "tableFrom": "simulations",
+          "tableTo": "simulation_jobs",
+          "columnsFrom": ["simulation_job_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "simulations_depot_id_depots_id_fk": {
+          "name": "simulations_depot_id_depots_id_fk",
+          "tableFrom": "simulations",
+          "tableTo": "depots",
+          "columnsFrom": ["depot_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "simulations_user_id_users_id_fk": {
+          "name": "simulations_user_id_users_id_fk",
+          "tableFrom": "simulations",
+          "tableTo": "users",
+          "columnsFrom": ["user_id"],
+          "columnsTo": ["user_id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.simulation_uploaded_rows": {
+      "name": "simulation_uploaded_rows",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "simulation_job_id": {
+          "name": "simulation_job_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nosi": {
+          "name": "nosi",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "courier": {
+          "name": "courier",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "customer_name": {
+          "name": "customer_name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "address": {
+          "name": "address",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "normalized_address": {
+          "name": "normalized_address",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "suggested_address": {
+          "name": "suggested_address",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "final_address": {
+          "name": "final_address",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "city": {
+          "name": "city",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "weight": {
+          "name": "weight",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "latitude": {
+          "name": "latitude",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "longitude": {
+          "name": "longitude",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "geocode_score": {
+          "name": "geocode_score",
+          "type": "double precision",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "geocode_provider": {
+          "name": "geocode_provider",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "geocode_response": {
+          "name": "geocode_response",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "resolution_status": {
+          "name": "resolution_status",
+          "type": "resolution_status",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'pending'"
+        },
+        "resolution_source": {
+          "name": "resolution_source",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "is_ignored": {
+          "name": "is_ignored",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": false
+        },
+        "start_datetime": {
+          "name": "start_datetime",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "end_datetime": {
+          "name": "end_datetime",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "deleted_at": {
+          "name": "deleted_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "error_details": {
+          "name": "error_details",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "simulation_uploaded_rows_simulation_job_id_idx": {
+          "name": "simulation_uploaded_rows_simulation_job_id_idx",
+          "columns": [
+            {
+              "expression": "simulation_job_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "simulation_uploaded_rows_nosi_idx": {
+          "name": "simulation_uploaded_rows_nosi_idx",
+          "columns": [
+            {
+              "expression": "nosi",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "simulation_uploaded_rows_simulation_job_id_simulation_jobs_id_fk": {
+          "name": "simulation_uploaded_rows_simulation_job_id_simulation_jobs_id_fk",
+          "tableFrom": "simulation_uploaded_rows",
+          "tableTo": "simulation_jobs",
+          "columnsFrom": ["simulation_job_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.solutions": {
+      "name": "solutions",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "simulation_id": {
+          "name": "simulation_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "courier_id": {
+          "name": "courier_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "routes": {
+          "name": "routes",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "demand_in_kilograms": {
+          "name": "demand_in_kilograms",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "time_in_seconds": {
+          "name": "time_in_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "distance_in_meters": {
+          "name": "distance_in_meters",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "indexes": {
+        "solutions_simulation_id_idx": {
+          "name": "solutions_simulation_id_idx",
+          "columns": [
+            {
+              "expression": "simulation_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "solutions_courier_id_idx": {
+          "name": "solutions_courier_id_idx",
+          "columns": [
+            {
+              "expression": "courier_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "solutions_simulation_id_simulations_id_fk": {
+          "name": "solutions_simulation_id_simulations_id_fk",
+          "tableFrom": "solutions",
+          "tableTo": "simulations",
+          "columnsFrom": ["simulation_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "solutions_courier_id_couriers_id_fk": {
+          "name": "solutions_courier_id_couriers_id_fk",
+          "tableFrom": "solutions",
+          "tableTo": "couriers",
+          "columnsFrom": ["courier_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.traffic_incidents": {
+      "name": "traffic_incidents",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "tomtom_incident_id": {
+          "name": "tomtom_incident_id",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "simulation_id": {
+          "name": "simulation_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "detected_at": {
+          "name": "detected_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "category": {
+          "name": "category",
+          "type": "smallint",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "delay_in_seconds": {
+          "name": "delay_in_seconds",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "geometry": {
+          "name": "geometry",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "start_time": {
+          "name": "start_time",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "end_time": {
+          "name": "end_time",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "length_in_meters": {
+          "name": "length_in_meters",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "from_address": {
+          "name": "from_address",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "to_address": {
+          "name": "to_address",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "incident_description": {
+          "name": "incident_description",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "traffic_incidents_simulation_id_simulations_id_fk": {
+          "name": "traffic_incidents_simulation_id_simulations_id_fk",
+          "tableFrom": "traffic_incidents",
+          "tableTo": "simulations",
+          "columnsFrom": ["simulation_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "traffic_incidents_tomtom_incident_id_unique": {
+          "name": "traffic_incidents_tomtom_incident_id_unique",
+          "nullsNotDistinct": false,
+          "columns": ["tomtom_incident_id"]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.users": {
+      "name": "users",
+      "schema": "",
+      "columns": {
+        "user_id": {
+          "name": "user_id",
+          "type": "varchar",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "email": {
+          "name": "email",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "full_name": {
+          "name": "full_name",
+          "type": "varchar",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "users_user_id_idx": {
+          "name": "users_user_id_idx",
+          "columns": [
+            {
+              "expression": "user_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {
+        "users_user_id_unique": {
+          "name": "users_user_id_unique",
+          "nullsNotDistinct": false,
+          "columns": ["user_id"]
+        },
+        "users_email_unique": {
+          "name": "users_email_unique",
+          "nullsNotDistinct": false,
+          "columns": ["email"]
+        }
+      },
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    }
+  },
+  "enums": {
+    "public.calculation_status_enum": {
+      "name": "calculation_status_enum",
+      "schema": "public",
+      "values": ["pending", "processing", "completed", "failed"]
+    },
+    "public.geocoding_status_enum": {
+      "name": "geocoding_status_enum",
+      "schema": "public",
+      "values": ["pending", "in_progress", "needed_review", "completed", "failed"]
+    },
+    "public.matrix_batch_status_enum": {
+      "name": "matrix_batch_status_enum",
+      "schema": "public",
+      "values": ["submitted", "validated", "completed", "failed"]
+    },
+    "public.optimization_algorithm_enum": {
+      "name": "optimization_algorithm_enum",
+      "schema": "public",
+      "values": ["manual_without_optimization", "manual_with_optimization", "google_or_tools"]
+    },
+    "public.reoptimization_outcome_enum": {
+      "name": "reoptimization_outcome_enum",
+      "schema": "public",
+      "values": ["resequencing_applied", "duration_updated", "no_improvement"]
+    },
+    "public.resolution_status": {
+      "name": "resolution_status",
+      "schema": "public",
+      "values": ["pending", "auto_solved", "needed_review", "failed", "manual_override"]
+    },
+    "public.route_status_enum": {
+      "name": "route_status_enum",
+      "schema": "public",
+      "values": [
+        "baseline_planned",
+        "baseline_running",
+        "baseline_completed",
+        "planned",
+        "running",
+        "completed",
+        "cancelled"
+      ]
+    },
+    "public.simulation_cleaning_status_enum": {
+      "name": "simulation_cleaning_status_enum",
+      "schema": "public",
+      "values": ["pending", "in_progress", "completed", "needed_review", "failed"]
+    },
+    "public.simulation_file_validation_status_enum": {
+      "name": "simulation_file_validation_status_enum",
+      "schema": "public",
+      "values": ["uploaded", "validating", "validated", "needed_review", "completed", "failed"]
+    },
+    "public.simulation_job_status_enum": {
+      "name": "simulation_job_status_enum",
+      "schema": "public",
+      "values": ["uploaded", "processing", "completed", "failed"]
+    },
+    "public.simulation_status_enum": {
+      "name": "simulation_status_enum",
+      "schema": "public",
+      "values": ["pending", "stopped", "optimizing", "running", "completed", "failed"]
+    }
+  },
+  "schemas": {},
+  "sequences": {},
+  "roles": {},
+  "policies": {},
+  "views": {},
+  "_meta": {
+    "columns": {},
+    "schemas": {},
+    "tables": {}
+  }
+}

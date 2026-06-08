@@ -466,6 +466,7 @@ export const solutionTable = pgTable(
     routes: jsonb("routes").notNull(), // Array of node indices representing the route
     demandInKilograms: real("demand_in_kilograms").notNull(), // Total demand served by this vehicle
     timeInSeconds: integer("time_in_seconds").notNull(), // Total time for this route
+    distanceInMeters: integer("distance_in_meters").notNull(), // Total distance for this route
   },
   (table) => [
     foreignKey({
