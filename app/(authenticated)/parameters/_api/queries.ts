@@ -28,7 +28,7 @@ export const GET_PARAMETER_QUERIES = {
 
         return response.data.data;
       },
-      enabled: !!id, // Only run this query if id is truthy (not null or undefined)
+      enabled: !!id,
     });
   },
 };

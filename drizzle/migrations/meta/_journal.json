@@ -15,6 +15,13 @@
       "when": 1780918520240,
       "tag": "0001_perfect_hemingway",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1780946622111,
+      "tag": "0002_fine_cobalt_man",
+      "breakpoints": true
     }
   ]
 }

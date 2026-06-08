@@ -37,11 +37,12 @@ export const getParameterByIdRepository = async (id: string) => {
   return parameter;
 };
 
-export const createParameterRepository = async (filePath: string) => {
+export const createParameterRepository = async (data: { filePath: string; depotId: number }) => {
   const [parameter] = await db
     .insert(tuningExperimentDatasetTable)
     .values({
-      filePath,
+      filePath: data.filePath,
+      depotId: data.depotId,
     })
     .returning();
 

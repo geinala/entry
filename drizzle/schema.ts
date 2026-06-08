@@ -920,11 +920,22 @@ export const tuningExperimentDatasetTable = pgTable(
   "tuning_experiment_datasets",
   {
     id: uuid("id").defaultRandom().primaryKey(),
+    depotId: integer("depot_id")
+      .references(() => depotTable.id)
+      .notNull(),
     filePath: varchar("file_path").notNull(),
     status: tuningExperimentDatasetStatusEnum("status").notNull().default("uploaded"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
   },
-  (table) => [index("tuning_experiment_datasets_status_idx").on(table.status)],
+  (table) => [
+    foreignKey({
+      columns: [table.depotId],
+      foreignColumns: [depotTable.id],
+      name: "tuning_experiment_datasets_depot_id_depots_id_fk",
+    }),
+    index("tuning_experiment_datasets_status_idx").on(table.status),
+    index("tuning_experiment_datasets_depot_id_idx").on(table.depotId),
+  ],
 );
 
 export const tuningExperiments = pgTable(

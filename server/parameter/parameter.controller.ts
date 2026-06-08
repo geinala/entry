@@ -22,6 +22,7 @@ export const createParameterController = async (request: NextRequest) => {
 
     const payload: TCreateParameterSchema = {
       dataset: formData.get("dataset") as File,
+      depotId: Number(formData.get("depotId")),
     };
 
     const { data } = validateSchema<TCreateParameterSchema>(CreateParameterSchema, payload);

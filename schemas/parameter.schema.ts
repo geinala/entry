@@ -13,6 +13,10 @@ export type TIndexParameterQueryParams = z.infer<typeof IndexParameterQueryParam
 
 export const CreateParameterSchema = z.object({
   dataset: csvFileSchema,
+  depotId: z.coerce
+    .number({ required_error: "Depot ID is required", invalid_type_error: "Invalid depot ID" })
+    .int()
+    .positive(),
 });
 
 export type TCreateParameterSchema = z.infer<typeof CreateParameterSchema>;

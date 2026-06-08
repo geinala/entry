@@ -7,6 +7,15 @@ import { Button } from "@/app/_components/ui/button";
 import { TApiSuccessResponseWithData } from "@/types/response";
 import { CreateParameterSchema, TCreateParameterSchema } from "@/schemas/parameter.schema";
 import { TTuningExperimentDataset } from "@/types/database";
+import { useGetDepotOptionsQuery } from "../../depots/_hooks/use-queries";
+import { useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/app/_components/ui/select";
 
 interface ICreateParameterFormProps {
   defaultValues?: TCreateParameterSchema;
@@ -21,6 +30,9 @@ export const CreateParameterForm = ({
   onSubmit,
   isLoading,
 }: ICreateParameterFormProps) => {
+  const { data: depotOptions = [], isLoading: isDepotOptionsLoading } = useGetDepotOptionsQuery();
+  const [selectedDepotId, setSelectedDepotId] = useState<number | undefined>();
+
   const form = useForm({
     defaultValues,
     validators: {
@@ -39,6 +51,41 @@ export const CreateParameterForm = ({
       }}
       className="space-y-3 max-w-3xl mx-auto"
     >
+      <form.Field name="depotId">
+        {(field) => {
+          const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
+
+          return (
+            <Field data-invalid={isInvalid}>
+              <FieldLabel htmlFor="depotId">Depot</FieldLabel>
+              <Select
+                value={selectedDepotId?.toString() || ""}
+                onValueChange={(value) => {
+                  const depotId = Number(value);
+                  setSelectedDepotId(depotId);
+                  field.setValue(depotId);
+                }}
+                aria-invalid={isInvalid}
+                disabled={isDepotOptionsLoading || depotOptions.length === 0}
+              >
+                <SelectTrigger id="depotId" className="w-full">
+                  <SelectValue placeholder="Select a depot" />
+                </SelectTrigger>
+                <SelectContent position="popper">
+                  {depotOptions.map((depot) => (
+                    <SelectItem key={depot.id} value={depot.id.toString()}>
+                      {depot.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+
+              {isInvalid && <FieldError errors={field.state.meta.errors} />}
+            </Field>
+          );
+        }}
+      </form.Field>
+
       <form.Field name="dataset">
         {(field) => {
           const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;

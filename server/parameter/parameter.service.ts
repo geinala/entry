@@ -50,7 +50,10 @@ export const createParameterService = async (
 
   const minioUploadedFile = await uploadFileService(data.dataset, `dataset/raw`);
 
-  const result = await createParameterRepository(minioUploadedFile.filePath);
+  const result = await createParameterRepository({
+    filePath: minioUploadedFile.filePath,
+    depotId: data.depotId,
+  });
 
   try {
     await server.post(`/tuning-experiments/${result.id}`);
