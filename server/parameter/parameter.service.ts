@@ -53,7 +53,7 @@ export const createParameterService = async (
   const result = await createParameterRepository(minioUploadedFile.filePath);
 
   try {
-    server.post(`/tuning-experiments/${result.id}`);
+    await server.post(`/tuning-experiments/${result.id}`);
   } catch {
     await updateTuningExperminetDatasetStatusRepository({
       status: "failed",

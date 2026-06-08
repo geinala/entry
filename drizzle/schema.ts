@@ -997,3 +997,29 @@ export const tuningExperimentUploadedRows = pgTable(
     index("tuning_experiment_uploaded_rows_nosi_idx").on(table.nosi),
   ],
 );
+
+export const tuningExperimentRunTable = pgTable(
+  "tuning_experiment_runs",
+  {
+    id: serial().primaryKey(),
+    tuningExperimentId: integer("tuning_experiment_id")
+      .references(() => tuningExperiments.id)
+      .notNull(),
+    itMax: integer("it_max").notNull(),
+    tabTenure: integer("tab_tenure").notNull(),
+    itCons: integer("it_cons").notNull(),
+    itDiv: integer("it_div").notNull(),
+    fitnessScore: real("fitness_score").notNull(),
+    executionTimeMs: real("execution_time_ms").notNull(),
+    convergenceIteration: integer("convergence_iteration"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.tuningExperimentId],
+      foreignColumns: [tuningExperiments.id],
+      name: "tuning_experiment_runs_tuning_experiment_id_tuning_experiments_id_fk",
+    }),
+    index("tuning_experiment_runs_tuning_experiment_id_idx").on(table.tuningExperimentId),
+  ],
+);

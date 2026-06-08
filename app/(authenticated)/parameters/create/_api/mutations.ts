@@ -11,7 +11,11 @@ export const CREATE_PARAMETER_MUTATION = {
     return mutationOptions({
       mutationFn: async (data: TCreateParameterSchema) => {
         const response: AxiosResponse<TApiSuccessResponseWithData<TTuningExperimentDataset>> =
-          await api.post("/parameters", data);
+          await api.post("/parameters", data, {
+            headers: {
+              "Content-Type": "multipart/form-data",
+            },
+          });
 
         return response.data;
       },

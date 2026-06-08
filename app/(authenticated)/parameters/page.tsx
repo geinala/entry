@@ -19,6 +19,8 @@ import { useEffect } from "react";
 import { useBreadcrumb } from "@/app/_contexts/breadcrumb.context";
 import { IndexQueryParams } from "@/types/query-params";
 import { useGetParametersWithPaginationQuery } from "./_hooks/use-queries";
+import { Badge } from "@/app/_components/ui/badge";
+import { toTitleCase } from "@/lib/utils";
 
 export default function ParametersPage() {
   const { setBreadcrumbs } = useBreadcrumb();
@@ -45,6 +47,23 @@ export default function ParametersPage() {
     {
       accessorKey: "createdAt",
       header: "Created At",
+    },
+    {
+      accessorKey: "status",
+      header: "Status",
+      cell: ({ row }) => {
+        const status = row.original.status;
+
+        return (
+          <Badge
+            variant={
+              status === "failed" ? "destructive" : status === "completed" ? "success" : "warning"
+            }
+          >
+            {toTitleCase(status)}
+          </Badge>
+        );
+      },
     },
     {
       id: "action",
