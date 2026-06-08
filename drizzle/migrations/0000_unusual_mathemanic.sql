@@ -91,6 +91,8 @@ CREATE TABLE "nodes" (
 CREATE TABLE "optimization_iterations" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"simulation_id" uuid,
+	"solution_id" integer,
+	"courier_id" integer,
 	"event_type" varchar(100),
 	"iteration" integer NOT NULL,
 	"elapsed_ms" double precision,
@@ -242,7 +244,6 @@ CREATE TABLE "simulation_jobs" (
 	"tabu_iterations" integer,
 	"tabu_tenure" integer,
 	"max_neighbors_2opt" integer,
-	"max_neighbors_oropt" integer,
 	"diversify_after_iterations" integer,
 	"diversification_strength" integer,
 	"total_demand_in_kilograms" real DEFAULT 0 NOT NULL,
@@ -310,7 +311,6 @@ CREATE TABLE "simulations" (
 	"tabu_iterations" integer,
 	"tabu_tenure" integer,
 	"max_neighbors_2opt" integer,
-	"max_neighbors_oropt" integer,
 	"diversify_after_iterations" integer,
 	"diversification_strength" integer,
 	"depot_id" integer NOT NULL,
@@ -367,7 +367,8 @@ CREATE TABLE "solutions" (
 	"courier_id" integer,
 	"routes" jsonb NOT NULL,
 	"demand_in_kilograms" real NOT NULL,
-	"time_in_seconds" integer NOT NULL
+	"time_in_seconds" integer NOT NULL,
+	"distance_in_meters" integer NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "traffic_incidents" (
@@ -386,6 +387,55 @@ CREATE TABLE "traffic_incidents" (
 	"incident_description" text,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
 	CONSTRAINT "traffic_incidents_tomtom_incident_id_unique" UNIQUE("tomtom_incident_id")
+);
+--> statement-breakpoint
+CREATE TABLE "tuning_experiment_datasets" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"file_path" varchar NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "tuning_experiment_uploaded_rows" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"tuning_experiment_dataset_id" uuid NOT NULL,
+	"nosi" varchar,
+	"courier" varchar,
+	"customer_name" varchar,
+	"address" varchar,
+	"normalized_address" varchar,
+	"suggested_address" varchar,
+	"final_address" varchar,
+	"city" varchar,
+	"weight" real,
+	"latitude" double precision,
+	"longitude" double precision,
+	"geocode_score" double precision,
+	"geocode_provider" varchar,
+	"geocode_response" jsonb,
+	"start_datetime" timestamp with time zone,
+	"end_datetime" timestamp with time zone,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "tuning_experiments" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"dataset_id" uuid NOT NULL,
+	"status" varchar(50) DEFAULT 'running' NOT NULL,
+	"base_n_c" integer NOT NULL,
+	"it_max" integer NOT NULL,
+	"tab_tenure" integer NOT NULL,
+	"it_cons" integer NOT NULL,
+	"it_div" integer NOT NULL,
+	"random_seed" integer DEFAULT 42 NOT NULL,
+	"early_stop_no_improvement_iterations" integer,
+	"initial_fitness_score" real,
+	"best_fitness_score" real,
+	"execution_time_ms" real,
+	"convergence_iteration" integer,
+	"improvement_percentage" real,
+	"best_route_payload" jsonb,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"completed_at" timestamp with time zone
 );
 --> statement-breakpoint
 CREATE TABLE "users" (
@@ -411,6 +461,8 @@ ALTER TABLE "nodes" ADD CONSTRAINT "nodes_courier_id_couriers_id_fk" FOREIGN KEY
 ALTER TABLE "nodes" ADD CONSTRAINT "nodes_completed_by_couriers_id_fk" FOREIGN KEY ("completed_by") REFERENCES "public"."couriers"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "nodes" ADD CONSTRAINT "nodes_completed_by_courier_id_couriers_id_fk" FOREIGN KEY ("completed_by") REFERENCES "public"."couriers"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "optimization_iterations" ADD CONSTRAINT "optimization_iterations_simulation_id_simulations_id_fk" FOREIGN KEY ("simulation_id") REFERENCES "public"."simulations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "optimization_iterations" ADD CONSTRAINT "optimization_iterations_solution_id_solutions_id_fk" FOREIGN KEY ("solution_id") REFERENCES "public"."solutions"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "optimization_iterations" ADD CONSTRAINT "optimization_iterations_courier_id_couriers_id_fk" FOREIGN KEY ("courier_id") REFERENCES "public"."couriers"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "optimization_runs" ADD CONSTRAINT "optimization_runs_simulation_id_simulations_id_fk" FOREIGN KEY ("simulation_id") REFERENCES "public"."simulations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "optimization_runs" ADD CONSTRAINT "optimization_runs_congestion_check_id_route_leg_congestion_checks_id_fk" FOREIGN KEY ("congestion_check_id") REFERENCES "public"."route_leg_congestion_checks"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "optimization_runs" ADD CONSTRAINT "optimization_runs_courier_id_couriers_id_fk" FOREIGN KEY ("courier_id") REFERENCES "public"."couriers"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -444,6 +496,8 @@ ALTER TABLE "simulation_uploaded_rows" ADD CONSTRAINT "simulation_uploaded_rows_
 ALTER TABLE "solutions" ADD CONSTRAINT "solutions_simulation_id_simulations_id_fk" FOREIGN KEY ("simulation_id") REFERENCES "public"."simulations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "solutions" ADD CONSTRAINT "solutions_courier_id_couriers_id_fk" FOREIGN KEY ("courier_id") REFERENCES "public"."couriers"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "traffic_incidents" ADD CONSTRAINT "traffic_incidents_simulation_id_simulations_id_fk" FOREIGN KEY ("simulation_id") REFERENCES "public"."simulations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "tuning_experiment_uploaded_rows" ADD CONSTRAINT "tuning_experiment_uploaded_rows_tuning_experiment_dataset_id_tuning_experiment_datasets_id_fk" FOREIGN KEY ("tuning_experiment_dataset_id") REFERENCES "public"."tuning_experiment_datasets"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "tuning_experiments" ADD CONSTRAINT "tuning_experiments_dataset_id_tuning_experiment_datasets_id_fk" FOREIGN KEY ("dataset_id") REFERENCES "public"."tuning_experiment_datasets"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "courier_routes_solution_id_idx" ON "courier_routes" USING btree ("solution_id");--> statement-breakpoint
 CREATE INDEX "courier_routes_courier_id_idx" ON "courier_routes" USING btree ("courier_id");--> statement-breakpoint
 CREATE INDEX "couriers_simulation_id_idx" ON "couriers" USING btree ("simulation_id");--> statement-breakpoint
@@ -485,4 +539,8 @@ CREATE INDEX "simulation_uploaded_rows_simulation_job_id_idx" ON "simulation_upl
 CREATE INDEX "simulation_uploaded_rows_nosi_idx" ON "simulation_uploaded_rows" USING btree ("nosi");--> statement-breakpoint
 CREATE INDEX "solutions_simulation_id_idx" ON "solutions" USING btree ("simulation_id");--> statement-breakpoint
 CREATE INDEX "solutions_courier_id_idx" ON "solutions" USING btree ("courier_id");--> statement-breakpoint
+CREATE INDEX "tuning_experiment_uploaded_rows_tuning_experiment_dataset_id_idx" ON "tuning_experiment_uploaded_rows" USING btree ("tuning_experiment_dataset_id");--> statement-breakpoint
+CREATE INDEX "tuning_experiment_uploaded_rows_nosi_idx" ON "tuning_experiment_uploaded_rows" USING btree ("nosi");--> statement-breakpoint
+CREATE INDEX "tuning_experiments_dataset_id_idx" ON "tuning_experiments" USING btree ("dataset_id");--> statement-breakpoint
+CREATE INDEX "tuning_experiments_status_idx" ON "tuning_experiments" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "users_user_id_idx" ON "users" USING btree ("user_id");

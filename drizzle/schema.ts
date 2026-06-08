@@ -903,3 +903,97 @@ export const optimizationIterationTable = pgTable(
     index("optimization_iterations_event_type_idx").on(table.eventType),
   ],
 );
+
+export const tuningExperimentDatasetStatusEnum = pgEnum("tuning_experiment_dataset_status_enum", [
+  "uploaded",
+  "validating",
+  "validated",
+  "cleaning",
+  "cleaned",
+  "geocoding",
+  "geocoded",
+  "completed",
+  "failed",
+]);
+
+export const tuningExperimentDatasetTable = pgTable(
+  "tuning_experiment_datasets",
+  {
+    id: uuid("id").defaultRandom().primaryKey(),
+    filePath: varchar("file_path").notNull(),
+    status: tuningExperimentDatasetStatusEnum("status").notNull().default("uploaded"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [index("tuning_experiment_datasets_status_idx").on(table.status)],
+);
+
+export const tuningExperiments = pgTable(
+  "tuning_experiments",
+  {
+    id: serial().primaryKey(),
+    datasetId: uuid("dataset_id")
+      .references(() => tuningExperimentDatasetTable.id)
+      .notNull(),
+    baseNc: integer("base_n_c").notNull(),
+    itMax: integer("it_max").notNull(),
+    tabTenure: integer("tab_tenure").notNull(),
+    itCons: integer("it_cons").notNull(),
+    itDiv: integer("it_div").notNull(),
+    randomSeed: integer("random_seed").default(42).notNull(),
+    earlyStopNoImprovementIterations: integer("early_stop_no_improvement_iterations"),
+    initialFitnessScore: real("initial_fitness_score"),
+    bestFitnessScore: real("best_fitness_score"),
+    executionTimeMs: real("execution_time_ms"),
+    convergenceIteration: integer("convergence_iteration"),
+    improvementPercentage: real("improvement_percentage"),
+    bestRoutePayload: jsonb("best_route_payload"),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+    completedAt: timestamp("completed_at", { withTimezone: true }),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.datasetId],
+      foreignColumns: [tuningExperimentDatasetTable.id],
+      name: "tuning_experiments_dataset_id_tuning_experiment_datasets_id_fk",
+    }),
+    index("tuning_experiments_dataset_id_idx").on(table.datasetId),
+  ],
+);
+
+export const tuningExperimentUploadedRows = pgTable(
+  "tuning_experiment_uploaded_rows",
+  {
+    id: serial().primaryKey(),
+    tuningExperimentDatasetId: uuid("tuning_experiment_dataset_id")
+      .references(() => tuningExperimentDatasetTable.id)
+      .notNull(),
+    nosi: varchar("nosi"),
+    courier: varchar("courier"),
+    customerName: varchar("customer_name"),
+    address: varchar("address"),
+    normalizedAddress: varchar("normalized_address"),
+    suggestedAddress: varchar("suggested_address"),
+    finalAddress: varchar("final_address"),
+    city: varchar("city"),
+    weight: real("weight"),
+    latitude: doublePrecision("latitude"),
+    longitude: doublePrecision("longitude"),
+    geocodeScore: doublePrecision("geocode_score"),
+    geocodeProvider: varchar("geocode_provider"), // TomTom API
+    geocodeResponse: jsonb("geocode_response"),
+    startDatetime: timestamp("start_datetime", { withTimezone: true }),
+    endDatetime: timestamp("end_datetime", { withTimezone: true }),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.tuningExperimentDatasetId],
+      foreignColumns: [tuningExperimentDatasetTable.id],
+      name: "tuning_experiment_uploaded_rows_tuning_experiment_dataset_id_tuning_experiment_datasets_id_fk",
+    }),
+    index("tuning_experiment_uploaded_rows_tuning_experiment_dataset_id_idx").on(
+      table.tuningExperimentDatasetId,
+    ),
+    index("tuning_experiment_uploaded_rows_nosi_idx").on(table.nosi),
+  ],
+);

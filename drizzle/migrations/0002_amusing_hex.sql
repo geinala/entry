@@ -1,4 +1,0 @@
-ALTER TABLE "optimization_iterations" ADD COLUMN "solution_id" integer;--> statement-breakpoint
-ALTER TABLE "optimization_iterations" ADD COLUMN "courier_id" integer;--> statement-breakpoint
-ALTER TABLE "optimization_iterations" ADD CONSTRAINT "optimization_iterations_solution_id_solutions_id_fk" FOREIGN KEY ("solution_id") REFERENCES "public"."solutions"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "optimization_iterations" ADD CONSTRAINT "optimization_iterations_courier_id_couriers_id_fk" FOREIGN KEY ("courier_id") REFERENCES "public"."couriers"("id") ON DELETE no action ON UPDATE no action;
