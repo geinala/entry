@@ -41,7 +41,9 @@ export const getLatestRouteBySimulationIdRepository = async (
     ) vr ON s.id = vr.solution_id
     JOIN ${courierTable} v ON vr.courier_id = v.id
     JOIN ${routeLegTable} rl ON vr.id = rl.courier_route_id
-    WHERE s.simulation_id = ${simulationId} AND vr.is_active = true
+    WHERE s.simulation_id = ${simulationId}
+      AND rl.route_status IN ('completed', 'running', 'planned')
+    ORDER BY rl.courier_route_id, rl.sequence
   `);
 
   return result.rows as TLatestRouteBySimulationRow[];

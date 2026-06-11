@@ -3,7 +3,13 @@
 import { useState } from "react";
 
 import { Button } from "@/app/_components/ui/button";
-import { Field, FieldError, FieldLabel } from "@/app/_components/ui/field";
+import {
+  Field,
+  FieldDescription,
+  FieldError,
+  FieldGroup,
+  FieldLabel,
+} from "@/app/_components/ui/field";
 import { Input } from "@/app/_components/ui/input";
 import DateTimeInput from "@/app/_components/ui/datetime-input";
 import {
@@ -18,16 +24,14 @@ import DownloadTemplateButton from "@/app/(authenticated)/_components/download-t
 import { useGetDepotOptionsQuery } from "@/app/(authenticated)/depots/_hooks/use-queries";
 import EmptyDepotDialog from "./empty-depot.dialog";
 import { useCreateSimulationForm } from "../_hooks/use-form";
-import { Dialog } from "@/app/_components/ui/dialog";
-import { AdvanceConfigFormDialog } from "./advance-config-form.dialog";
-import { Settings } from "lucide-react";
+import { optimizationAlgorithmEnum } from "@/drizzle/schema";
+import { snakeToText, toTitleCase } from "@/lib/utils";
 
 const CreateSimulationForm = () => {
   const { mutateAsync } = useCreateSimulationJobMutations();
   const { data: depotOptions = [], isLoading: isDepotOptionsLoading } = useGetDepotOptionsQuery();
   const [selectedDepotId, setSelectedDepotId] = useState<string | undefined>();
   const shouldPromptCreateDepot = !isDepotOptionsLoading && depotOptions.length === 0;
-  const [isAdvanceConfigDialogOpen, setIsAdvanceConfigDialogOpen] = useState(false);
 
   const form = useCreateSimulationForm({
     onSubmit: async (values) => {
@@ -50,23 +54,20 @@ const CreateSimulationForm = () => {
     <>
       <EmptyDepotDialog open={shouldPromptCreateDepot} />
 
-      <Dialog open={isAdvanceConfigDialogOpen} onOpenChange={setIsAdvanceConfigDialogOpen}>
-        <AdvanceConfigFormDialog form={form} onSave={() => setIsAdvanceConfigDialogOpen(false)} />
-        <form
-          id="create-simulation-job-form"
-          onSubmit={(e) => {
-            e.preventDefault();
-            form.handleSubmit(e);
-          }}
-          className="w-full max-w-3xl mx-auto flex flex-col items-end gap-3"
-        >
-          <DownloadTemplateButton />
-          <div className="w-full gap-3 min-h-0">
-            <div className="flex-1 flex flex-col gap-2 h-full">
-              <form.Field
-                name="depotLocationAddress"
-                /* eslint-disable react/no-children-prop */
-                children={(field) => {
+      <form
+        id="create-simulation-job-form"
+        onSubmit={(e) => {
+          e.preventDefault();
+          form.handleSubmit(e);
+        }}
+        className="w-full max-w-3xl mx-auto flex flex-col items-end gap-3"
+      >
+        <DownloadTemplateButton />
+        <div className="w-full gap-3 min-h-0">
+          <div className="flex-1 flex flex-col gap-2 h-full">
+            <FieldGroup>
+              <form.Field name="depotLocationAddress">
+                {(field) => {
                   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
                   return (
@@ -93,11 +94,10 @@ const CreateSimulationForm = () => {
                     </Field>
                   );
                 }}
-              />
-              <form.Field
-                name="title"
-                /* eslint-disable react/no-children-prop */
-                children={(field) => {
+              </form.Field>
+
+              <form.Field name="title">
+                {(field) => {
                   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
                   return (
@@ -117,11 +117,10 @@ const CreateSimulationForm = () => {
                     </Field>
                   );
                 }}
-              />
-              <form.Field
-                name="startDatetime"
-                /* eslint-disable react/no-children-prop */
-                children={(field) => {
+              </form.Field>
+
+              <form.Field name="startDatetime">
+                {(field) => {
                   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
                   return (
@@ -141,10 +140,10 @@ const CreateSimulationForm = () => {
                     </Field>
                   );
                 }}
-              />
-              <form.Field
-                name="computationTimeLimit"
-                children={(field) => {
+              </form.Field>
+
+              <form.Field name="computationTimeLimit">
+                {(field) => {
                   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
 
                   return (
@@ -167,10 +166,77 @@ const CreateSimulationForm = () => {
                     </Field>
                   );
                 }}
-              />
-              <form.Field
-                name="customersFile"
-                children={(field) => {
+              </form.Field>
+
+              <form.Field name="algorithm">
+                {(field) => (
+                  <Field>
+                    <FieldLabel>Algorithm</FieldLabel>
+                    <FieldDescription>
+                      Choose the optimization strategy used during route calculation.
+                    </FieldDescription>
+                    <Select
+                      value={field.state.value}
+                      onValueChange={(
+                        value: (typeof optimizationAlgorithmEnum.enumValues)[number],
+                      ) => field.setValue(value)}
+                    >
+                      <SelectTrigger id="algorithm" className="w-full">
+                        <SelectValue placeholder="Select an algorithm" />
+                      </SelectTrigger>
+                      <SelectContent position="popper">
+                        {optimizationAlgorithmEnum.enumValues.map((algorithm) => (
+                          <SelectItem key={algorithm} value={algorithm}>
+                            {toTitleCase(snakeToText(algorithm))}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FieldError errors={field.state.meta.errors} />
+                  </Field>
+                )}
+              </form.Field>
+
+              <FieldGroup className="grid grid-cols-2">
+                <form.Field name="congestionDelayThresholdInSeconds">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Congestion Delay Threshold (seconds)</FieldLabel>
+                      <FieldDescription>
+                        Minimum delay (seconds) before traffic is considered congestion.
+                      </FieldDescription>
+                      <Input
+                        type="number"
+                        value={field.state.value}
+                        onChange={(e) => field.setValue(Number(e.target.value))}
+                        className="w-full mt-auto"
+                      />
+                      <FieldError errors={field.state.meta.errors} />
+                    </Field>
+                  )}
+                </form.Field>
+
+                <form.Field name="resequenceImprovementThresholdPercent">
+                  {(field) => (
+                    <Field>
+                      <FieldLabel>Resequence Improvement Threshold (%)</FieldLabel>
+                      <FieldDescription>
+                        Minimum percentage improvement required before resequencing is applied.
+                      </FieldDescription>
+                      <Input
+                        type="number"
+                        step="0.1"
+                        value={field.state.value}
+                        onChange={(e) => field.setValue(Number(e.target.value))}
+                      />
+                      <FieldError errors={field.state.meta.errors} />
+                    </Field>
+                  )}
+                </form.Field>
+              </FieldGroup>
+
+              <form.Field name="customersFile">
+                {(field) => {
                   const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
                   const selectedFile = field.state.value;
 
@@ -217,27 +283,17 @@ const CreateSimulationForm = () => {
                     </Field>
                   );
                 }}
-              />
+              </form.Field>
 
-              <Button
-                variant={"link"}
-                onClick={() => setIsAdvanceConfigDialogOpen(true)}
-                className="w-fit"
-                type="button"
-              >
-                <Settings className="mr-2" size={16} />
-                Advanced Configuration
-              </Button>
-            </div>
+              <div className="flex w-full items-center">
+                <Button type="submit" className="ml-auto" form="create-simulation-job-form">
+                  Next Step
+                </Button>
+              </div>
+            </FieldGroup>
           </div>
-
-          <div className="flex w-full items-center">
-            <Button type="submit" className="ml-auto" form="create-simulation-job-form">
-              Next Step
-            </Button>
-          </div>
-        </form>
-      </Dialog>
+        </div>
+      </form>
     </>
   );
 };

@@ -1,6 +1,7 @@
 import { TTrafficIncidentGeometry } from "@/types/database";
 import {
   boolean,
+  date,
   doublePrecision,
   foreignKey,
   index,
@@ -103,21 +104,12 @@ export const simulationJobTable = pgTable(
     computationTimeLimitInSeconds: integer("computation_time_limit_in_seconds")
       .notNull()
       .default(600),
-    randomSeed: integer("random_seed").notNull().default(42),
-    enableResequence: boolean("enable_resequence").notNull().default(true),
-    enableAspiration: boolean("enable_aspiration").notNull().default(true),
     resequenceImprovementThresholdPercent: real("resequence_improvement_threshold_percent").default(
       5,
     ),
     congestionDelayThresholdInSeconds: integer("congestion_delay_threshold_in_seconds").default(
       300,
     ),
-    earlyStopNoImprovementIterations: integer("early_stop_no_improvement_iterations").default(100),
-    tabuIterations: integer("tabu_iterations"),
-    tabuTenure: integer("tabu_tenure"),
-    maxNeighbors2Opt: integer("max_neighbors_2opt"),
-    diversifyAfterIterations: integer("diversify_after_iterations"),
-    diversificationStrength: integer("diversification_strength"),
     totalDemandInKilograms: real("total_demand_in_kilograms").notNull().default(0),
     totalCouriers: integer("total_couriers").notNull().default(0),
     totalActiveCouriers: integer("total_active_couriers").notNull().default(0),
@@ -263,21 +255,12 @@ export const simulationTable = pgTable(
     computationTimeLimitInSeconds: integer("computation_time_limit_in_seconds")
       .notNull()
       .default(600),
-    randomSeed: integer("random_seed").notNull().default(42),
-    enableResequence: boolean("enable_resequence").notNull().default(true),
-    enableAspiration: boolean("enable_aspiration").notNull().default(true),
     resequenceImprovementThresholdPercent: real("resequence_improvement_threshold_percent").default(
       5,
     ),
     congestionDelayThresholdInSeconds: integer("congestion_delay_threshold_in_seconds").default(
       300,
     ),
-    earlyStopNoImprovementIterations: integer("early_stop_no_improvement_iterations").default(100),
-    tabuIterations: integer("tabu_iterations"),
-    tabuTenure: integer("tabu_tenure"),
-    maxNeighbors2Opt: integer("max_neighbors_2opt"),
-    diversifyAfterIterations: integer("diversify_after_iterations"),
-    diversificationStrength: integer("diversification_strength"),
     depotId: integer("depot_id")
       .references(() => depotTable.id)
       .notNull(),
@@ -938,7 +921,7 @@ export const tuningExperimentDatasetTable = pgTable(
   ],
 );
 
-export const tuningExperiments = pgTable(
+export const tuningExperimentTable = pgTable(
   "tuning_experiments",
   {
     id: serial().primaryKey(),
@@ -958,6 +941,7 @@ export const tuningExperiments = pgTable(
     convergenceIteration: integer("convergence_iteration"),
     improvementPercentage: real("improvement_percentage"),
     bestRoutePayload: jsonb("best_route_payload"),
+    bestIterationHistoryPayload: jsonb("best_iteration_history_payload"),
     createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
     completedAt: timestamp("completed_at", { withTimezone: true }),
   },
@@ -1014,7 +998,7 @@ export const tuningExperimentRunTable = pgTable(
   {
     id: serial().primaryKey(),
     tuningExperimentId: integer("tuning_experiment_id")
-      .references(() => tuningExperiments.id)
+      .references(() => tuningExperimentTable.id)
       .notNull(),
     itMax: integer("it_max").notNull(),
     tabTenure: integer("tab_tenure").notNull(),
@@ -1028,9 +1012,43 @@ export const tuningExperimentRunTable = pgTable(
   (table) => [
     foreignKey({
       columns: [table.tuningExperimentId],
-      foreignColumns: [tuningExperiments.id],
-      name: "tuning_experiment_runs_tuning_experiment_id_tuning_experiments_id_fk",
+      foreignColumns: [tuningExperimentTable.id],
+      name: "tuning_experiment_runs_tuning_experiment_id_tuning_experiment_table_id_fk",
     }),
     index("tuning_experiment_runs_tuning_experiment_id_idx").on(table.tuningExperimentId),
+  ],
+);
+
+export const tabuSearchConfigurationTable = pgTable("tabu_search_configurations", {
+  id: uuid("id").defaultRandom().primaryKey(),
+  itMaxMultiplier: real("it_max_multiplier").notNull(),
+  tabTenureDivider: real("tab_tenure_divider").notNull(),
+  itConsMultiplier: real("it_cons_multiplier").notNull(),
+  itDivDivider: real("it_div_divider").notNull(),
+  isActive: boolean("is_active").notNull().default(true),
+  createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+});
+
+export const dailyOptimizationLogTable = pgTable(
+  "daily_optimization_logs",
+  {
+    id: serial().primaryKey(),
+    configId: uuid("config_id").references(() => tabuSearchConfigurationTable.id),
+    date: date("date").notNull(),
+    totalNodes: integer("total_nodes").notNull(),
+    totalCouriers: integer("total_couriers").notNull(),
+    excecutionTimeMs: real("execution_time_ms").notNull(),
+    totalFitnessScore: real("total_fitness_score").notNull(),
+    improvementPercentage: real("improvement_percentage").notNull(),
+    createdAt: timestamp("created_at", { withTimezone: true }).defaultNow().notNull(),
+  },
+  (table) => [
+    foreignKey({
+      columns: [table.configId],
+      foreignColumns: [tabuSearchConfigurationTable.id],
+      name: "daily_optimization_logs_config_id_tabu_search_configurations_id_fk",
+    }),
+    index("daily_optimization_logs_config_id_idx").on(table.configId),
+    index("daily_optimization_logs_date_idx").on(table.date),
   ],
 );

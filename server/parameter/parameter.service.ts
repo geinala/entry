@@ -7,7 +7,6 @@ import { TPaginationResponse } from "@/types/meta";
 import {
   createParameterRepository,
   getParameterByIdRepository,
-  getParametersCountRepository,
   getParametersWithPaginationRepository,
   updateTuningExperminetDatasetStatusRepository,
 } from "./parameter.repository";
@@ -19,10 +18,7 @@ import { server } from "@/lib/axios";
 export const getParametersWithPaginationService = async (
   queryParams: TIndexParameterQueryParams,
 ): Promise<TPaginationResponse<TTuningExperimentDataset>> => {
-  const [parameters, total] = await Promise.all([
-    getParametersWithPaginationRepository(queryParams),
-    getParametersCountRepository(queryParams),
-  ]);
+  const [parameters, total] = await getParametersWithPaginationRepository(queryParams);
 
   return paginationResponseMapper<TTuningExperimentDataset>(parameters, {
     currentPage: queryParams.page,
@@ -66,3 +62,7 @@ export const createParameterService = async (
 
   return result;
 };
+
+// export const getActiveTabuSearchConfigurationService = async () => {
+//   return await getActiveTabuSearchConfigurationRepository();
+// };

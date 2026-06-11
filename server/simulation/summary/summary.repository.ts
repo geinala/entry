@@ -3,11 +3,40 @@ import {
   courierTable,
   optimizationRunTable,
   routeLegTable,
+  simulationTable,
 } from "@/drizzle/schema";
 import { db } from "@/lib/db";
 import { TOptimizationSummaryParams } from "@/schemas/simulations/optimization-summary.schema";
 import { TComparisonChartDataItem, TGlobalAlgorithmSummary } from "@/types/database";
 import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
+
+const getAlgorithmMapping = (simulationAlgorithm: string) => {
+  switch (simulationAlgorithm) {
+    case "google_or_tools":
+      return {
+        greedy: "greedy",
+        tabu: "tabu_search",
+      };
+
+    case "manual_with_optimization":
+      return {
+        greedy: "greedy_with_2opt",
+        tabu: "tabu_search_with_2opt",
+      };
+
+    case "manual_without_optimization":
+      return {
+        greedy: "greedy_without_2opt",
+        tabu: "tabu_search_without_2opt",
+      };
+
+    default:
+      return {
+        greedy: "greedy",
+        tabu: "tabu_search",
+      };
+  }
+};
 
 export const getGlobalSummaryAlgorithmRepository = async (
   simulationId: string,
@@ -15,6 +44,20 @@ export const getGlobalSummaryAlgorithmRepository = async (
 ): Promise<Omit<TGlobalAlgorithmSummary, "improvement">> => {
   const summaryType = queryParams.summaryType ?? "initial";
   const courierId = queryParams.courierId ? Number(queryParams.courierId) : null;
+
+  const [simulation] = await db
+    .select({
+      algorithm: simulationTable.algorithm,
+    })
+    .from(simulationTable)
+    .where(eq(simulationTable.id, simulationId))
+    .limit(1);
+
+  if (!simulation) {
+    throw new Error("Simulation not found");
+  }
+
+  const { greedy, tabu } = getAlgorithmMapping(simulation.algorithm);
 
   let optimizationScope;
 
@@ -42,15 +85,96 @@ export const getGlobalSummaryAlgorithmRepository = async (
 
   const [row] = await db
     .select({
-      greedyTotalDistance: sql<number>`COALESCE(SUM(CASE WHEN o.algorithm = 'greedy' THEN o.total_distance_in_meters ELSE 0 END), 0)`,
-      greedyTotalTravelTime: sql<number>`COALESCE(SUM(CASE WHEN o.algorithm = 'greedy' THEN o.total_travel_time_in_seconds ELSE 0 END), 0)`,
-      greedyComputationTime: sql<number>`COALESCE(SUM(CASE WHEN o.algorithm = 'greedy' THEN o.computation_time_in_ms ELSE 0 END), 0)`,
+      greedyTotalDistance: sql<number>`
+        COALESCE(
+          SUM(
+            CASE
+              WHEN o.algorithm = ${greedy}
+              THEN o.total_distance_in_meters
+              ELSE 0
+            END
+          ),
+          0
+        )
+      `,
 
-      tabuTotalDistance: sql<number>`COALESCE(SUM(CASE WHEN o.algorithm = 'tabu_search' THEN o.total_distance_in_meters ELSE 0 END), 0)`,
-      tabuTotalTravelTime: sql<number>`COALESCE(SUM(CASE WHEN o.algorithm = 'tabu_search' THEN o.total_travel_time_in_seconds ELSE 0 END), 0)`,
-      tabuComputationTime: sql<number>`COALESCE(SUM(CASE WHEN o.algorithm = 'tabu_search' THEN o.computation_time_in_ms ELSE 0 END), 0)`,
+      greedyTotalTravelTime: sql<number>`
+        COALESCE(
+          SUM(
+            CASE
+              WHEN o.algorithm = ${greedy}
+              THEN o.total_travel_time_in_seconds
+              ELSE 0
+            END
+          ),
+          0
+        )
+      `,
 
-      totalNodesExplored: sql<number>`COALESCE(SUM(CASE WHEN o.algorithm = 'tabu_search' THEN o.total_nodes_explored ELSE 0 END), 0)`,
+      greedyComputationTime: sql<number>`
+        COALESCE(
+          SUM(
+            CASE
+              WHEN o.algorithm = ${greedy}
+              THEN o.computation_time_in_ms
+              ELSE 0
+            END
+          ),
+          0
+        )
+      `,
+
+      tabuTotalDistance: sql<number>`
+        COALESCE(
+          SUM(
+            CASE
+              WHEN o.algorithm = ${tabu}
+              THEN o.total_distance_in_meters
+              ELSE 0
+            END
+          ),
+          0
+        )
+      `,
+
+      tabuTotalTravelTime: sql<number>`
+        COALESCE(
+          SUM(
+            CASE
+              WHEN o.algorithm = ${tabu}
+              THEN o.total_travel_time_in_seconds
+              ELSE 0
+            END
+          ),
+          0
+        )
+      `,
+
+      tabuComputationTime: sql<number>`
+        COALESCE(
+          SUM(
+            CASE
+              WHEN o.algorithm = ${tabu}
+              THEN o.computation_time_in_ms
+              ELSE 0
+            END
+          ),
+          0
+        )
+      `,
+
+      totalNodesExplored: sql<number>`
+        COALESCE(
+          SUM(
+            CASE
+              WHEN o.algorithm = ${tabu}
+              THEN o.total_nodes_explored
+              ELSE 0
+            END
+          ),
+          0
+        )
+      `,
     })
     .from(sql`optimization_runs o`)
     .where(sql`o.id IN (${optimizationScope})`);
@@ -84,29 +208,44 @@ export const getTimeSeriesSummaryRepository = async (
     return [];
   }
 
+  const [simulation] = await db
+    .select({
+      algorithm: simulationTable.algorithm,
+    })
+    .from(simulationTable)
+    .where(eq(simulationTable.id, simulationId))
+    .limit(1);
+
+  if (!simulation) {
+    throw new Error("Simulation not found");
+  }
+
+  const { greedy, tabu } = getAlgorithmMapping(simulation.algorithm);
+
   const runTypes = RUN_TYPE_MAPPING[summaryType];
 
   const [result, [latestRouteLeg]] = await Promise.all([
     db
       .select({
         triggeredAt: optimizationRunTable.triggeredAt,
+
         greedyTime: sql<number>`
-        MAX(
-          CASE 
-            WHEN ${optimizationRunTable.algorithm} = 'greedy'
-            THEN ${optimizationRunTable.totalTravelTimeInSeconds}
-          END
-        )
-      `,
+          MAX(
+            CASE
+              WHEN ${optimizationRunTable.algorithm} = ${greedy}
+              THEN ${optimizationRunTable.totalTravelTimeInSeconds}
+            END
+          )
+        `,
 
         tabuTime: sql<number>`
-        MAX(
-          CASE 
-            WHEN ${optimizationRunTable.algorithm} = 'tabu_search'
-            THEN ${optimizationRunTable.totalTravelTimeInSeconds}
-          END
-        )
-      `,
+          MAX(
+            CASE
+              WHEN ${optimizationRunTable.algorithm} = ${tabu}
+              THEN ${optimizationRunTable.totalTravelTimeInSeconds}
+            END
+          )
+        `,
       })
       .from(optimizationRunTable)
       .where(
@@ -118,6 +257,7 @@ export const getTimeSeriesSummaryRepository = async (
       )
       .groupBy(optimizationRunTable.triggeredAt, optimizationRunTable.runType)
       .orderBy(optimizationRunTable.triggeredAt),
+
     db
       .select({
         arrivalTime: routeLegTable.arrivalTime,
@@ -143,8 +283,35 @@ export const getTimeSeriesSummaryRepository = async (
 };
 
 const ALGORITHM_KEY_MAP = {
-  greedy: { baseline: "greedyBaselineTime", final: "greedyFinalTime" },
-  tabu_search: { baseline: "tabuBaselineTime", final: "tabuFinalTime" },
+  greedy: {
+    baseline: "greedyBaselineTime",
+    final: "greedyFinalTime",
+  },
+
+  greedy_with_2opt: {
+    baseline: "greedyBaselineTime",
+    final: "greedyFinalTime",
+  },
+
+  greedy_without_2opt: {
+    baseline: "greedyBaselineTime",
+    final: "greedyFinalTime",
+  },
+
+  tabu_search: {
+    baseline: "tabuBaselineTime",
+    final: "tabuFinalTime",
+  },
+
+  tabu_search_with_2opt: {
+    baseline: "tabuBaselineTime",
+    final: "tabuFinalTime",
+  },
+
+  tabu_search_without_2opt: {
+    baseline: "tabuBaselineTime",
+    final: "tabuFinalTime",
+  },
 } as const;
 
 type AlgorithmKey = keyof typeof ALGORITHM_KEY_MAP;
@@ -167,7 +334,10 @@ export const getComparisonChartRepository = async (simulationId: string) => {
 
   for (const { courierId, courierName, algorithm, runType, time } of runs) {
     const keys = ALGORITHM_KEY_MAP[algorithm as AlgorithmKey];
-    if (!keys) continue;
+
+    if (!keys) {
+      continue;
+    }
 
     if (!resultsMap.has(courierId)) {
       resultsMap.set(courierId, {
@@ -183,7 +353,10 @@ export const getComparisonChartRepository = async (simulationId: string) => {
     const data = resultsMap.get(courierId)!;
 
     if (runType === "initial") {
-      if (data[keys.baseline] === 0) data[keys.baseline] = time;
+      if (data[keys.baseline] === 0) {
+        data[keys.baseline] = time;
+      }
+
       data[keys.final] = time;
     } else if (runType === "baseline_tracking") {
       data[keys.baseline] = time;

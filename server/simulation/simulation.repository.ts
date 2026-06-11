@@ -7,6 +7,7 @@ import {
   matrixResultTable,
   nodeDetailTable,
   nodeTable,
+  optimizationIterationTable,
   optimizationRunTable,
   reoptimizationEventTable,
   routeLegCongestionCheckTable,
@@ -91,18 +92,21 @@ export const deleteSimulationWithRelationsRepository = async (
       .select({ id: courierTable.id })
       .from(courierTable)
       .where(eq(courierTable.simulationId, simulationId));
+
     const courierIds = couriers.map((courier) => courier.id);
 
     const nodes = await tx
       .select({ id: nodeTable.id })
       .from(nodeTable)
       .where(eq(nodeTable.simulationId, simulationId));
+
     const nodeIds = nodes.map((node) => node.id);
 
     const matrixBatches = await tx
       .select({ id: matrixBatchTable.id })
       .from(matrixBatchTable)
       .where(eq(matrixBatchTable.simulationId, simulationId));
+
     const matrixBatchIds = matrixBatches.map((batch) => batch.id);
 
     const routeIds =
@@ -122,6 +126,13 @@ export const deleteSimulationWithRelationsRepository = async (
 
     const optimizationRunIds = optimizationRuns.map((run) => run.id);
 
+    const solutions = await tx
+      .select({ id: solutionTable.id })
+      .from(solutionTable)
+      .where(eq(solutionTable.simulationId, simulationId));
+
+    const solutionIds = solutions.map((solution) => solution.id);
+
     if (optimizationRunIds.length > 0) {
       await tx
         .delete(reoptimizationEventTable)
@@ -131,13 +142,17 @@ export const deleteSimulationWithRelationsRepository = async (
     await tx
       .delete(optimizationRunTable)
       .where(eq(optimizationRunTable.simulationId, simulationId));
+
     await tx.delete(simulationLogTable).where(eq(simulationLogTable.simulationId, simulationId));
+
     await tx
       .delete(reoptimizationEventTable)
       .where(eq(reoptimizationEventTable.simulationId, simulationId));
+
     await tx
       .delete(routeLegCongestionCheckTable)
       .where(eq(routeLegCongestionCheckTable.simulationId, simulationId));
+
     await tx
       .delete(trafficIncidentTable)
       .where(eq(trafficIncidentTable.simulationId, simulationId));
@@ -149,15 +164,24 @@ export const deleteSimulationWithRelationsRepository = async (
     }
 
     await tx.delete(matrixResultTable).where(eq(matrixResultTable.simulationId, simulationId));
+
     await tx.delete(matrixBatchTable).where(eq(matrixBatchTable.simulationId, simulationId));
 
     if (routeIds.length > 0) {
       await tx.delete(routeLegTable).where(inArray(routeLegTable.courierRouteId, routeIds));
+
       await tx
         .update(courierRouteTable)
         .set({ reoptimizedFromRouteId: null })
         .where(inArray(courierRouteTable.id, routeIds));
+
       await tx.delete(courierRouteTable).where(inArray(courierRouteTable.id, routeIds));
+    }
+
+    if (solutionIds.length > 0) {
+      await tx
+        .delete(optimizationIterationTable)
+        .where(inArray(optimizationIterationTable.solutionId, solutionIds));
     }
 
     await tx.delete(solutionTable).where(eq(solutionTable.simulationId, simulationId));
@@ -167,6 +191,7 @@ export const deleteSimulationWithRelationsRepository = async (
     }
 
     await tx.delete(nodeTable).where(eq(nodeTable.simulationId, simulationId));
+
     await tx.delete(courierTable).where(eq(courierTable.simulationId, simulationId));
 
     const [deletedSimulation] = await tx

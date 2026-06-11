@@ -40,18 +40,9 @@ export const createSimulationJobController = async (request: NextRequest, clerkU
       depotId: Number(formData.get("depotId")),
       algorithm: formData.get("algorithm") as TCreateSimulationJobInput["algorithm"],
       congestionDelayThresholdInSeconds: Number(formData.get("congestionDelayThresholdInSeconds")),
-      diversificationStrength: Number(formData.get("diversificationStrength")),
-      diversifyAfterIterations: Number(formData.get("diversifyAfterIterations")),
-      earlyStopNoImprovementIterations: Number(formData.get("earlyStopNoImprovementIterations")),
-      enableAspiration: formData.get("enableAspiration") === "true",
-      enableResequence: formData.get("enableResequence") === "true",
-      maxNeighbors2Opt: Number(formData.get("maxNeighbors2Opt")),
-      randomSeed: Number(formData.get("randomSeed")),
       resequenceImprovementThresholdPercent: Number(
         formData.get("resequenceImprovementThresholdPercent"),
       ),
-      tabuIterations: Number(formData.get("tabuIterations")),
-      tabuTenure: Number(formData.get("tabuTenure")),
     };
 
     const { data } = validateSchema<TCreateSimulationJobSchema>(CreateSimulationJobSchema, payload);

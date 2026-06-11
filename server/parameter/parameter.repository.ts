@@ -12,19 +12,18 @@ const PARAMETER_COLUMNS: TColumnsDefinition<typeof tuningExperimentDatasetTable>
 export const getParametersWithPaginationRepository = async (
   queryParams: TIndexParameterQueryParams,
 ) => {
-  return await buildPaginatedQuery({
-    table: tuningExperimentDatasetTable,
-    columns: PARAMETER_COLUMNS,
-    queryParams,
-  });
-};
-
-export const getParametersCountRepository = async (queryParams: TIndexParameterQueryParams) => {
-  return await buildCountQuery({
-    table: tuningExperimentDatasetTable,
-    columns: PARAMETER_COLUMNS,
-    queryParams,
-  });
+  return Promise.all([
+    await buildPaginatedQuery({
+      table: tuningExperimentDatasetTable,
+      columns: PARAMETER_COLUMNS,
+      queryParams,
+    }),
+    await buildCountQuery({
+      table: tuningExperimentDatasetTable,
+      columns: PARAMETER_COLUMNS,
+      queryParams,
+    }),
+  ]);
 };
 
 export const getParameterByIdRepository = async (id: string) => {
@@ -66,3 +65,13 @@ export const updateTuningExperminetDatasetStatusRepository = async ({
 
   return result;
 };
+
+// export const getActiveTabuSearchConfigurationRepository = async () => {
+//   const [config] = await db
+//     .select()
+//     .from(tabuSearchConfigurationTable)
+//     .where(eq(tabuSearchConfigurationTable.isActive, true))
+//     .limit(1);
+
+//   return config;
+// };
