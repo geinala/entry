@@ -9,6 +9,7 @@ CREATE TYPE "public"."simulation_cleaning_status_enum" AS ENUM('pending', 'in_pr
 CREATE TYPE "public"."simulation_file_validation_status_enum" AS ENUM('uploaded', 'validating', 'validated', 'needed_review', 'completed', 'failed');--> statement-breakpoint
 CREATE TYPE "public"."simulation_job_status_enum" AS ENUM('uploaded', 'processing', 'completed', 'failed');--> statement-breakpoint
 CREATE TYPE "public"."simulation_status_enum" AS ENUM('pending', 'stopped', 'optimizing', 'running', 'completed', 'failed');--> statement-breakpoint
+CREATE TYPE "public"."tuning_experiment_dataset_status_enum" AS ENUM('uploaded', 'validating', 'validated', 'cleaning', 'cleaned', 'geocoding', 'geocoded', 'completed', 'failed');--> statement-breakpoint
 CREATE TABLE "courier_routes" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"solution_id" integer,
@@ -29,6 +30,18 @@ CREATE TABLE "couriers" (
 	"simulation_id" uuid,
 	"name" varchar NOT NULL,
 	"is_active" boolean DEFAULT true NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "daily_optimization_logs" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"config_id" uuid,
+	"date" date NOT NULL,
+	"total_nodes" integer NOT NULL,
+	"total_couriers" integer NOT NULL,
+	"execution_time_ms" real NOT NULL,
+	"total_fitness_score" real NOT NULL,
+	"improvement_percentage" real NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
 CREATE TABLE "depots" (
@@ -233,19 +246,9 @@ CREATE TABLE "simulation_jobs" (
 	"depot_location_address" varchar NOT NULL,
 	"depot_location_latitude" double precision NOT NULL,
 	"depot_location_longitude" double precision NOT NULL,
-	"algorithm" "optimization_algorithm_enum" DEFAULT 'google_or_tools' NOT NULL,
-	"computation_time_limit_in_seconds" integer DEFAULT 600 NOT NULL,
-	"random_seed" integer DEFAULT 42 NOT NULL,
-	"enable_resequence" boolean DEFAULT true NOT NULL,
-	"enable_aspiration" boolean DEFAULT true NOT NULL,
 	"resequence_improvement_threshold_percent" real DEFAULT 5,
 	"congestion_delay_threshold_in_seconds" integer DEFAULT 300,
-	"early_stop_no_improvement_iterations" integer DEFAULT 100,
-	"tabu_iterations" integer,
-	"tabu_tenure" integer,
-	"max_neighbors_2opt" integer,
-	"diversify_after_iterations" integer,
-	"diversification_strength" integer,
+	"is_with_adaptive_parameters" boolean DEFAULT false NOT NULL,
 	"total_demand_in_kilograms" real DEFAULT 0 NOT NULL,
 	"total_couriers" integer DEFAULT 0 NOT NULL,
 	"total_active_couriers" integer DEFAULT 0 NOT NULL,
@@ -300,19 +303,9 @@ CREATE TABLE "simulations" (
 	"status" "simulation_status_enum" DEFAULT 'optimizing' NOT NULL,
 	"started_at" timestamp with time zone,
 	"completed_at" timestamp with time zone,
-	"algorithm" "optimization_algorithm_enum" NOT NULL,
-	"computation_time_limit_in_seconds" integer DEFAULT 600 NOT NULL,
-	"random_seed" integer DEFAULT 42 NOT NULL,
-	"enable_resequence" boolean DEFAULT true NOT NULL,
-	"enable_aspiration" boolean DEFAULT true NOT NULL,
+	"is_with_adaptive_parameters" boolean DEFAULT false NOT NULL,
 	"resequence_improvement_threshold_percent" real DEFAULT 5,
 	"congestion_delay_threshold_in_seconds" integer DEFAULT 300,
-	"early_stop_no_improvement_iterations" integer DEFAULT 100,
-	"tabu_iterations" integer,
-	"tabu_tenure" integer,
-	"max_neighbors_2opt" integer,
-	"diversify_after_iterations" integer,
-	"diversification_strength" integer,
 	"depot_id" integer NOT NULL,
 	"depot_location_address" varchar NOT NULL,
 	"depot_location_latitude" double precision NOT NULL,
@@ -371,6 +364,16 @@ CREATE TABLE "solutions" (
 	"distance_in_meters" integer NOT NULL
 );
 --> statement-breakpoint
+CREATE TABLE "tabu_search_configurations" (
+	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"it_max_multiplier" real NOT NULL,
+	"tab_tenure_divider" real NOT NULL,
+	"it_cons_multiplier" real NOT NULL,
+	"it_div_divider" real NOT NULL,
+	"is_active" boolean DEFAULT true NOT NULL,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
 CREATE TABLE "traffic_incidents" (
 	"id" serial PRIMARY KEY NOT NULL,
 	"tomtom_incident_id" varchar NOT NULL,
@@ -391,8 +394,44 @@ CREATE TABLE "traffic_incidents" (
 --> statement-breakpoint
 CREATE TABLE "tuning_experiment_datasets" (
 	"id" uuid PRIMARY KEY DEFAULT gen_random_uuid() NOT NULL,
+	"depot_id" integer NOT NULL,
 	"file_path" varchar NOT NULL,
+	"status" "tuning_experiment_dataset_status_enum" DEFAULT 'uploaded' NOT NULL,
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "tuning_experiment_runs" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"tuning_experiment_id" integer NOT NULL,
+	"it_max" integer NOT NULL,
+	"tab_tenure" integer NOT NULL,
+	"it_cons" integer NOT NULL,
+	"it_div" integer NOT NULL,
+	"fitness_score" real NOT NULL,
+	"execution_time_ms" real NOT NULL,
+	"convergence_iteration" integer,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL
+);
+--> statement-breakpoint
+CREATE TABLE "tuning_experiments" (
+	"id" serial PRIMARY KEY NOT NULL,
+	"dataset_id" uuid NOT NULL,
+	"base_n_c" integer NOT NULL,
+	"it_max" integer NOT NULL,
+	"tab_tenure" integer NOT NULL,
+	"it_cons" integer NOT NULL,
+	"it_div" integer NOT NULL,
+	"random_seed" integer DEFAULT 42 NOT NULL,
+	"early_stop_no_improvement_iterations" integer,
+	"initial_fitness_score" real,
+	"best_fitness_score" real,
+	"execution_time_ms" real,
+	"convergence_iteration" integer,
+	"improvement_percentage" real,
+	"best_route_payload" jsonb,
+	"best_iteration_history_payload" jsonb,
+	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
+	"completed_at" timestamp with time zone
 );
 --> statement-breakpoint
 CREATE TABLE "tuning_experiment_uploaded_rows" (
@@ -417,27 +456,6 @@ CREATE TABLE "tuning_experiment_uploaded_rows" (
 	"created_at" timestamp with time zone DEFAULT now() NOT NULL
 );
 --> statement-breakpoint
-CREATE TABLE "tuning_experiments" (
-	"id" serial PRIMARY KEY NOT NULL,
-	"dataset_id" uuid NOT NULL,
-	"status" varchar(50) DEFAULT 'running' NOT NULL,
-	"base_n_c" integer NOT NULL,
-	"it_max" integer NOT NULL,
-	"tab_tenure" integer NOT NULL,
-	"it_cons" integer NOT NULL,
-	"it_div" integer NOT NULL,
-	"random_seed" integer DEFAULT 42 NOT NULL,
-	"early_stop_no_improvement_iterations" integer,
-	"initial_fitness_score" real,
-	"best_fitness_score" real,
-	"execution_time_ms" real,
-	"convergence_iteration" integer,
-	"improvement_percentage" real,
-	"best_route_payload" jsonb,
-	"created_at" timestamp with time zone DEFAULT now() NOT NULL,
-	"completed_at" timestamp with time zone
-);
---> statement-breakpoint
 CREATE TABLE "users" (
 	"user_id" varchar PRIMARY KEY NOT NULL,
 	"email" varchar NOT NULL,
@@ -452,6 +470,7 @@ ALTER TABLE "courier_routes" ADD CONSTRAINT "courier_routes_courier_id_couriers_
 ALTER TABLE "courier_routes" ADD CONSTRAINT "courier_routes_trigger_node_id_nodes_id_fk" FOREIGN KEY ("trigger_node_id") REFERENCES "public"."nodes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "courier_routes" ADD CONSTRAINT "courier_routes_reoptimized_from_route_id_courier_routes_id_fk" FOREIGN KEY ("reoptimized_from_route_id") REFERENCES "public"."courier_routes"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "couriers" ADD CONSTRAINT "couriers_simulation_id_simulations_id_fk" FOREIGN KEY ("simulation_id") REFERENCES "public"."simulations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "daily_optimization_logs" ADD CONSTRAINT "daily_optimization_logs_config_id_tabu_search_configurations_id_fk" FOREIGN KEY ("config_id") REFERENCES "public"."tabu_search_configurations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "matrix_batches" ADD CONSTRAINT "matrix_batches_simulation_id_simulations_id_fk" FOREIGN KEY ("simulation_id") REFERENCES "public"."simulations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "matrix_results" ADD CONSTRAINT "matrix_results_simulation_id_simulations_id_fk" FOREIGN KEY ("simulation_id") REFERENCES "public"."simulations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "matrix_results" ADD CONSTRAINT "matrix_results_matrix_batch_id_matrix_batches_id_fk" FOREIGN KEY ("matrix_batch_id") REFERENCES "public"."matrix_batches"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
@@ -496,11 +515,16 @@ ALTER TABLE "simulation_uploaded_rows" ADD CONSTRAINT "simulation_uploaded_rows_
 ALTER TABLE "solutions" ADD CONSTRAINT "solutions_simulation_id_simulations_id_fk" FOREIGN KEY ("simulation_id") REFERENCES "public"."simulations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "solutions" ADD CONSTRAINT "solutions_courier_id_couriers_id_fk" FOREIGN KEY ("courier_id") REFERENCES "public"."couriers"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "traffic_incidents" ADD CONSTRAINT "traffic_incidents_simulation_id_simulations_id_fk" FOREIGN KEY ("simulation_id") REFERENCES "public"."simulations"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
-ALTER TABLE "tuning_experiment_uploaded_rows" ADD CONSTRAINT "tuning_experiment_uploaded_rows_tuning_experiment_dataset_id_tuning_experiment_datasets_id_fk" FOREIGN KEY ("tuning_experiment_dataset_id") REFERENCES "public"."tuning_experiment_datasets"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "tuning_experiment_datasets" ADD CONSTRAINT "tuning_experiment_datasets_depot_id_depots_id_fk" FOREIGN KEY ("depot_id") REFERENCES "public"."depots"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "tuning_experiment_runs" ADD CONSTRAINT "tuning_experiment_runs_tuning_experiment_id_tuning_experiments_id_fk" FOREIGN KEY ("tuning_experiment_id") REFERENCES "public"."tuning_experiments"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "tuning_experiment_runs" ADD CONSTRAINT "tuning_experiment_runs_tuning_experiment_id_tuning_experiment_table_id_fk" FOREIGN KEY ("tuning_experiment_id") REFERENCES "public"."tuning_experiments"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 ALTER TABLE "tuning_experiments" ADD CONSTRAINT "tuning_experiments_dataset_id_tuning_experiment_datasets_id_fk" FOREIGN KEY ("dataset_id") REFERENCES "public"."tuning_experiment_datasets"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
+ALTER TABLE "tuning_experiment_uploaded_rows" ADD CONSTRAINT "tuning_experiment_uploaded_rows_tuning_experiment_dataset_id_tuning_experiment_datasets_id_fk" FOREIGN KEY ("tuning_experiment_dataset_id") REFERENCES "public"."tuning_experiment_datasets"("id") ON DELETE no action ON UPDATE no action;--> statement-breakpoint
 CREATE INDEX "courier_routes_solution_id_idx" ON "courier_routes" USING btree ("solution_id");--> statement-breakpoint
 CREATE INDEX "courier_routes_courier_id_idx" ON "courier_routes" USING btree ("courier_id");--> statement-breakpoint
 CREATE INDEX "couriers_simulation_id_idx" ON "couriers" USING btree ("simulation_id");--> statement-breakpoint
+CREATE INDEX "daily_optimization_logs_config_id_idx" ON "daily_optimization_logs" USING btree ("config_id");--> statement-breakpoint
+CREATE INDEX "daily_optimization_logs_date_idx" ON "daily_optimization_logs" USING btree ("date");--> statement-breakpoint
 CREATE INDEX "depots_name_idx" ON "depots" USING btree ("name");--> statement-breakpoint
 CREATE INDEX "depots_coordinates_idx" ON "depots" USING btree ("latitude","longitude");--> statement-breakpoint
 CREATE INDEX "matrix_batches_simulation_id_idx" ON "matrix_batches" USING btree ("simulation_id");--> statement-breakpoint
@@ -539,8 +563,10 @@ CREATE INDEX "simulation_uploaded_rows_simulation_job_id_idx" ON "simulation_upl
 CREATE INDEX "simulation_uploaded_rows_nosi_idx" ON "simulation_uploaded_rows" USING btree ("nosi");--> statement-breakpoint
 CREATE INDEX "solutions_simulation_id_idx" ON "solutions" USING btree ("simulation_id");--> statement-breakpoint
 CREATE INDEX "solutions_courier_id_idx" ON "solutions" USING btree ("courier_id");--> statement-breakpoint
+CREATE INDEX "tuning_experiment_datasets_status_idx" ON "tuning_experiment_datasets" USING btree ("status");--> statement-breakpoint
+CREATE INDEX "tuning_experiment_datasets_depot_id_idx" ON "tuning_experiment_datasets" USING btree ("depot_id");--> statement-breakpoint
+CREATE INDEX "tuning_experiment_runs_tuning_experiment_id_idx" ON "tuning_experiment_runs" USING btree ("tuning_experiment_id");--> statement-breakpoint
+CREATE INDEX "tuning_experiments_dataset_id_idx" ON "tuning_experiments" USING btree ("dataset_id");--> statement-breakpoint
 CREATE INDEX "tuning_experiment_uploaded_rows_tuning_experiment_dataset_id_idx" ON "tuning_experiment_uploaded_rows" USING btree ("tuning_experiment_dataset_id");--> statement-breakpoint
 CREATE INDEX "tuning_experiment_uploaded_rows_nosi_idx" ON "tuning_experiment_uploaded_rows" USING btree ("nosi");--> statement-breakpoint
-CREATE INDEX "tuning_experiments_dataset_id_idx" ON "tuning_experiments" USING btree ("dataset_id");--> statement-breakpoint
-CREATE INDEX "tuning_experiments_status_idx" ON "tuning_experiments" USING btree ("status");--> statement-breakpoint
 CREATE INDEX "users_user_id_idx" ON "users" USING btree ("user_id");

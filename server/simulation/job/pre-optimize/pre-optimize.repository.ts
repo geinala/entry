@@ -46,9 +46,9 @@ export const createSimulationFromJobRepository = async (jobId: string) => {
       depotLocationAddress: simulationJob.depotLocationAddress,
       depotLocationLatitude: simulationJob.depotLocationLatitude,
       depotLocationLongitude: simulationJob.depotLocationLongitude,
-      computationTimeLimitInSeconds: simulationJob.computationTimeLimitInSeconds,
       startedAt: simulationJob.startedAt,
       depotId: simulationJob.depotId,
+      isWithAdaptiveParameters: simulationJob.isWithAdaptiveParameters,
     })
     .returning();
 

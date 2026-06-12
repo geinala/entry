@@ -210,9 +210,11 @@ export const FullRouteComparison = () => {
               <CardContent>
                 <div>
                   <span>
-                    {metersToKm(
-                      (data?.beforeTotalDistanceInMeters ?? 0) -
-                        (data?.afterTotalDistanceInMeters ?? 0),
+                    {Math.abs(
+                      metersToKm(
+                        (data?.beforeTotalDistanceInMeters ?? 0) -
+                          (data?.afterTotalDistanceInMeters ?? 0),
+                      ),
                     )}{" "}
                     km
                   </span>

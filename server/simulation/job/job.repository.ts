@@ -23,11 +23,11 @@ export const createSimulationJobRepository = async (
       depotLocationLatitude: data.depotLatitude,
       depotLocationLongitude: data.depotLongitude,
       currentStep: 1,
-      computationTimeLimitInSeconds: data.computationTimeLimit,
       startedAt: new Date(data.startDatetime),
       fileTotalRows,
       fileValidationStatus: "uploaded",
       fileValidationStartedAt: new Date(),
+      isWithAdaptiveParameters: data.isWithAdaptiveParameters,
     })
     .returning();
 

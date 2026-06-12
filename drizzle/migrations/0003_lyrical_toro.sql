@@ -1,1 +1,0 @@
-ALTER TABLE "tuning_experiments" ADD COLUMN "best_iteration_history_payload" jsonb;

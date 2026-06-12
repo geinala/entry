@@ -79,7 +79,7 @@ const Map = ({ center, zoom, pitch, bearing, routes = [], vehicles = [] }: MapPr
       )}
       {displayRoutes.map((route) => (
         <Route
-          key={route.id}
+          key={`${route.id}-${route.routeStatus}-${route.coordinates.length}`}
           id={`route-leg-${route.id}`}
           coordinates={route.coordinates}
           color={getRouteStatusColor(route.routeStatus)}
@@ -95,7 +95,7 @@ const Map = ({ center, zoom, pitch, bearing, routes = [], vehicles = [] }: MapPr
 
           return (
             <Marker
-              key={`node-${idx}`}
+              key={`node-seq-${node.sequence}-lat-${node.lat}-lng-${node.lng}-${idx}`}
               lng={node.lng}
               lat={node.lat}
               icon={<span>{node.sequence}</span>}

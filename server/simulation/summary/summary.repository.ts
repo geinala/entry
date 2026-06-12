@@ -3,40 +3,11 @@ import {
   courierTable,
   optimizationRunTable,
   routeLegTable,
-  simulationTable,
 } from "@/drizzle/schema";
 import { db } from "@/lib/db";
 import { TOptimizationSummaryParams } from "@/schemas/simulations/optimization-summary.schema";
 import { TComparisonChartDataItem, TGlobalAlgorithmSummary } from "@/types/database";
 import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
-
-const getAlgorithmMapping = (simulationAlgorithm: string) => {
-  switch (simulationAlgorithm) {
-    case "google_or_tools":
-      return {
-        greedy: "greedy",
-        tabu: "tabu_search",
-      };
-
-    case "manual_with_optimization":
-      return {
-        greedy: "greedy_with_2opt",
-        tabu: "tabu_search_with_2opt",
-      };
-
-    case "manual_without_optimization":
-      return {
-        greedy: "greedy_without_2opt",
-        tabu: "tabu_search_without_2opt",
-      };
-
-    default:
-      return {
-        greedy: "greedy",
-        tabu: "tabu_search",
-      };
-  }
-};
 
 export const getGlobalSummaryAlgorithmRepository = async (
   simulationId: string,
@@ -44,20 +15,6 @@ export const getGlobalSummaryAlgorithmRepository = async (
 ): Promise<Omit<TGlobalAlgorithmSummary, "improvement">> => {
   const summaryType = queryParams.summaryType ?? "initial";
   const courierId = queryParams.courierId ? Number(queryParams.courierId) : null;
-
-  const [simulation] = await db
-    .select({
-      algorithm: simulationTable.algorithm,
-    })
-    .from(simulationTable)
-    .where(eq(simulationTable.id, simulationId))
-    .limit(1);
-
-  if (!simulation) {
-    throw new Error("Simulation not found");
-  }
-
-  const { greedy, tabu } = getAlgorithmMapping(simulation.algorithm);
 
   let optimizationScope;
 
@@ -89,7 +46,7 @@ export const getGlobalSummaryAlgorithmRepository = async (
         COALESCE(
           SUM(
             CASE
-              WHEN o.algorithm = ${greedy}
+              WHEN o.algorithm = 'greedy'
               THEN o.total_distance_in_meters
               ELSE 0
             END
@@ -102,7 +59,7 @@ export const getGlobalSummaryAlgorithmRepository = async (
         COALESCE(
           SUM(
             CASE
-              WHEN o.algorithm = ${greedy}
+              WHEN o.algorithm = 'greedy'
               THEN o.total_travel_time_in_seconds
               ELSE 0
             END
@@ -115,7 +72,7 @@ export const getGlobalSummaryAlgorithmRepository = async (
         COALESCE(
           SUM(
             CASE
-              WHEN o.algorithm = ${greedy}
+              WHEN o.algorithm = 'greedy'
               THEN o.computation_time_in_ms
               ELSE 0
             END
@@ -128,7 +85,7 @@ export const getGlobalSummaryAlgorithmRepository = async (
         COALESCE(
           SUM(
             CASE
-              WHEN o.algorithm = ${tabu}
+              WHEN o.algorithm = 'tabu_search'
               THEN o.total_distance_in_meters
               ELSE 0
             END
@@ -141,7 +98,7 @@ export const getGlobalSummaryAlgorithmRepository = async (
         COALESCE(
           SUM(
             CASE
-              WHEN o.algorithm = ${tabu}
+              WHEN o.algorithm = 'tabu_search'
               THEN o.total_travel_time_in_seconds
               ELSE 0
             END
@@ -154,21 +111,8 @@ export const getGlobalSummaryAlgorithmRepository = async (
         COALESCE(
           SUM(
             CASE
-              WHEN o.algorithm = ${tabu}
+              WHEN o.algorithm = 'tabu_search'
               THEN o.computation_time_in_ms
-              ELSE 0
-            END
-          ),
-          0
-        )
-      `,
-
-      totalNodesExplored: sql<number>`
-        COALESCE(
-          SUM(
-            CASE
-              WHEN o.algorithm = ${tabu}
-              THEN o.total_nodes_explored
               ELSE 0
             END
           ),
@@ -208,20 +152,6 @@ export const getTimeSeriesSummaryRepository = async (
     return [];
   }
 
-  const [simulation] = await db
-    .select({
-      algorithm: simulationTable.algorithm,
-    })
-    .from(simulationTable)
-    .where(eq(simulationTable.id, simulationId))
-    .limit(1);
-
-  if (!simulation) {
-    throw new Error("Simulation not found");
-  }
-
-  const { greedy, tabu } = getAlgorithmMapping(simulation.algorithm);
-
   const runTypes = RUN_TYPE_MAPPING[summaryType];
 
   const [result, [latestRouteLeg]] = await Promise.all([
@@ -232,7 +162,7 @@ export const getTimeSeriesSummaryRepository = async (
         greedyTime: sql<number>`
           MAX(
             CASE
-              WHEN ${optimizationRunTable.algorithm} = ${greedy}
+              WHEN ${optimizationRunTable.algorithm} = 'greedy'
               THEN ${optimizationRunTable.totalTravelTimeInSeconds}
             END
           )
@@ -241,7 +171,7 @@ export const getTimeSeriesSummaryRepository = async (
         tabuTime: sql<number>`
           MAX(
             CASE
-              WHEN ${optimizationRunTable.algorithm} = ${tabu}
+              WHEN ${optimizationRunTable.algorithm} = 'tabu_search'
               THEN ${optimizationRunTable.totalTravelTimeInSeconds}
             END
           )

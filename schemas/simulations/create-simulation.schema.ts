@@ -1,6 +1,5 @@
 import z from "zod";
 import { csvFileSchema } from "../file.schema";
-import { optimizationAlgorithmEnum } from "@/drizzle/schema";
 
 export const CreateSimulationJobSchema = z.object({
   title: z
@@ -33,13 +32,6 @@ export const CreateSimulationJobSchema = z.object({
     .trim()
     .nonempty("The depot address cannot be left blank.")
     .max(500, "The address is too long. Please keep it under 500 characters."),
-  computationTimeLimit: z.coerce
-    .number({
-      required_error: "Please set a computation time limit.",
-      invalid_type_error: "The computation time limit must be a number.",
-    })
-    .min(300, "The time limit is too short. It must be at least 5 minutes (300 seconds).")
-    .max(600, "The time limit is too long. It cannot exceed 10 minutes (600 seconds)."),
   startDatetime: z
     .string({
       required_error: "Please specify a starting date and time.",
@@ -54,10 +46,6 @@ export const CreateSimulationJobSchema = z.object({
     invalid_type_error: "Invalid depot ID (must be a number).",
   }),
   customersFile: csvFileSchema,
-  algorithm: z.enum(optimizationAlgorithmEnum.enumValues, {
-    required_error: "Please select an optimization algorithm.",
-    invalid_type_error: "The selected algorithm is invalid.",
-  }),
   resequenceImprovementThresholdPercent: z
     .number({
       required_error: "Please set an improvement threshold for resequencing.",
@@ -72,7 +60,10 @@ export const CreateSimulationJobSchema = z.object({
     })
     .min(0, "Congestion delay cannot be a negative number.")
     .max(3600, "Congestion delay is too high. It cannot exceed 1 hour (3600 seconds)."),
+  isWithAdaptiveParameters: z.boolean({
+    required_error: "Please specify whether to use adaptive parameters.",
+    invalid_type_error: "The value for adaptive parameters must be true or false.",
+  }),
 });
 
 export type TCreateSimulationJobSchema = z.infer<typeof CreateSimulationJobSchema>;
-export type TCreateSimulationJobInput = z.input<typeof CreateSimulationJobSchema>;

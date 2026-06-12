@@ -7,7 +7,7 @@ import {
 } from "@/drizzle/schema";
 import { buildCountQuery, buildPaginatedQuery, TColumnsDefinition } from "@/lib/query-builder";
 import { TReoptimizationEventTableIndexQueryParams } from "@/schemas/simulations/reoptimization-event.schema";
-import { and, eq, getTableColumns, gt } from "drizzle-orm";
+import { and, eq, getTableColumns, gt, sql } from "drizzle-orm";
 
 export const getReoptimizationEventsWithPaginationRepository = async (
   simulationId: string,
@@ -29,6 +29,13 @@ export const getReoptimizationEventsWithPaginationRepository = async (
         courierName: courierTable.name,
         fromNodeId: routeLegTable.fromNodeId,
         toNodeId: routeLegTable.toNodeId,
+        isBaseline: sql<boolean>`
+            CASE
+              WHEN ${courierRouteTable.isActive} = false
+              THEN true
+              ELSE false
+            END
+          `.as("isBaseline"),
       },
       baseConditions: [
         and(

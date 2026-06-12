@@ -3,7 +3,6 @@ import "server-only";
 import { validateSchema } from "@/lib/validation";
 import {
   CreateSimulationJobSchema,
-  TCreateSimulationJobInput,
   TCreateSimulationJobSchema,
 } from "@/schemas/simulations/create-simulation.schema";
 import { NextRequest } from "next/server";
@@ -34,15 +33,14 @@ export const createSimulationJobController = async (request: NextRequest, clerkU
       depotLongitude: Number(formData.get("depotLongitude")),
       depotLatitude: Number(formData.get("depotLatitude")),
       title: formData.get("title") as string,
-      computationTimeLimit: Number(formData.get("computationTimeLimit")),
       customersFile: formData.get("customersFile") as File,
       startDatetime: formData.get("startDatetime") as string,
       depotId: Number(formData.get("depotId")),
-      algorithm: formData.get("algorithm") as TCreateSimulationJobInput["algorithm"],
       congestionDelayThresholdInSeconds: Number(formData.get("congestionDelayThresholdInSeconds")),
       resequenceImprovementThresholdPercent: Number(
         formData.get("resequenceImprovementThresholdPercent"),
       ),
+      isWithAdaptiveParameters: formData.get("isWithAdaptiveParameters") === "true",
     };
 
     const { data } = validateSchema<TCreateSimulationJobSchema>(CreateSimulationJobSchema, payload);

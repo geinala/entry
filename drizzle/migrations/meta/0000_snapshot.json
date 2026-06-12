@@ -1,5 +1,5 @@
 {
-  "id": "477bd354-5103-4872-ace0-403e361efdfa",
+  "id": "8d37b609-a014-431c-927e-be4131ac9b6d",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "version": "7",
   "dialect": "postgresql",
@@ -215,6 +215,115 @@
           "tableFrom": "couriers",
           "tableTo": "simulations",
           "columnsFrom": ["simulation_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.daily_optimization_logs": {
+      "name": "daily_optimization_logs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "config_id": {
+          "name": "config_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "date": {
+          "name": "date",
+          "type": "date",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "total_nodes": {
+          "name": "total_nodes",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "total_couriers": {
+          "name": "total_couriers",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "execution_time_ms": {
+          "name": "execution_time_ms",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "total_fitness_score": {
+          "name": "total_fitness_score",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "improvement_percentage": {
+          "name": "improvement_percentage",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "daily_optimization_logs_config_id_idx": {
+          "name": "daily_optimization_logs_config_id_idx",
+          "columns": [
+            {
+              "expression": "config_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "daily_optimization_logs_date_idx": {
+          "name": "daily_optimization_logs_date_idx",
+          "columns": [
+            {
+              "expression": "date",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "daily_optimization_logs_config_id_tabu_search_configurations_id_fk": {
+          "name": "daily_optimization_logs_config_id_tabu_search_configurations_id_fk",
+          "tableFrom": "daily_optimization_logs",
+          "tableTo": "tabu_search_configurations",
+          "columnsFrom": ["config_id"],
           "columnsTo": ["id"],
           "onDelete": "no action",
           "onUpdate": "no action"
@@ -2111,42 +2220,6 @@
           "primaryKey": false,
           "notNull": true
         },
-        "algorithm": {
-          "name": "algorithm",
-          "type": "optimization_algorithm_enum",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'google_or_tools'"
-        },
-        "computation_time_limit_in_seconds": {
-          "name": "computation_time_limit_in_seconds",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 600
-        },
-        "random_seed": {
-          "name": "random_seed",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 42
-        },
-        "enable_resequence": {
-          "name": "enable_resequence",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        },
-        "enable_aspiration": {
-          "name": "enable_aspiration",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
-        },
         "resequence_improvement_threshold_percent": {
           "name": "resequence_improvement_threshold_percent",
           "type": "real",
@@ -2161,42 +2234,12 @@
           "notNull": false,
           "default": 300
         },
-        "early_stop_no_improvement_iterations": {
-          "name": "early_stop_no_improvement_iterations",
-          "type": "integer",
+        "is_with_adaptive_parameters": {
+          "name": "is_with_adaptive_parameters",
+          "type": "boolean",
           "primaryKey": false,
-          "notNull": false,
-          "default": 100
-        },
-        "tabu_iterations": {
-          "name": "tabu_iterations",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "tabu_tenure": {
-          "name": "tabu_tenure",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "max_neighbors_2opt": {
-          "name": "max_neighbors_2opt",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "diversify_after_iterations": {
-          "name": "diversify_after_iterations",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "diversification_strength": {
-          "name": "diversification_strength",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
+          "notNull": true,
+          "default": false
         },
         "total_demand_in_kilograms": {
           "name": "total_demand_in_kilograms",
@@ -2685,40 +2728,12 @@
           "primaryKey": false,
           "notNull": false
         },
-        "algorithm": {
-          "name": "algorithm",
-          "type": "optimization_algorithm_enum",
-          "typeSchema": "public",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "computation_time_limit_in_seconds": {
-          "name": "computation_time_limit_in_seconds",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 600
-        },
-        "random_seed": {
-          "name": "random_seed",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 42
-        },
-        "enable_resequence": {
-          "name": "enable_resequence",
+        "is_with_adaptive_parameters": {
+          "name": "is_with_adaptive_parameters",
           "type": "boolean",
           "primaryKey": false,
           "notNull": true,
-          "default": true
-        },
-        "enable_aspiration": {
-          "name": "enable_aspiration",
-          "type": "boolean",
-          "primaryKey": false,
-          "notNull": true,
-          "default": true
+          "default": false
         },
         "resequence_improvement_threshold_percent": {
           "name": "resequence_improvement_threshold_percent",
@@ -2733,43 +2748,6 @@
           "primaryKey": false,
           "notNull": false,
           "default": 300
-        },
-        "early_stop_no_improvement_iterations": {
-          "name": "early_stop_no_improvement_iterations",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false,
-          "default": 100
-        },
-        "tabu_iterations": {
-          "name": "tabu_iterations",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "tabu_tenure": {
-          "name": "tabu_tenure",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "max_neighbors_2opt": {
-          "name": "max_neighbors_2opt",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "diversify_after_iterations": {
-          "name": "diversify_after_iterations",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "diversification_strength": {
-          "name": "diversification_strength",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
         },
         "depot_id": {
           "name": "depot_id",
@@ -3299,6 +3277,64 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
+    "public.tabu_search_configurations": {
+      "name": "tabu_search_configurations",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "uuid",
+          "primaryKey": true,
+          "notNull": true,
+          "default": "gen_random_uuid()"
+        },
+        "it_max_multiplier": {
+          "name": "it_max_multiplier",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tab_tenure_divider": {
+          "name": "tab_tenure_divider",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "it_cons_multiplier": {
+          "name": "it_cons_multiplier",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "it_div_divider": {
+          "name": "it_div_divider",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "is_active": {
+          "name": "is_active",
+          "type": "boolean",
+          "primaryKey": false,
+          "notNull": true,
+          "default": true
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
     "public.traffic_incidents": {
       "name": "traffic_incidents",
       "schema": "",
@@ -3424,11 +3460,25 @@
           "notNull": true,
           "default": "gen_random_uuid()"
         },
+        "depot_id": {
+          "name": "depot_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
         "file_path": {
           "name": "file_path",
           "type": "varchar",
           "primaryKey": false,
           "notNull": true
+        },
+        "status": {
+          "name": "status",
+          "type": "tuning_experiment_dataset_status_enum",
+          "typeSchema": "public",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "'uploaded'"
         },
         "created_at": {
           "name": "created_at",
@@ -3438,8 +3488,307 @@
           "default": "now()"
         }
       },
-      "indexes": {},
-      "foreignKeys": {},
+      "indexes": {
+        "tuning_experiment_datasets_status_idx": {
+          "name": "tuning_experiment_datasets_status_idx",
+          "columns": [
+            {
+              "expression": "status",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        },
+        "tuning_experiment_datasets_depot_id_idx": {
+          "name": "tuning_experiment_datasets_depot_id_idx",
+          "columns": [
+            {
+              "expression": "depot_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "tuning_experiment_datasets_depot_id_depots_id_fk": {
+          "name": "tuning_experiment_datasets_depot_id_depots_id_fk",
+          "tableFrom": "tuning_experiment_datasets",
+          "tableTo": "depots",
+          "columnsFrom": ["depot_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.tuning_experiment_runs": {
+      "name": "tuning_experiment_runs",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "tuning_experiment_id": {
+          "name": "tuning_experiment_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "it_max": {
+          "name": "it_max",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tab_tenure": {
+          "name": "tab_tenure",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "it_cons": {
+          "name": "it_cons",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "it_div": {
+          "name": "it_div",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fitness_score": {
+          "name": "fitness_score",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "execution_time_ms": {
+          "name": "execution_time_ms",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "convergence_iteration": {
+          "name": "convergence_iteration",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        }
+      },
+      "indexes": {
+        "tuning_experiment_runs_tuning_experiment_id_idx": {
+          "name": "tuning_experiment_runs_tuning_experiment_id_idx",
+          "columns": [
+            {
+              "expression": "tuning_experiment_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "tuning_experiment_runs_tuning_experiment_id_tuning_experiments_id_fk": {
+          "name": "tuning_experiment_runs_tuning_experiment_id_tuning_experiments_id_fk",
+          "tableFrom": "tuning_experiment_runs",
+          "tableTo": "tuning_experiments",
+          "columnsFrom": ["tuning_experiment_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "tuning_experiment_runs_tuning_experiment_id_tuning_experiment_table_id_fk": {
+          "name": "tuning_experiment_runs_tuning_experiment_id_tuning_experiment_table_id_fk",
+          "tableFrom": "tuning_experiment_runs",
+          "tableTo": "tuning_experiments",
+          "columnsFrom": ["tuning_experiment_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "policies": {},
+      "checkConstraints": {},
+      "isRLSEnabled": false
+    },
+    "public.tuning_experiments": {
+      "name": "tuning_experiments",
+      "schema": "",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "serial",
+          "primaryKey": true,
+          "notNull": true
+        },
+        "dataset_id": {
+          "name": "dataset_id",
+          "type": "uuid",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "base_n_c": {
+          "name": "base_n_c",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "it_max": {
+          "name": "it_max",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "tab_tenure": {
+          "name": "tab_tenure",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "it_cons": {
+          "name": "it_cons",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "it_div": {
+          "name": "it_div",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "random_seed": {
+          "name": "random_seed",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "default": 42
+        },
+        "early_stop_no_improvement_iterations": {
+          "name": "early_stop_no_improvement_iterations",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "initial_fitness_score": {
+          "name": "initial_fitness_score",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "best_fitness_score": {
+          "name": "best_fitness_score",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "execution_time_ms": {
+          "name": "execution_time_ms",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "convergence_iteration": {
+          "name": "convergence_iteration",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "improvement_percentage": {
+          "name": "improvement_percentage",
+          "type": "real",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "best_route_payload": {
+          "name": "best_route_payload",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "best_iteration_history_payload": {
+          "name": "best_iteration_history_payload",
+          "type": "jsonb",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": true,
+          "default": "now()"
+        },
+        "completed_at": {
+          "name": "completed_at",
+          "type": "timestamp with time zone",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "indexes": {
+        "tuning_experiments_dataset_id_idx": {
+          "name": "tuning_experiments_dataset_id_idx",
+          "columns": [
+            {
+              "expression": "dataset_id",
+              "isExpression": false,
+              "asc": true,
+              "nulls": "last"
+            }
+          ],
+          "isUnique": false,
+          "concurrently": false,
+          "method": "btree",
+          "with": {}
+        }
+      },
+      "foreignKeys": {
+        "tuning_experiments_dataset_id_tuning_experiment_datasets_id_fk": {
+          "name": "tuning_experiments_dataset_id_tuning_experiment_datasets_id_fk",
+          "tableFrom": "tuning_experiments",
+          "tableTo": "tuning_experiment_datasets",
+          "columnsFrom": ["dataset_id"],
+          "columnsTo": ["id"],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {},
       "policies": {},
@@ -3615,171 +3964,6 @@
       "checkConstraints": {},
       "isRLSEnabled": false
     },
-    "public.tuning_experiments": {
-      "name": "tuning_experiments",
-      "schema": "",
-      "columns": {
-        "id": {
-          "name": "id",
-          "type": "serial",
-          "primaryKey": true,
-          "notNull": true
-        },
-        "dataset_id": {
-          "name": "dataset_id",
-          "type": "uuid",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "status": {
-          "name": "status",
-          "type": "varchar(50)",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "'running'"
-        },
-        "base_n_c": {
-          "name": "base_n_c",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "it_max": {
-          "name": "it_max",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "tab_tenure": {
-          "name": "tab_tenure",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "it_cons": {
-          "name": "it_cons",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "it_div": {
-          "name": "it_div",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true
-        },
-        "random_seed": {
-          "name": "random_seed",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": true,
-          "default": 42
-        },
-        "early_stop_no_improvement_iterations": {
-          "name": "early_stop_no_improvement_iterations",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "initial_fitness_score": {
-          "name": "initial_fitness_score",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "best_fitness_score": {
-          "name": "best_fitness_score",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "execution_time_ms": {
-          "name": "execution_time_ms",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "convergence_iteration": {
-          "name": "convergence_iteration",
-          "type": "integer",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "improvement_percentage": {
-          "name": "improvement_percentage",
-          "type": "real",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "best_route_payload": {
-          "name": "best_route_payload",
-          "type": "jsonb",
-          "primaryKey": false,
-          "notNull": false
-        },
-        "created_at": {
-          "name": "created_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": true,
-          "default": "now()"
-        },
-        "completed_at": {
-          "name": "completed_at",
-          "type": "timestamp with time zone",
-          "primaryKey": false,
-          "notNull": false
-        }
-      },
-      "indexes": {
-        "tuning_experiments_dataset_id_idx": {
-          "name": "tuning_experiments_dataset_id_idx",
-          "columns": [
-            {
-              "expression": "dataset_id",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        },
-        "tuning_experiments_status_idx": {
-          "name": "tuning_experiments_status_idx",
-          "columns": [
-            {
-              "expression": "status",
-              "isExpression": false,
-              "asc": true,
-              "nulls": "last"
-            }
-          ],
-          "isUnique": false,
-          "concurrently": false,
-          "method": "btree",
-          "with": {}
-        }
-      },
-      "foreignKeys": {
-        "tuning_experiments_dataset_id_tuning_experiment_datasets_id_fk": {
-          "name": "tuning_experiments_dataset_id_tuning_experiment_datasets_id_fk",
-          "tableFrom": "tuning_experiments",
-          "tableTo": "tuning_experiment_datasets",
-          "columnsFrom": ["dataset_id"],
-          "columnsTo": ["id"],
-          "onDelete": "no action",
-          "onUpdate": "no action"
-        }
-      },
-      "compositePrimaryKeys": {},
-      "uniqueConstraints": {},
-      "policies": {},
-      "checkConstraints": {},
-      "isRLSEnabled": false
-    },
     "public.users": {
       "name": "users",
       "schema": "",
@@ -3909,6 +4093,21 @@
       "name": "simulation_status_enum",
       "schema": "public",
       "values": ["pending", "stopped", "optimizing", "running", "completed", "failed"]
+    },
+    "public.tuning_experiment_dataset_status_enum": {
+      "name": "tuning_experiment_dataset_status_enum",
+      "schema": "public",
+      "values": [
+        "uploaded",
+        "validating",
+        "validated",
+        "cleaning",
+        "cleaned",
+        "geocoding",
+        "geocoded",
+        "completed",
+        "failed"
+      ]
     }
   },
   "schemas": {},

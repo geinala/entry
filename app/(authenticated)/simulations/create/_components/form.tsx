@@ -24,8 +24,8 @@ import DownloadTemplateButton from "@/app/(authenticated)/_components/download-t
 import { useGetDepotOptionsQuery } from "@/app/(authenticated)/depots/_hooks/use-queries";
 import EmptyDepotDialog from "./empty-depot.dialog";
 import { useCreateSimulationForm } from "../_hooks/use-form";
-import { optimizationAlgorithmEnum } from "@/drizzle/schema";
-import { snakeToText, toTitleCase } from "@/lib/utils";
+import { Checkbox } from "@/app/_components/ui/checkbox";
+import { Label } from "@/app/_components/ui/label";
 
 const CreateSimulationForm = () => {
   const { mutateAsync } = useCreateSimulationJobMutations();
@@ -142,61 +142,6 @@ const CreateSimulationForm = () => {
                 }}
               </form.Field>
 
-              <form.Field name="computationTimeLimit">
-                {(field) => {
-                  const isInvalid = field.state.meta.isTouched && !field.state.meta.isValid;
-
-                  return (
-                    <Field data-invalid={isInvalid}>
-                      <FieldLabel htmlFor={field.name}>Computation Time Limit (seconds)</FieldLabel>
-
-                      <Input
-                        id={field.name}
-                        name={field.name}
-                        type="number"
-                        min={300}
-                        max={600}
-                        value={field.state.value}
-                        onChange={(e) => field.setValue(Number(e.target.value))}
-                        placeholder="300 - 600"
-                        aria-invalid={isInvalid}
-                      />
-
-                      {isInvalid && <FieldError errors={field.state.meta.errors} />}
-                    </Field>
-                  );
-                }}
-              </form.Field>
-
-              <form.Field name="algorithm">
-                {(field) => (
-                  <Field>
-                    <FieldLabel>Algorithm</FieldLabel>
-                    <FieldDescription>
-                      Choose the optimization strategy used during route calculation.
-                    </FieldDescription>
-                    <Select
-                      value={field.state.value}
-                      onValueChange={(
-                        value: (typeof optimizationAlgorithmEnum.enumValues)[number],
-                      ) => field.setValue(value)}
-                    >
-                      <SelectTrigger id="algorithm" className="w-full">
-                        <SelectValue placeholder="Select an algorithm" />
-                      </SelectTrigger>
-                      <SelectContent position="popper">
-                        {optimizationAlgorithmEnum.enumValues.map((algorithm) => (
-                          <SelectItem key={algorithm} value={algorithm}>
-                            {toTitleCase(snakeToText(algorithm))}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FieldError errors={field.state.meta.errors} />
-                  </Field>
-                )}
-              </form.Field>
-
               <FieldGroup className="grid grid-cols-2">
                 <form.Field name="congestionDelayThresholdInSeconds">
                   {(field) => (
@@ -283,6 +228,26 @@ const CreateSimulationForm = () => {
                     </Field>
                   );
                 }}
+              </form.Field>
+
+              <form.Field name="isWithAdaptiveParameters">
+                {(field) => (
+                  <Field>
+                    <Label className="flex items-center gap-2">
+                      <Checkbox
+                        defaultChecked={field.state.value}
+                        checked={field.state.value}
+                        onCheckedChange={(checked) => field.setValue(!!checked)}
+                      />
+                      Enable Adaptive Parameters
+                    </Label>
+                    <FieldDescription>
+                      When enabled, the simulation will automatically adjust parameters based on
+                      real-time node conditions.
+                    </FieldDescription>
+                    <FieldError errors={field.state.meta.errors} />
+                  </Field>
+                )}
               </form.Field>
 
               <div className="flex w-full items-center">

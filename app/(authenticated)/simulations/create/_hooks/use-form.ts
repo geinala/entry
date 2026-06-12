@@ -12,7 +12,6 @@ interface UseCreateSimulationFormParams {
 export const useCreateSimulationForm = ({ onSubmit }: UseCreateSimulationFormParams) => {
   return useForm({
     defaultValues: {
-      computationTimeLimit: 600,
       customersFile: null as unknown as File,
       depotLatitude: 0,
       depotLongitude: 0,
@@ -20,9 +19,9 @@ export const useCreateSimulationForm = ({ onSubmit }: UseCreateSimulationFormPar
       startDatetime: new Date().toISOString(),
       title: "Simulation Job - " + formatDate(new Date(), "yyyy-MM-dd"),
       depotId: 0,
-      algorithm: "manual_without_optimization",
       congestionDelayThresholdInSeconds: 300,
       resequenceImprovementThresholdPercent: 3,
+      isWithAdaptiveParameters: true,
     },
     validators: {
       onSubmit: CreateSimulationJobSchema,

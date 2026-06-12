@@ -14,6 +14,7 @@ import SummaryContainer from "../summary-container";
 import CourierSelect from "../courier.select";
 import { useGetAllCouriersQuery } from "../../[id]/_hooks/use-queries";
 import { ReoptimizationEventTableIndexQueryParams } from "@/schemas/simulations/reoptimization-event.schema";
+import { Badge } from "@/app/_components/ui/badge";
 
 interface ILogTable {
   simulationId: string;
@@ -69,6 +70,18 @@ export default function ReoptimizationEventsTable({ simulationId }: ILogTable) {
               format: "HH:mm",
             }).toString()}
           </span>
+        );
+      },
+    },
+    {
+      id: "type",
+      header: "Route Type",
+      cell: ({ row }) => {
+        const isBaseline = row.original.isBaseline;
+        return (
+          <Badge variant={isBaseline ? "secondary" : "default"}>
+            {isBaseline ? "Baseline" : "Actual"}
+          </Badge>
         );
       },
     },

@@ -161,6 +161,7 @@ export type TReoptimizationEvent = InferSelectModel<typeof reoptimizationEventTa
     courierName: string;
     fromNodeId: TNode["id"] | null;
     toNodeId: TNode["id"] | null;
+    isBaseline: boolean;
   };
 
 export type TTrafficIncident = InferSelectModel<typeof trafficIncidentTable>;

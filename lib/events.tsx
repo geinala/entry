@@ -56,6 +56,17 @@ export const eventHandlers: Record<string, TEventHandler> = {
       queryKey: SIMULATIONS_QUERY_KEYS.findById(simulationId),
     });
   },
+  REOPTIMIZATION_TRIGGERED: ({ queryClient, simulationId }) => {
+    setTimeout(() => {
+      queryClient.refetchQueries({
+        queryKey: ["final-routes", simulationId],
+      });
+
+      queryClient.refetchQueries({
+        queryKey: SIMULATIONS_QUERY_KEYS.findById(simulationId),
+      });
+    }, 500);
+  },
 };
 
 export const EVENT_TYPES = Object.keys(eventHandlers);

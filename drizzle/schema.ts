@@ -100,16 +100,13 @@ export const simulationJobTable = pgTable(
     depotLocationAddress: varchar("depot_location_address").notNull(),
     depotLocationLatitude: doublePrecision("depot_location_latitude").notNull(),
     depotLocationLongitude: doublePrecision("depot_location_longitude").notNull(),
-    algorithm: optimizationAlgorithmEnum("algorithm").notNull().default("google_or_tools"),
-    computationTimeLimitInSeconds: integer("computation_time_limit_in_seconds")
-      .notNull()
-      .default(600),
     resequenceImprovementThresholdPercent: real("resequence_improvement_threshold_percent").default(
       5,
     ),
     congestionDelayThresholdInSeconds: integer("congestion_delay_threshold_in_seconds").default(
       300,
     ),
+    isWithAdaptiveParameters: boolean("is_with_adaptive_parameters").notNull().default(false),
     totalDemandInKilograms: real("total_demand_in_kilograms").notNull().default(0),
     totalCouriers: integer("total_couriers").notNull().default(0),
     totalActiveCouriers: integer("total_active_couriers").notNull().default(0),
@@ -251,10 +248,7 @@ export const simulationTable = pgTable(
     completedAt: timestamp("completed_at", {
       withTimezone: true,
     }),
-    algorithm: optimizationAlgorithmEnum("algorithm").notNull(),
-    computationTimeLimitInSeconds: integer("computation_time_limit_in_seconds")
-      .notNull()
-      .default(600),
+    isWithAdaptiveParameters: boolean("is_with_adaptive_parameters").notNull().default(false),
     resequenceImprovementThresholdPercent: real("resequence_improvement_threshold_percent").default(
       5,
     ),
