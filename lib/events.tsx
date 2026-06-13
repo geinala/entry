@@ -67,6 +67,15 @@ export const eventHandlers: Record<string, TEventHandler> = {
       });
     }, 500);
   },
+  VEHICLE_RETURNED_TO_DEPOT: ({ queryClient, simulationId }) => {
+    queryClient.invalidateQueries({
+      queryKey: ["final-routes", simulationId],
+    });
+
+    queryClient.invalidateQueries({
+      queryKey: SIMULATIONS_QUERY_KEYS.findById(simulationId),
+    });
+  },
 };
 
 export const EVENT_TYPES = Object.keys(eventHandlers);

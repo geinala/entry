@@ -80,11 +80,29 @@ export const updateSimulationJobStatusRepository = async (
   return updatedSimulationJob;
 };
 
-export const getSimulationBySimulationJobIdRepository = async (simulationJobId: string) => {
-  const [simulation] = await db
+export const createSimulationFromJobRepository = async (jobId: string) => {
+  const [simulationJob] = await db
     .select()
-    .from(simulationTable)
-    .where(eq(simulationTable.simulationJobId, simulationJobId));
+    .from(simulationJobTable)
+    .where(eq(simulationJobTable.id, jobId))
+    .limit(1);
 
-  return simulation;
+  const [created] = await db
+    .insert(simulationTable)
+    .values({
+      ...simulationJob,
+      status: "optimizing",
+      simulationJobId: jobId,
+      userId: simulationJob.userId,
+      title: simulationJob.title,
+      depotLocationAddress: simulationJob.depotLocationAddress,
+      depotLocationLatitude: simulationJob.depotLocationLatitude,
+      depotLocationLongitude: simulationJob.depotLocationLongitude,
+      startedAt: simulationJob.startedAt,
+      depotId: simulationJob.depotId,
+      isWithAdaptiveParameters: simulationJob.isWithAdaptiveParameters,
+    })
+    .returning();
+
+  return created;
 };

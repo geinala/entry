@@ -31,7 +31,7 @@ export default function Page({
       ) : (
         <>
           <header className="flex justify-between items-center mb-2">
-            <div>
+            <div className="flex-2">
               {title && <Title level={2}>{title}</Title>}
               {description && <Paragraph>{description}</Paragraph>}
             </div>

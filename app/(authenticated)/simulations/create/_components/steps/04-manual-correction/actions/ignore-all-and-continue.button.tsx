@@ -20,7 +20,7 @@ export const IgnoreAllAndContinueButton = ({ jobId, disabled }: IProps) => {
         disabled={disabled || isPending}
         onClick={() => setIsDialogOpen(true)}
       >
-        Ignore All Errors and Continue
+        Ignore all and continue
       </Button>
 
       <IgnoreConfirmationDialog
@@ -31,7 +31,7 @@ export const IgnoreAllAndContinueButton = ({ jobId, disabled }: IProps) => {
           setIsDialogOpen(false);
         }}
         isLoading={isPending}
-        title="Ignore All Errors and Continue"
+        title="Ignore all and continue"
         description="All error rows will be ignored before continuing the process."
       />
     </>

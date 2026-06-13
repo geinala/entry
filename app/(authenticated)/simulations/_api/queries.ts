@@ -22,7 +22,8 @@ import { AxiosInstance, AxiosResponse } from "axios";
 
 export const SIMULATIONS_QUERY_KEYS = {
   all: ["simulations"] as const,
-  findById: (id: string) => ["simulations", id] as const,
+  single: ["simulation"] as const,
+  findById: (id?: string) => [...SIMULATIONS_QUERY_KEYS.single, id] as const,
 };
 
 export const simulationQueries = {
@@ -48,7 +49,7 @@ export const simulationQueries = {
   },
   findById: (api: AxiosInstance, id?: string) => {
     return queryOptions({
-      queryKey: SIMULATIONS_QUERY_KEYS.findById(id || ""),
+      queryKey: SIMULATIONS_QUERY_KEYS.findById(id),
       queryFn: async (): Promise<TSimulationWithDepot> => {
         const response: AxiosResponse<TApiSuccessResponseWithData<TSimulationWithDepot>> =
           await api.get(`/simulations/${id}`);

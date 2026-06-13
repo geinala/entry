@@ -64,14 +64,16 @@ export const AffectedSegment = () => {
                 showTrafficIncidents={false}
                 zoom={beforeZoom}
               >
-                {congestionData?.acceptedIncident && (
-                  <Route
-                    coordinates={geometryToCoordinates(congestionData.acceptedIncident.geometry)}
-                    label="Traffic Incident"
-                    color="red"
-                    width={2}
-                  />
-                )}
+                {congestionData?.acceptedIncidents &&
+                  congestionData.acceptedIncidents.map((incident) => (
+                    <Route
+                      key={`before-incident-${incident.id}`}
+                      coordinates={geometryToCoordinates(incident.geometry)}
+                      label="Traffic Incident"
+                      color="red"
+                      width={2}
+                    />
+                  ))}
                 <Route coordinates={beforeRouteSegment} label="Before" color="blue" width={2} />
               </TomTomMap>
             </div>
@@ -100,14 +102,16 @@ export const AffectedSegment = () => {
                 showTrafficIncidents={false}
                 zoom={afterZoom}
               >
-                {congestionData?.acceptedIncident && (
-                  <Route
-                    coordinates={geometryToCoordinates(congestionData.acceptedIncident.geometry)}
-                    label="Traffic Incident"
-                    color="red"
-                    width={2}
-                  />
-                )}
+                {congestionData?.acceptedIncidents &&
+                  congestionData.acceptedIncidents.map((incident) => (
+                    <Route
+                      key={`after-incident-${incident.id}`}
+                      coordinates={geometryToCoordinates(incident.geometry)}
+                      label="Traffic Incident"
+                      color="red"
+                      width={2}
+                    />
+                  ))}
                 <Route coordinates={afterRouteSegment} label="After" color="green" width={2} />
               </TomTomMap>
             </div>

@@ -1,68 +1,17 @@
-import {
-  courierTable,
-  simulationUploadedRows,
-  simulationJobTable,
-  simulationTable,
-  nodeTable,
-  nodeDetailTable,
-} from "@/drizzle/schema";
+import { simulationUploadedRows, simulationJobTable } from "@/drizzle/schema";
 import { db } from "@/lib/db";
 import {
-  TNewCourier,
-  TNewNode,
-  TNewNodeDetail,
   TSimulationJobAreaDistributionRow,
   TSimulationJobSummaryBaseRow,
   TSimulationJobCombinedSummaryRow,
 } from "@/types/database";
 import { and, eq, sql } from "drizzle-orm";
 
-export const insertAllCouriersFromUploadedRowsRepository = async (couriers: TNewCourier[]) => {
-  return await db.insert(courierTable).values(couriers).returning();
-};
-
 export const getAllUploadedRowsRepository = async (jobId: string) => {
   return await db
     .select()
     .from(simulationUploadedRows)
     .where(eq(simulationUploadedRows.simulationJobId, jobId));
-};
-
-export const createSimulationFromJobRepository = async (jobId: string) => {
-  const [simulationJob] = await db
-    .select()
-    .from(simulationJobTable)
-    .where(eq(simulationJobTable.id, jobId))
-    .limit(1);
-
-  const [created] = await db
-    .insert(simulationTable)
-    .values({
-      ...simulationJob,
-      status: "optimizing",
-      simulationJobId: jobId,
-      userId: simulationJob.userId,
-      title: simulationJob.title,
-      depotLocationAddress: simulationJob.depotLocationAddress,
-      depotLocationLatitude: simulationJob.depotLocationLatitude,
-      depotLocationLongitude: simulationJob.depotLocationLongitude,
-      startedAt: simulationJob.startedAt,
-      depotId: simulationJob.depotId,
-      isWithAdaptiveParameters: simulationJob.isWithAdaptiveParameters,
-    })
-    .returning();
-
-  return created;
-};
-
-export const insertAllNodesFromUploadedRowsRepository = async (nodes: TNewNode[]) => {
-  return await db.insert(nodeTable).values(nodes).returning();
-};
-
-export const insertAllNodeDetailsFromUploadedRowsRepository = async (
-  nodeDetails: TNewNodeDetail[],
-) => {
-  return await db.insert(nodeDetailTable).values(nodeDetails).returning();
 };
 
 export const getSimulationJobSummaryBaseRepository = async (

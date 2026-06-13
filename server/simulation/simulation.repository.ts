@@ -3,6 +3,7 @@ import "server-only";
 import {
   courierRouteTable,
   courierTable,
+  depotTable,
   matrixBatchTable,
   matrixResultTable,
   nodeDetailTable,
@@ -12,8 +13,10 @@ import {
   reoptimizationEventTable,
   routeLegCongestionCheckTable,
   routeLegTable,
+  simulationJobTable,
   simulationLogTable,
   simulationTable,
+  simulationUploadedRows,
   solutionTable,
   trafficIncidentTable,
 } from "@/drizzle/schema";
@@ -62,15 +65,14 @@ export const getSimulationsCountRepository = async (
 };
 
 export const getSimulationByIdRepository = async (simulationId: string) => {
-  return await db
+  const [result] = await db
     .select()
     .from(simulationTable)
     .where(eq(simulationTable.id, simulationId))
-    .leftJoin(
-      nodeTable,
-      and(eq(simulationTable.id, nodeTable.simulationId), eq(nodeTable.matrixIndex, 0)),
-    )
+    .innerJoin(depotTable, eq(depotTable.id, simulationTable.depotId))
     .limit(1);
+
+  return result;
 };
 
 export const deleteSimulationWithRelationsRepository = async (
@@ -87,6 +89,10 @@ export const deleteSimulationWithRelationsRepository = async (
     if (!simulation) {
       return null;
     }
+
+    await tx
+      .delete(simulationUploadedRows)
+      .where(eq(simulationUploadedRows.simulationJobId, simulation.id));
 
     const couriers = await tx
       .select({ id: courierTable.id })
@@ -198,6 +204,8 @@ export const deleteSimulationWithRelationsRepository = async (
       .delete(simulationTable)
       .where(and(eq(simulationTable.id, simulationId), eq(simulationTable.userId, userId)))
       .returning();
+
+    await tx.delete(simulationJobTable).where(eq(simulationJobTable.id, simulationId));
 
     return deletedSimulation;
   });

@@ -38,7 +38,7 @@ export const RouteSegmentMap = () => {
   );
   const routeCenter = useMemo(() => getRouteCenter(decodedRoutes), [decodedRoutes]);
   const zoom = getAutoZoom(decodedRoutes);
-  const acceptedIncidentId = data?.acceptedIncident?.id;
+  const acceptedIncidentIds = data?.acceptedIncidents?.map((incident) => incident.id);
 
   if (isLoading) {
     return <Skeleton className="w-full h-64" />;
@@ -67,14 +67,17 @@ export const RouteSegmentMap = () => {
             />
           )}
           {/* Traffic Incident */}
-          {data?.acceptedIncident && (
-            <Route
-              coordinates={geometryToCoordinates(data?.acceptedIncident.geometry)}
-              label="Traffic Incident"
-              color="red"
-              width={2}
-            />
-          )}
+          {data?.acceptedIncidents &&
+            data.acceptedIncidents.map((acceptedIncident) => (
+              <Route
+                key={acceptedIncident.id}
+                coordinates={geometryToCoordinates(acceptedIncident.geometry)}
+                label={acceptedIncident.tomtomIncidentId}
+                color="red"
+                width={2}
+                opacity={1}
+              />
+            ))}
           {(incidents ?? []).map((incident) => (
             <Route
               key={incident.id}
@@ -82,7 +85,7 @@ export const RouteSegmentMap = () => {
               label={incident.tomtomIncidentId}
               color="red"
               width={2}
-              opacity={incident.id === acceptedIncidentId ? 1 : 0.5}
+              opacity={acceptedIncidentIds?.includes(incident.id) ? 1 : 0.5}
             />
           ))}
           <Route coordinates={decodedRoutes} color="#3b82f6" width={2} opacity={0.4} />

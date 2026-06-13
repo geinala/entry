@@ -204,9 +204,9 @@ export default function SimulationDetailPage() {
             </EmptyContent>
           </Empty>
         )}
-        {!isShowEmptyState && data?.depot && (
+        {!isShowEmptyState && data?.depotLocationLongitude && data?.depotLocationLatitude && (
           <Map
-            center={[data.depot.longitude, data.depot.latitude]}
+            center={[data.depotLocationLongitude, data.depotLocationLatitude]}
             zoom={18}
             pitch={200}
             bearing={-20}

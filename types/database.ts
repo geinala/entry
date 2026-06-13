@@ -1,4 +1,4 @@
-import { InferSelectModel, InferInsertModel } from "drizzle-orm";
+import { InferSelectModel } from "drizzle-orm";
 import {
   userTable,
   simulationTable,
@@ -8,7 +8,6 @@ import {
   courierRouteTable,
   simulationJobTable,
   simulationUploadedRows,
-  nodeDetailTable,
   simulationLogTable,
   depotTable,
   reoptimizationEventTable,
@@ -31,7 +30,7 @@ export type TSimulationUploadedRow = InferSelectModel<typeof simulationUploadedR
 // Simulation Types
 export type TSimulation = InferSelectModel<typeof simulationTable>;
 export type TSimulationWithDepot = TSimulation & {
-  depot: TNode | null;
+  depot: TDepot | null;
 };
 export type TSimulationStatus = TSimulation["status"];
 
@@ -41,12 +40,9 @@ export type TDepotOption = Pick<TDepot, "id" | "name" | "address" | "latitude" |
 
 // Node Types
 type TNode = InferSelectModel<typeof nodeTable>;
-export type TNewNode = InferInsertModel<typeof nodeTable>;
-export type TNewNodeDetail = InferInsertModel<typeof nodeDetailTable>;
 
 // Courier Types
 export type TCourier = InferSelectModel<typeof courierTable>;
-export type TNewCourier = InferInsertModel<typeof courierTable>;
 
 // Route Types
 type TCourierRoute = InferSelectModel<typeof courierRouteTable>;
@@ -173,7 +169,7 @@ export type TRouteSegmentWithBoundingBox = {
   bboxMinLon: number;
   bboxMaxLat: number;
   bboxMaxLon: number;
-  acceptedIncident: TTrafficIncident | null;
+  acceptedIncidents: TTrafficIncident[] | null;
 };
 
 export type TRouteLegCongestionCheckIncident = InferSelectModel<

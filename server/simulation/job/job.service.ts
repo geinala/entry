@@ -3,8 +3,8 @@ import "server-only";
 import { TCreateSimulationJobSchema } from "@/schemas/simulations/create-simulation.schema";
 import { uploadFileService } from "@/server/files/file.service";
 import {
+  createSimulationFromJobRepository,
   createSimulationJobRepository,
-  getSimulationBySimulationJobIdRepository,
   getSimulationJobsByUserIdAndStatusRepository,
   updateSimulationJobRepository,
   updateSimulationJobStatusRepository,
@@ -111,10 +111,10 @@ export const startOptimizationProcessService = async (clerkUserId: string) => {
     throw new InternalServerErrorException("Simulation job not found");
   }
 
-  const simulation = await getSimulationBySimulationJobIdRepository(simulationJob.id);
+  const simulation = await createSimulationFromJobRepository(simulationJob.id);
 
   if (!simulation) {
-    throw new InternalServerErrorException("Associated simulation not found");
+    throw new InternalServerErrorException("Failed to create simulation from job");
   }
 
   try {

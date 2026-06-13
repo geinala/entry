@@ -18,7 +18,7 @@ export const getRouteSegmentWithBoundingBoxRepository = async (
   simulationId: string,
   congestionCheckId: number,
 ): Promise<TRouteSegmentWithBoundingBox | undefined> => {
-  const [result] = await db
+  const rows = await db
     .select({
       routeSegmentPolyline: routeLegTable.encodedPolyline,
       fromNode: fromNodeTable,
@@ -30,12 +30,6 @@ export const getRouteSegmentWithBoundingBoxRepository = async (
       acceptedIncident: getTableColumns(trafficIncidentTable),
     })
     .from(routeLegCongestionCheckIncidentTable)
-    .where(
-      and(
-        eq(routeLegCongestionCheckIncidentTable.congestionCheckId, congestionCheckId),
-        eq(routeLegCongestionCheckTable.simulationId, simulationId),
-      ),
-    )
     .innerJoin(
       routeLegCongestionCheckTable,
       eq(routeLegCongestionCheckTable.id, routeLegCongestionCheckIncidentTable.congestionCheckId),
@@ -46,9 +40,30 @@ export const getRouteSegmentWithBoundingBoxRepository = async (
     .innerJoin(
       trafficIncidentTable,
       eq(trafficIncidentTable.id, routeLegCongestionCheckIncidentTable.trafficIncidentId),
+    )
+    .where(
+      and(
+        eq(routeLegCongestionCheckIncidentTable.congestionCheckId, congestionCheckId),
+        eq(routeLegCongestionCheckTable.simulationId, simulationId),
+        eq(routeLegCongestionCheckIncidentTable.isValidCongestion, true),
+      ),
     );
 
-  return result;
+  if (!rows.length) {
+    return undefined;
+  }
+
+  return {
+    routeSegmentPolyline: rows[0].routeSegmentPolyline,
+    fromNode: rows[0].fromNode,
+    toNode: rows[0].toNode,
+    bboxMinLat: rows[0].bboxMinLat,
+    bboxMinLon: rows[0].bboxMinLon,
+    bboxMaxLat: rows[0].bboxMaxLat,
+    bboxMaxLon: rows[0].bboxMaxLon,
+
+    acceptedIncidents: rows.map((r) => r.acceptedIncident),
+  };
 };
 
 export const getRouteSegmentCongestionCheckMatchDetailsRepository = async (

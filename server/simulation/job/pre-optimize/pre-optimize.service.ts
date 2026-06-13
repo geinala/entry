@@ -1,16 +1,6 @@
-import {
-  TNewCourier,
-  TNewNode,
-  TNewNodeDetail,
-  TSimulationJobSummary,
-  TSimulationUploadedRow,
-} from "@/types/database";
+import { TSimulationJobSummary, TSimulationUploadedRow } from "@/types/database";
 import {
   getAllUploadedRowsRepository,
-  insertAllCouriersFromUploadedRowsRepository,
-  createSimulationFromJobRepository,
-  insertAllNodeDetailsFromUploadedRowsRepository,
-  insertAllNodesFromUploadedRowsRepository,
   getSimulationJobCombinedSummaryRepository,
   getSimulationJobAreaDistributionRepository,
   getSimulationJobSummaryBaseRepository,
@@ -104,74 +94,26 @@ export const preOptimizeService = async (
 
   const uploadedRows = (await getAllUploadedRowsRepository(jobId)) as TSimulationUploadedRow[];
 
-  const createdSimulation = await createSimulationFromJobRepository(jobId);
-  if (!createdSimulation) throw new Error("Simulation job not found");
-  const simulationId = createdSimulation.id as string;
-
-  const courierNames = new Set(
-    uploadedRows.map((r) => r.courier?.toString().trim()).filter(Boolean) as string[],
+  const validRows = uploadedRows.filter(
+    (row) =>
+      row.latitude !== null &&
+      row.latitude !== undefined &&
+      row.longitude !== null &&
+      row.longitude !== undefined,
   );
 
-  const couriers: TNewCourier[] = Array.from(courierNames).map((name) => ({
-    simulationId,
-    name,
-    isActive: true,
-  }));
+  const addressMap = buildAddressMap(validRows, new Map());
 
-  // insert couriers first so we can map courier name -> id
-  const insertedCouriers = couriers.length
-    ? await insertAllCouriersFromUploadedRowsRepository(couriers)
-    : [];
+  const entries = Array.from(addressMap.values()).filter(
+    (entry) =>
+      entry.latitude !== null &&
+      entry.latitude !== undefined &&
+      entry.longitude !== null &&
+      entry.longitude !== undefined,
+  );
 
-  const courierNameToId = new Map<string, number>();
-  for (const c of insertedCouriers as { id: number; name: string }[]) {
-    courierNameToId.set(c.name.toString().trim(), c.id);
-  }
-
-  const addressMap = buildAddressMap(uploadedRows, courierNameToId);
-  const entries = Array.from(addressMap.values());
-
-  const nodes: TNewNode[] = [
-    {
-      simulationId,
-      matrixIndex: 0,
-      courierId: null,
-      latitude: job.depotLocationLatitude,
-      longitude: job.depotLocationLongitude,
-      demand: 0,
-    },
-    ...entries.map((v) => ({
-      simulationId,
-      matrixIndex: v.matrixIndex,
-      courierId: v.courierId ?? null,
-      latitude: v.latitude ?? 0,
-      longitude: v.longitude ?? 0,
-      demand: v.demand,
-    })),
-  ];
-
-  const insertedNodeRows = nodes.length
-    ? await insertAllNodesFromUploadedRowsRepository(nodes)
-    : [];
-
-  if (insertedNodeRows?.length) {
-    const indexToNodeId = new Map<number, number>(
-      (insertedNodeRows as { id: number; matrixIndex: number }[]).map((n) => [n.matrixIndex, n.id]),
-    );
-
-    const nodeDetails: TNewNodeDetail[] = entries.flatMap((v) =>
-      v.details.map((d) => ({
-        nodeId: indexToNodeId.get(v.matrixIndex)!,
-        name: d.name,
-        address: d.address,
-        city: d.city,
-        weight: d.weight,
-      })),
-    );
-
-    if (nodeDetails.length) {
-      await insertAllNodeDetailsFromUploadedRowsRepository(nodeDetails);
-    }
+  if (entries.length === 0) {
+    throw new Error("No valid geocoded addresses found");
   }
 
   const [combinedSummary, areaDistribution] = await Promise.all([

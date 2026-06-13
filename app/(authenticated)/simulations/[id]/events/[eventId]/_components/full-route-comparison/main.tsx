@@ -355,9 +355,9 @@ export const FullRouteComparison = () => {
                   showTrafficIncidents={false}
                   zoom={afterZoom}
                 >
-                  {(data?.afterRoute ?? []).map((routeLeg) => (
+                  {(data?.afterRoute ?? []).map((routeLeg, idx) => (
                     <Route
-                      key={`after-leg-${routeLeg.id}`}
+                      key={`after-leg-${routeLeg.id}-${routeLeg.originLatitude}-${routeLeg.originLongitude}-${routeLeg.destinationLatitude}-${routeLeg.destinationLongitude}-${idx}`}
                       coordinates={decodePolyline(
                         routeLeg.encodedPolyline,
                         routeLeg.encodedPolylinePrecision,
