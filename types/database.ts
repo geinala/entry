@@ -133,6 +133,9 @@ export type TSimulationJobAreaDistributionRow = {
 };
 
 export type TSimulationLog = InferSelectModel<typeof simulationLogTable>;
+export type TSimulationLogWithCourier = TSimulationLog & {
+  courier?: Pick<TCourier, "id" | "name">;
+};
 
 export type TGlobalAlgorithmSummary = {
   greedySummary: {

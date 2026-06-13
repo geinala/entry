@@ -28,6 +28,7 @@ import GlobalSummaryTable from "./_components/tables/global-summary.table";
 import ReoptimizationEventsTable from "./_components/tables/reoptimization-events.table";
 import { TimeTravelChart } from "./_components/charts/time-travel.chart";
 import { ComparisonChart } from "./_components/charts/comparison.chart";
+import SimulationLogTable from "./_components/tables/log-simulation.table";
 
 const SHORTCUT_KEY_TO_REMOVE_DETAILS = "Escape";
 
@@ -161,6 +162,7 @@ export default function HistoryPage() {
                 <ReoptimizationEventsTable simulationId={selectedSimulationId} />
                 <TimeTravelChart simulationId={selectedSimulationId} />
                 <ComparisonChart simulationId={selectedSimulationId} />
+                <SimulationLogTable simulationId={selectedSimulationId} />
               </section>
             </div>
           </main>

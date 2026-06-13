@@ -1,7 +1,10 @@
 import { TIndexQueryParams } from "@/types/query-params";
-import { getSimulationLogsWithPaginationRepository } from "./log.repository";
+import {
+  getSimulationLogByIdRepository,
+  getSimulationLogsWithPaginationRepository,
+} from "./log.repository";
 import { paginationResponseMapper } from "@/lib/pagination";
-import { TSimulationLog } from "@/types/database";
+import { TSimulationLog, TSimulationLogWithCourier } from "@/types/database";
 
 export const getSimulationLogsWithPaginationService = async (
   simulationId: string,
@@ -20,4 +23,21 @@ export const getSimulationLogsWithPaginationService = async (
     pageSize: queryParams.pageSize,
     totalItems: total,
   });
+};
+
+export const getSimulationLogByIdService = async (
+  simulationId: string,
+  logId: number,
+): Promise<TSimulationLogWithCourier | null> => {
+  const { couriers, simulation_logs } = await getSimulationLogByIdRepository(simulationId, logId);
+
+  return {
+    ...simulation_logs,
+    courier: couriers
+      ? {
+          id: couriers.id,
+          name: couriers.name,
+        }
+      : undefined,
+  };
 };

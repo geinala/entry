@@ -6,6 +6,7 @@ import { simulationQueries } from "../_api/queries";
 import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
 import { TOptimizationSummaryParams } from "@/schemas/simulations/optimization-summary.schema";
 import { TReoptimizationEventTableIndexQueryParams } from "@/schemas/simulations/reoptimization-event.schema";
+import { TIndexQueryParams } from "@/types/query-params";
 
 export const useGetInfiniteSimulationsQuery = (queryParams: TIndexSimulationQueryParams) => {
   const api = useAuthenticatedClient();
@@ -65,4 +66,16 @@ export const useGetReoptimizationEventsQuery = ({
       queryParams,
     }),
   );
+};
+
+export const useGetSimulationLogsQuery = ({
+  queryParams,
+  simulationId,
+}: {
+  queryParams: TIndexQueryParams;
+  simulationId?: string;
+}) => {
+  const api = useAuthenticatedClient();
+
+  return useQuery(simulationQueries.getLogs(api, simulationId, queryParams));
 };
