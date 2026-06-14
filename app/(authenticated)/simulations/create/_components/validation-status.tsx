@@ -96,8 +96,6 @@ const ValidationStatus: React.FC<Props> = ({
               Create New Simulation
             </Button>
           </EmptyContent>
-          {/* <Link href="/file-requirements"> */}
-          {/* TODO: Add link to guide */}
           <Button
             variant="link"
             className="text-muted-foreground"
@@ -108,7 +106,6 @@ const ValidationStatus: React.FC<Props> = ({
           >
             Learn more about file requirements <ArrowUpRightIcon />
           </Button>
-          {/* </Link> */}
         </Empty>
       </div>
     );
@@ -120,7 +117,7 @@ const ValidationStatus: React.FC<Props> = ({
         <Empty className="w-full">
           <EmptyHeader>
             <EmptyMedia variant={"default"}>
-              <Image src={logoSrc} alt={logoAlt} width={50} height={50} />
+              <Image src={logoSrc} alt={logoAlt} width={50} height={50} unoptimized />
             </EmptyMedia>
             <EmptyTitle>{mergedCopy.processingLabel}</EmptyTitle>
             <EmptyDescription>

@@ -68,7 +68,15 @@ export default function DepotPage() {
                       <Marker
                         lat={data.latitude}
                         lng={data.longitude}
-                        icon={<Image src="/images/depot.png" alt="Depot" width={96} height={96} />}
+                        icon={
+                          <Image
+                            src="/images/depot.png"
+                            alt="Depot"
+                            width={96}
+                            height={96}
+                            unoptimized
+                          />
+                        }
                         style={{
                           width: "96px",
                           height: "96px",

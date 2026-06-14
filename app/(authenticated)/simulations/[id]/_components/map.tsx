@@ -70,7 +70,7 @@ const Map = ({ center, zoom, pitch, bearing, routes = [], vehicles = [] }: MapPr
         <Marker
           lat={center[1]}
           lng={center[0]}
-          icon={<Image src="/images/depot.png" alt="Depot" width={96} height={96} />}
+          icon={<Image src="/images/depot.png" alt="Depot" width={96} height={96} unoptimized />}
           style={{
             width: "96px",
             height: "96px",
@@ -124,7 +124,9 @@ const Map = ({ center, zoom, pitch, bearing, routes = [], vehicles = [] }: MapPr
           key={`vehicle-${vehicle.id}`}
           lng={vehicle.lng}
           lat={vehicle.lat}
-          icon={<Image src="/images/courier.png" alt="Vehicle" width={40} height={40} />}
+          icon={
+            <Image src="/images/courier.png" alt="Vehicle" width={40} height={40} unoptimized />
+          }
           className="w-20 h-20"
           style={{
             borderRadius: "9999px",
