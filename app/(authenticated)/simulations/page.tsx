@@ -87,85 +87,83 @@ export default function HistoryPage() {
             </div>
           }
         >
-          <main className="flex-1 overflow-y-auto min-h-0">
-            <div className="flex flex-col gap-3">
-              <section className="flex gap-3 w-full">
-                <TotalDistanceCard
-                  content={
-                    <Paragraph className="font-medium text-2xl">
-                      {data.finalTotalDistanceInMeters
-                        ? metersToKm(data.finalTotalDistanceInMeters)
-                        : metersToKm(data.initialTotalDistanceInMeters)}{" "}
-                      km
+          <div className="flex flex-col gap-3">
+            <section className="flex gap-3 w-full">
+              <TotalDistanceCard
+                content={
+                  <Paragraph className="font-medium text-2xl">
+                    {data.finalTotalDistanceInMeters
+                      ? metersToKm(data.finalTotalDistanceInMeters)
+                      : metersToKm(data.initialTotalDistanceInMeters)}{" "}
+                    km
+                  </Paragraph>
+                }
+                footer={
+                  <>
+                    <Clock className="text-muted-foreground w-3 h-3 mr-1" />
+                    <Paragraph className="text-muted-foreground">
+                      Updated {formatDistanceToNow(data.updatedAt, { addSuffix: true })}
                     </Paragraph>
-                  }
-                  footer={
-                    <>
-                      <Clock className="text-muted-foreground w-3 h-3 mr-1" />
-                      <Paragraph className="text-muted-foreground">
-                        Updated {formatDistanceToNow(data.updatedAt, { addSuffix: true })}
-                      </Paragraph>
-                    </>
-                  }
-                />
-                <TotalTimeTravelCard
-                  content={
-                    <Paragraph className="font-medium text-2xl">
-                      {formatSeconds(
-                        data.finalTotalDurationInSeconds || data.initialTotalDurationInSeconds,
-                        ["hours", "minutes"],
-                      )}
+                  </>
+                }
+              />
+              <TotalTimeTravelCard
+                content={
+                  <Paragraph className="font-medium text-2xl">
+                    {formatSeconds(
+                      data.finalTotalDurationInSeconds || data.initialTotalDurationInSeconds,
+                      ["hours", "minutes"],
+                    )}
+                  </Paragraph>
+                }
+                footer={
+                  <>
+                    <Clock className="text-muted-foreground w-3 h-3 mr-1" />
+                    <Paragraph className="text-muted-foreground">
+                      Updated {formatDistanceToNow(data.updatedAt, { addSuffix: true })}
                     </Paragraph>
-                  }
-                  footer={
-                    <>
-                      <Clock className="text-muted-foreground w-3 h-3 mr-1" />
-                      <Paragraph className="text-muted-foreground">
-                        Updated {formatDistanceToNow(data.updatedAt, { addSuffix: true })}
-                      </Paragraph>
-                    </>
-                  }
-                />
-                <TotalActiveCouriersCard
-                  content={
-                    <Paragraph className="font-medium text-2xl">
-                      {data.totalActiveCouriers} couriers
+                  </>
+                }
+              />
+              <TotalActiveCouriersCard
+                content={
+                  <Paragraph className="font-medium text-2xl">
+                    {data.totalActiveCouriers} couriers
+                  </Paragraph>
+                }
+                footer={
+                  <>
+                    <Clock className="w-3 h-3 mr-1 text-muted-foreground" />
+                    <Paragraph className="text-muted-foreground">
+                      Updated {formatDistanceToNow(data.updatedAt, { addSuffix: true })}
                     </Paragraph>
-                  }
-                  footer={
-                    <>
-                      <Clock className="w-3 h-3 mr-1 text-muted-foreground" />
-                      <Paragraph className="text-muted-foreground">
-                        Updated {formatDistanceToNow(data.updatedAt, { addSuffix: true })}
-                      </Paragraph>
-                    </>
-                  }
-                />
-                <TotalCompletedNodesCard
-                  content={
-                    <Paragraph className="font-medium text-2xl">
-                      {data.totalCompletedNodes} nodes
+                  </>
+                }
+              />
+              <TotalCompletedNodesCard
+                content={
+                  <Paragraph className="font-medium text-2xl">
+                    {data.totalCompletedNodes} nodes
+                  </Paragraph>
+                }
+                footer={
+                  <>
+                    <Clock className="w-3 h-3 mr-1 text-muted-foreground" />
+                    <Paragraph className="text-muted-foreground">
+                      Updated {formatDistanceToNow(data.updatedAt, { addSuffix: true })}
                     </Paragraph>
-                  }
-                  footer={
-                    <>
-                      <Clock className="w-3 h-3 mr-1 text-muted-foreground" />
-                      <Paragraph className="text-muted-foreground">
-                        Updated {formatDistanceToNow(data.updatedAt, { addSuffix: true })}
-                      </Paragraph>
-                    </>
-                  }
-                />
-              </section>
-              <section className="w-full h-full flex flex-col gap-3">
-                <GlobalSummaryTable simulationId={selectedSimulationId} />
-                <ReoptimizationEventsTable simulationId={selectedSimulationId} />
-                <TimeTravelChart simulationId={selectedSimulationId} />
-                <ComparisonChart simulationId={selectedSimulationId} />
-                <SimulationLogTable simulationId={selectedSimulationId} />
-              </section>
-            </div>
-          </main>
+                  </>
+                }
+              />
+            </section>
+            <section className="w-full h-full flex flex-col gap-3">
+              <GlobalSummaryTable simulationId={selectedSimulationId} />
+              <ReoptimizationEventsTable simulationId={selectedSimulationId} />
+              <TimeTravelChart simulationId={selectedSimulationId} />
+              <ComparisonChart simulationId={selectedSimulationId} />
+              <SimulationLogTable simulationId={selectedSimulationId} />
+            </section>
+          </div>
         </Page>
       ) : (
         <Page>

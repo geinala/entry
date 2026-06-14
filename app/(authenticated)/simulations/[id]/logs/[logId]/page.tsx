@@ -10,6 +10,7 @@ import ReactJson from "react-json-view";
 import { Table, TableBody, TableCell, TableRow } from "@/app/_components/ui/table";
 import { Badge } from "@/app/_components/ui/badge";
 import { format } from "date-fns";
+import { truncateText } from "@/lib/utils";
 
 export const SimulationLogDetailsPage = () => {
   const { setBreadcrumbs } = useBreadcrumb();
@@ -36,9 +37,9 @@ export const SimulationLogDetailsPage = () => {
 
   return (
     <Page
-      title={`Log ${logId} - Simulation ${id}`}
+      title={`${truncateText(data?.title || "Log Details", 50)}`}
       isLoading={isLoading}
-      description={`Details of log ${logId} for simulation ${id}.`}
+      description={`${truncateText(data?.description || "", 100)}`}
     >
       <Card>
         <CardContent>
@@ -71,7 +72,7 @@ export const SimulationLogDetailsPage = () => {
                 <TableCell>{data?.description}</TableCell>
               </TableRow>
               <TableRow>
-                <TableCell className="font-medium">Metadata</TableCell>
+                <TableCell className="font-medium flex justify-start">Metadata</TableCell>
                 <TableCell>
                   <ReactJson
                     src={data?.metadata ? data.metadata : {}}

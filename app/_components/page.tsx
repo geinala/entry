@@ -37,7 +37,7 @@ export default function Page({
             </div>
             {headerAction && headerAction}
           </header>
-          {children}
+          <main className="flex-1 overflow-y-auto min-h-0">{children}</main>
         </>
       )}
     </div>
