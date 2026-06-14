@@ -43,6 +43,10 @@ export const getSimulationByIdService = async (
 ): Promise<TSimulationWithDepot> => {
   const simulation = await getSimulationByIdRepository(simulationId);
 
+  if (!simulation) {
+    throw new NotFoundException("Simulation not found");
+  }
+
   return {
     ...simulation.simulations,
     depot: simulation.depots,

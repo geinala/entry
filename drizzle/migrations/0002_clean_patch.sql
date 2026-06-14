@@ -1,0 +1,2 @@
+ALTER TABLE "matrix_results" ADD COLUMN "courier_id" integer;--> statement-breakpoint
+ALTER TABLE "matrix_results" ADD CONSTRAINT "matrix_results_courier_id_couriers_id_fk" FOREIGN KEY ("courier_id") REFERENCES "public"."couriers"("id") ON DELETE no action ON UPDATE no action;

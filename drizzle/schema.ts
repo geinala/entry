@@ -355,64 +355,34 @@ export const nodeDetailTable = pgTable(
   ],
 );
 
-export const matrixBatchStatusEnum = pgEnum("matrix_batch_status_enum", [
-  "submitted",
-  "validated",
-  "completed",
-  "failed",
-]);
-
-export const matrixBatchTable = pgTable(
-  "matrix_batches",
-  {
-    id: serial().primaryKey(),
-    simulationId: uuid("simulation_id").references(() => simulationTable.id),
-    originStartIndex: integer("origin_start_index").notNull(),
-    originEndIndex: integer("origin_end_index").notNull(),
-    destinationStartIndex: integer("destination_start_index").notNull(),
-    destinationEndIndex: integer("destination_end_index").notNull(),
-    tomtomJobId: varchar("tomtom_job_id").notNull(),
-    status: matrixBatchStatusEnum("status").notNull().default("submitted"),
-    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
-    updatedAt: timestamp("updated_at", { withTimezone: true }).notNull().defaultNow(),
-    completedAt: timestamp("completed_at", { withTimezone: true }),
-  },
-  (table) => [
-    foreignKey({
-      columns: [table.simulationId],
-      foreignColumns: [simulationTable.id],
-      name: "matrix_batches_simulation_id_simulations_id_fk",
-    }),
-    index("matrix_batches_simulation_id_idx").on(table.simulationId),
-  ],
-);
+export const matrixTypeEnum = pgEnum("matrix_type_enum", ["initial", "reoptimized"]);
 
 export const matrixResultTable = pgTable(
   "matrix_results",
   {
     id: serial().primaryKey(),
     simulationId: uuid("simulation_id").references(() => simulationTable.id),
+    courierId: integer("courier_id").references(() => courierTable.id),
     originIndex: integer("origin_index").notNull(),
     destinationIndex: integer("destination_index").notNull(),
     lengthInMeters: integer("length_in_meters").notNull(),
     travelTimeInSeconds: integer("travel_time_in_seconds").notNull(),
-    trafficDelayInSeconds: integer("traffic_delay_in_seconds").notNull(),
-    matrixBatchId: integer("matrix_batch_id").references(() => matrixBatchTable.id),
+    matrixStage: integer("matrix_stage").notNull(),
+    matrixType: matrixTypeEnum("matrix_type").notNull(),
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (table) => [
-    foreignKey({
-      columns: [table.matrixBatchId],
-      foreignColumns: [matrixBatchTable.id],
-      name: "matrix_results_matrix_batch_id_matrix_batches_id_fk",
-    }),
     foreignKey({
       columns: [table.simulationId],
       foreignColumns: [simulationTable.id],
       name: "matrix_results_simulation_id_simulations_id_fk",
     }),
+    foreignKey({
+      columns: [table.courierId],
+      foreignColumns: [courierTable.id],
+      name: "matrix_results_courier_id_couriers_id_fk",
+    }),
     index("matrix_results_simulation_id_idx").on(table.simulationId),
-    index("matrix_results_matrix_batch_id_idx").on(table.matrixBatchId),
   ],
 );
 

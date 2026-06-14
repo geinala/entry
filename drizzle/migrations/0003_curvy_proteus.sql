@@ -1,0 +1,1 @@
+ALTER TABLE "matrix_results" DROP COLUMN "traffic_delay_in_seconds";

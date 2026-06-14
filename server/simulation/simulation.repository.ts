@@ -4,7 +4,6 @@ import {
   courierRouteTable,
   courierTable,
   depotTable,
-  matrixBatchTable,
   matrixResultTable,
   nodeDetailTable,
   nodeTable,
@@ -108,13 +107,6 @@ export const deleteSimulationWithRelationsRepository = async (
 
     const nodeIds = nodes.map((node) => node.id);
 
-    const matrixBatches = await tx
-      .select({ id: matrixBatchTable.id })
-      .from(matrixBatchTable)
-      .where(eq(matrixBatchTable.simulationId, simulationId));
-
-    const matrixBatchIds = matrixBatches.map((batch) => batch.id);
-
     const routeIds =
       courierIds.length > 0
         ? (
@@ -163,15 +155,7 @@ export const deleteSimulationWithRelationsRepository = async (
       .delete(trafficIncidentTable)
       .where(eq(trafficIncidentTable.simulationId, simulationId));
 
-    if (matrixBatchIds.length > 0) {
-      await tx
-        .delete(matrixResultTable)
-        .where(inArray(matrixResultTable.matrixBatchId, matrixBatchIds));
-    }
-
     await tx.delete(matrixResultTable).where(eq(matrixResultTable.simulationId, simulationId));
-
-    await tx.delete(matrixBatchTable).where(eq(matrixBatchTable.simulationId, simulationId));
 
     if (routeIds.length > 0) {
       await tx.delete(routeLegTable).where(inArray(routeLegTable.courierRouteId, routeIds));
