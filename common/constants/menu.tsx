@@ -1,6 +1,6 @@
 "use client";
 
-import { LayoutDashboard, Route, Users, Warehouse, Wrench } from "lucide-react";
+import { Route, Users, Warehouse, Wrench } from "lucide-react";
 import { Route as RouteNext } from "next";
 
 export type TMenuItem = {
@@ -21,11 +21,6 @@ export const MENU_ITEMS: (TMenuItem | IGroupedMenuItem)[] = [
     groupLabel: "Main Menu",
     level: 1,
     items: [
-      {
-        label: "Dashboard",
-        path: "/dashboard",
-        icon: <LayoutDashboard />,
-      },
       {
         label: "Simulations",
         path: "/simulations",

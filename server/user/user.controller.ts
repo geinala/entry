@@ -15,7 +15,7 @@ export const onBoardingUserController = async (clerkUserId: string): Promise<Nex
 
     if (user) {
       return responseFormatter.successWithData({
-        data: { registered: true, redirectTo: "/dashboard" },
+        data: { registered: true, redirectTo: "/simulations" },
         message: "User is already registered",
       });
     }

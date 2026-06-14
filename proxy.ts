@@ -18,7 +18,7 @@ export default clerkMiddleware(async (auth, req) => {
 
   // user yang sudah login tidak boleh mengakses halaman public
   if (isAuthenticated && isPublicRoute(req)) {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
+    return NextResponse.redirect(new URL("/simulations", req.url));
   }
 
   // user yang sudah login tapi belum onboarding harus diarahkan ke halaman onboarding
@@ -28,7 +28,7 @@ export default clerkMiddleware(async (auth, req) => {
 
   // user yang sudah onboarding tidak boleh mengakses halaman onboarding
   if (isEligible && isOnboardingRoute(req)) {
-    return NextResponse.redirect(new URL("/dashboard", req.url));
+    return NextResponse.redirect(new URL("/simulations", req.url));
   }
 });
 
