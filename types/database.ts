@@ -138,20 +138,25 @@ export type TSimulationLogWithCourier = TSimulationLog & {
 };
 
 export type TGlobalAlgorithmSummary = {
-  greedySummary: {
+  greedyInitial: {
     totalDistanceInMeters: number;
     totalTimeTravelledInSeconds: number;
     computationTimeInMs: number;
   };
-  tabuSearchSummary: {
+  greedyFinal: {
     totalDistanceInMeters: number;
     totalTimeTravelledInSeconds: number;
     computationTimeInMs: number;
   };
-  improvement: {
-    totalDistanceImprovementPercentage: number;
-    totalTimeTravelledImprovementPercentage: number;
-    computationTimeImprovementPercentage: number;
+  tabuSearchInitial: {
+    totalDistanceInMeters: number;
+    totalTimeTravelledInSeconds: number;
+    computationTimeInMs: number;
+  };
+  tabuSearchFinal: {
+    totalDistanceInMeters: number;
+    totalTimeTravelledInSeconds: number;
+    computationTimeInMs: number;
   };
 };
 

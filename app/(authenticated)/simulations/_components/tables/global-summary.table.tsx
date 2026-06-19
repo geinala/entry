@@ -1,6 +1,6 @@
 "use client";
 
-import { Calculator, TrendingDown, TrendingUp } from "lucide-react";
+import { Calculator } from "lucide-react";
 import { useState } from "react";
 import { useGetGlobalSummaryAlgorithmQuery } from "../../_hooks/use-queries";
 import { Table, TableBody, TableCell, TableHeader, TableRow } from "@/app/_components/ui/table";
@@ -9,7 +9,6 @@ import { useGetAllCouriersQuery } from "../../[id]/_hooks/use-queries";
 import CourierSelect from "../courier.select";
 import SummaryContainer from "../summary-container";
 import { TOptimizationSummaryParams } from "@/schemas/simulations/optimization-summary.schema";
-import SummaryTypeSelect from "../summary-type.select";
 
 interface ILogTable {
   simulationId: string;
@@ -17,8 +16,7 @@ interface ILogTable {
 
 export default function GlobalSummaryTable({ simulationId }: ILogTable) {
   const [selectedCourierId, setSelectedCourierId] = useState<string>("all");
-  const [summaryType, setSummaryType] =
-    useState<TOptimizationSummaryParams["summaryType"]>("initial");
+  const [summaryType] = useState<TOptimizationSummaryParams["summaryType"]>("initial");
   const courierIdForQuery = selectedCourierId === "all" ? undefined : selectedCourierId;
 
   const { data } = useGetGlobalSummaryAlgorithmQuery(simulationId, {
@@ -31,31 +29,6 @@ export default function GlobalSummaryTable({ simulationId }: ILogTable) {
     setSelectedCourierId(courierId);
   };
 
-  const handleSummaryTypeChange = (type: TOptimizationSummaryParams["summaryType"]) => {
-    setSummaryType(type);
-  };
-
-  const renderImprovement = (value?: number) => {
-    if (value === undefined || value === null) return "-";
-
-    const formattedValue = `${value.toFixed(2)}%`;
-    if (value > 0) {
-      return (
-        <span className="inline-flex items-center gap-1 text-green-600">
-          <TrendingUp className="h-4 w-4" />
-          {formattedValue}
-        </span>
-      );
-    } else {
-      return (
-        <span className="inline-flex items-center gap-1 text-red-600">
-          <TrendingDown className="h-4 w-4" />
-          {formattedValue}
-        </span>
-      );
-    }
-  };
-
   return (
     <SummaryContainer
       title="Global Summary"
@@ -63,7 +36,6 @@ export default function GlobalSummaryTable({ simulationId }: ILogTable) {
       icon={<Calculator className="text-primary w-full h-full" />}
       headerRight={
         <div className="flex gap-2">
-          <SummaryTypeSelect onValueChange={handleSummaryTypeChange} value={summaryType} />
           <CourierSelect
             couriers={couriersData ?? []}
             isLoading={isLoading}
@@ -77,33 +49,39 @@ export default function GlobalSummaryTable({ simulationId }: ILogTable) {
         <TableHeader>
           <TableRow>
             <TableCell className="font-medium">Metric</TableCell>
-            <TableCell className="font-medium">Greedy</TableCell>
-            <TableCell className="font-medium">Tabu Search</TableCell>
-            <TableCell className="font-medium">Improvement</TableCell>
+            <TableCell className="font-medium">Greedy Initial</TableCell>
+            <TableCell className="font-medium">Greedy Final</TableCell>
+            <TableCell className="font-medium">Tabu Search Initial</TableCell>
+            <TableCell className="font-medium">Tabu Search Final</TableCell>
           </TableRow>
         </TableHeader>
         <TableBody>
           <TableRow>
             <TableCell>Total Distance</TableCell>
             <TableCell>
-              {data?.greedySummary
-                ? `${metersToKm(data.greedySummary.totalDistanceInMeters)} km`
+              {data?.greedyInitial
+                ? `${metersToKm(data.greedyInitial.totalDistanceInMeters)} km`
                 : "-"}
             </TableCell>
             <TableCell>
-              {data?.tabuSearchSummary
-                ? `${metersToKm(data.tabuSearchSummary.totalDistanceInMeters)} km`
+              {data?.greedyFinal ? `${metersToKm(data.greedyFinal.totalDistanceInMeters)} km` : "-"}
+            </TableCell>
+            <TableCell>
+              {data?.tabuSearchInitial
+                ? `${metersToKm(data.tabuSearchInitial.totalDistanceInMeters)} km`
                 : "-"}
             </TableCell>
             <TableCell>
-              {renderImprovement(data?.improvement?.totalDistanceImprovementPercentage)}
+              {data?.tabuSearchFinal
+                ? `${metersToKm(data.tabuSearchFinal.totalDistanceInMeters)} km`
+                : "-"}
             </TableCell>
           </TableRow>
           <TableRow>
             <TableCell>Total Travel Time</TableCell>
             <TableCell>
-              {data?.greedySummary
-                ? formatSeconds(data.greedySummary.totalTimeTravelledInSeconds, [
+              {data?.greedyInitial
+                ? formatSeconds(data.greedyInitial.totalTimeTravelledInSeconds, [
                     "hours",
                     "minutes",
                     "seconds",
@@ -111,8 +89,8 @@ export default function GlobalSummaryTable({ simulationId }: ILogTable) {
                 : "-"}
             </TableCell>
             <TableCell>
-              {data?.tabuSearchSummary
-                ? formatSeconds(data.tabuSearchSummary.totalTimeTravelledInSeconds, [
+              {data?.greedyFinal
+                ? formatSeconds(data.greedyFinal.totalTimeTravelledInSeconds, [
                     "hours",
                     "minutes",
                     "seconds",
@@ -120,23 +98,45 @@ export default function GlobalSummaryTable({ simulationId }: ILogTable) {
                 : "-"}
             </TableCell>
             <TableCell>
-              {renderImprovement(data?.improvement?.totalTimeTravelledImprovementPercentage)}
+              {data?.tabuSearchInitial
+                ? formatSeconds(data.tabuSearchInitial.totalTimeTravelledInSeconds, [
+                    "hours",
+                    "minutes",
+                    "seconds",
+                  ])
+                : "-"}
+            </TableCell>
+            <TableCell>
+              {data?.tabuSearchFinal
+                ? formatSeconds(data.tabuSearchFinal.totalTimeTravelledInSeconds, [
+                    "hours",
+                    "minutes",
+                    "seconds",
+                  ])
+                : "-"}
             </TableCell>
           </TableRow>
           <TableRow>
             <TableCell>Computation Time</TableCell>
             <TableCell>
-              {data?.greedySummary
-                ? `${data.greedySummary.computationTimeInMs.toFixed(2)} ms`
+              {data?.greedyInitial
+                ? `${data.greedyInitial.computationTimeInMs.toFixed(2)} ms`
                 : "-"}
             </TableCell>
             <TableCell>
-              {data?.tabuSearchSummary
-                ? `${data.tabuSearchSummary.computationTimeInMs.toFixed(2)} ms`
+              {data?.tabuSearchFinal
+                ? `${data.tabuSearchFinal.computationTimeInMs.toFixed(2)} ms`
                 : "-"}
             </TableCell>
             <TableCell>
-              {renderImprovement(data?.improvement?.computationTimeImprovementPercentage)}
+              {data?.tabuSearchInitial
+                ? `${data.tabuSearchInitial.computationTimeInMs.toFixed(2)} ms`
+                : "-"}
+            </TableCell>
+            <TableCell>
+              {data?.tabuSearchFinal
+                ? `${data.tabuSearchFinal.computationTimeInMs.toFixed(2)} ms`
+                : "-"}
             </TableCell>
           </TableRow>
         </TableBody>

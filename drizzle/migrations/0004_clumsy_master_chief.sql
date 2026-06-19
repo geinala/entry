@@ -1,0 +1,1 @@
+ALTER TYPE "public"."reoptimization_outcome_enum" ADD VALUE 'improvement_below_threshold';

@@ -646,6 +646,7 @@ export const reoptimizationOutcomeEnum = pgEnum("reoptimization_outcome_enum", [
   "resequencing_applied",
   "duration_updated",
   "no_improvement",
+  "improvement_below_threshold",
 ]);
 
 export const reoptimizationEventTable = pgTable(

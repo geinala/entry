@@ -11,128 +11,231 @@ import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
 
 export const getGlobalSummaryAlgorithmRepository = async (
   simulationId: string,
-  queryParams: TOptimizationSummaryParams,
-): Promise<Omit<TGlobalAlgorithmSummary, "improvement">> => {
-  const summaryType = queryParams.summaryType ?? "initial";
+  queryParams: Omit<TOptimizationSummaryParams, "summaryType">,
+): Promise<TGlobalAlgorithmSummary> => {
   const courierId = queryParams.courierId ? Number(queryParams.courierId) : null;
 
-  let optimizationScope;
+  const [row] = await db.select({
+    greedyInitialDistance: sql<number>`
+      COALESCE(SUM(
+        CASE WHEN algorithm='greedy'
+        THEN initial_distance
+        ELSE 0 END
+      ),0)
+    `,
 
-  if (summaryType === "initial") {
-    optimizationScope = sql`
-      SELECT DISTINCT ON (o.courier_id, o.algorithm) o.id
-      FROM optimization_runs o
-      WHERE
-        o.simulation_id = ${simulationId}
-        AND o.run_type IN ('initial')
-        ${courierId !== null ? sql`AND o.courier_id = ${courierId}` : sql``}
-      ORDER BY o.courier_id, o.algorithm, o.triggered_at DESC
-    `;
-  } else {
-    optimizationScope = sql`
-      SELECT DISTINCT ON (o.courier_id, o.algorithm) o.id
-      FROM optimization_runs o
-      WHERE
-        o.simulation_id = ${simulationId}
-        AND o.run_type IN ('initial', 'reoptimization')
-        ${courierId !== null ? sql`AND o.courier_id = ${courierId}` : sql``}
-      ORDER BY o.courier_id, o.algorithm, o.triggered_at DESC
-    `;
-  }
+    greedyFinalDistance: sql<number>`
+      COALESCE(SUM(
+        CASE WHEN algorithm='greedy'
+        THEN final_distance
+        ELSE 0 END
+      ),0)
+    `,
 
-  const [row] = await db
-    .select({
-      greedyTotalDistance: sql<number>`
-        COALESCE(
-          SUM(
-            CASE
-              WHEN o.algorithm = 'greedy'
-              THEN o.total_distance_in_meters
-              ELSE 0
-            END
-          ),
-          0
+    greedyInitialComputationTime: sql<number>`
+      COALESCE(SUM(
+        CASE WHEN algorithm='greedy'
+        THEN initial_computation_time
+        ELSE 0 END
+      ),0)
+    `,
+
+    greedyFinalComputationTime: sql<number>`
+      COALESCE(SUM(
+        CASE WHEN algorithm='greedy'
+        THEN final_computation_time
+        ELSE 0 END
+      ),0)
+    `,
+
+    greedyInitialTime: sql<number>`
+      COALESCE(SUM(
+        CASE WHEN algorithm='greedy'
+        THEN initial_time
+        ELSE 0 END
+      ),0)
+    `,
+
+    greedyFinalTime: sql<number>`
+      COALESCE(SUM(
+        CASE WHEN algorithm='greedy'
+        THEN final_time
+        ELSE 0 END
+      ),0)
+    `,
+
+    tabuInitialDistance: sql<number>`
+      COALESCE(SUM(
+        CASE WHEN algorithm='tabu_search'
+        THEN initial_distance
+        ELSE 0 END
+      ),0)
+    `,
+
+    tabuFinalDistance: sql<number>`
+      COALESCE(SUM(
+        CASE WHEN algorithm='tabu_search'
+        THEN final_distance
+        ELSE 0 END
+      ),0)
+    `,
+
+    tabuInitialTime: sql<number>`
+      COALESCE(SUM(
+        CASE WHEN algorithm='tabu_search'
+        THEN initial_time
+        ELSE 0 END
+      ),0)
+    `,
+
+    tabuFinalTime: sql<number>`
+      COALESCE(SUM(
+        CASE WHEN algorithm='tabu_search'
+        THEN final_time
+        ELSE 0 END
+      ),0)`,
+
+    tabuInitialComputationTime: sql<number>`
+      COALESCE(SUM(
+        CASE WHEN algorithm='tabu_search'
+        THEN initial_computation_time
+        ELSE 0 END
+      ),0)
+    `,
+
+    tabuFinalComputationTime: sql<number>`
+      COALESCE(SUM(
+        CASE WHEN algorithm='tabu_search'
+        THEN final_computation_time
+        ELSE 0 END
+      ),0)
+    `,
+  }).from(sql`
+    (
+      WITH initial_runs AS (
+
+        SELECT DISTINCT ON (
+          o.algorithm,
+          o.courier_id
         )
-      `,
+          o.algorithm,
+          o.courier_id,
+          o.total_distance_in_meters AS initial_distance,
+          o.total_travel_time_in_seconds AS initial_time,
+          o.computation_time_in_ms AS initial_computation_time
 
-      greedyTotalTravelTime: sql<number>`
-        COALESCE(
-          SUM(
-            CASE
-              WHEN o.algorithm = 'greedy'
-              THEN o.total_travel_time_in_seconds
-              ELSE 0
-            END
-          ),
-          0
-        )
-      `,
+        FROM optimization_runs o
 
-      greedyComputationTime: sql<number>`
-        COALESCE(
-          SUM(
-            CASE
-              WHEN o.algorithm = 'greedy'
-              THEN o.computation_time_in_ms
-              ELSE 0
-            END
-          ),
-          0
-        )
-      `,
+        WHERE
+          o.simulation_id=${simulationId}
+          AND o.run_type IN (
+            'initial',
+            'baseline_tracking'
+          )
 
-      tabuTotalDistance: sql<number>`
-        COALESCE(
-          SUM(
-            CASE
-              WHEN o.algorithm = 'tabu_search'
-              THEN o.total_distance_in_meters
-              ELSE 0
-            END
-          ),
-          0
-        )
-      `,
+          ${courierId !== null ? sql`AND o.courier_id=${courierId}` : sql``}
 
-      tabuTotalTravelTime: sql<number>`
-        COALESCE(
-          SUM(
-            CASE
-              WHEN o.algorithm = 'tabu_search'
-              THEN o.total_travel_time_in_seconds
-              ELSE 0
-            END
-          ),
-          0
-        )
-      `,
+        ORDER BY
+          o.algorithm,
+          o.courier_id,
+          o.triggered_at DESC
 
-      tabuComputationTime: sql<number>`
-        COALESCE(
-          SUM(
-            CASE
-              WHEN o.algorithm = 'tabu_search'
-              THEN o.computation_time_in_ms
-              ELSE 0
-            END
-          ),
-          0
+      ),
+
+
+      final_runs AS (
+
+        SELECT DISTINCT ON (
+          o.algorithm,
+          o.courier_id
         )
-      `,
-    })
-    .from(sql`optimization_runs o`)
-    .where(sql`o.id IN (${optimizationScope})`);
+
+          o.algorithm,
+          o.courier_id,
+          o.total_distance_in_meters AS final_distance,
+          o.total_travel_time_in_seconds AS final_time,
+          o.computation_time_in_ms AS final_computation_time
+
+
+        FROM optimization_runs o
+
+        WHERE
+          o.simulation_id=${simulationId}
+
+          AND o.run_type='reoptimization'
+
+
+          ${courierId !== null ? sql`AND o.courier_id=${courierId}` : sql``}
+
+
+        ORDER BY
+          o.algorithm,
+          o.courier_id,
+          o.triggered_at DESC
+      )
+
+
+      SELECT
+
+        i.algorithm,
+
+        i.initial_distance,
+
+        COALESCE(
+          f.final_distance,
+          i.initial_distance
+        ) AS final_distance,
+
+        i.initial_time,
+
+        COALESCE(
+          f.final_time,
+          i.initial_time
+        ) AS final_time,
+
+        i.initial_computation_time,
+
+        COALESCE(
+          f.final_computation_time,
+          0
+        ) AS final_computation_time
+
+
+      FROM initial_runs i
+
+      LEFT JOIN final_runs f
+
+      ON
+        i.algorithm=f.algorithm
+        AND
+        i.courier_id=f.courier_id
+
+    ) summary
+  `);
 
   return {
-    greedySummary: {
-      totalDistanceInMeters: row?.greedyTotalDistance ?? 0,
-      totalTimeTravelledInSeconds: row?.greedyTotalTravelTime ?? 0,
-      computationTimeInMs: row?.greedyComputationTime ?? 0,
+    greedyInitial: {
+      computationTimeInMs: row?.greedyInitialComputationTime ?? 0,
+      totalDistanceInMeters: row?.greedyInitialDistance ?? 0,
+      totalTimeTravelledInSeconds: row?.greedyInitialTime ?? 0,
     },
-    tabuSearchSummary: {
-      totalDistanceInMeters: row?.tabuTotalDistance ?? 0,
-      totalTimeTravelledInSeconds: row?.tabuTotalTravelTime ?? 0,
-      computationTimeInMs: row?.tabuComputationTime ?? 0,
+
+    greedyFinal: {
+      totalDistanceInMeters: row?.greedyFinalDistance ?? 0,
+      totalTimeTravelledInSeconds: row?.greedyFinalTime ?? 0,
+      computationTimeInMs: row?.greedyFinalComputationTime ?? 0,
+    },
+
+    tabuSearchInitial: {
+      computationTimeInMs: row?.tabuInitialComputationTime ?? 0,
+      totalDistanceInMeters: row?.tabuInitialDistance ?? 0,
+      totalTimeTravelledInSeconds: row?.tabuInitialTime ?? 0,
+    },
+
+    tabuSearchFinal: {
+      totalDistanceInMeters: row?.tabuFinalDistance ?? 0,
+      totalTimeTravelledInSeconds: row?.tabuFinalTime ?? 0,
+      computationTimeInMs: row?.tabuFinalComputationTime ?? 0,
     },
   };
 };
